@@ -23,12 +23,10 @@ Asynchronous Python client for the Omnik Inverter.
 
 A python package with which you can read the data from your Omnik Inverter. Keep in mind that this repository uses webscraping, this is **not** a neat way of data processing but due to the lack of a local API this is the only option.
 
----
-**NOTE**
-
-In mid-2021, manufacturer Omnik was declared bankrupt. You can find more information about what your alternatives are [here][energiewacht].
-
----
+<div style="padding: 20px; background-color: #cc3429; color: white;
+margin-bottom: 15px; text-align: center;">
+    In mid-2021, manufacturer Omnik was declared bankrupt.<br>You can find more information about what your alternatives are <a href="https://www.energiewacht.com/hoofdsite/home/nieuws/omnik-failliet/">here</a>.
+</div>
 
 ## Supported models
 
@@ -157,7 +155,6 @@ SOFTWARE.
 [stars-shield]: https://img.shields.io/github/stars/klaasnicolaas/python-omnikinverter.svg
 [stars-url]: https://github.com/klaasnicolaas/python-omnikinverter/stargazers
 
-[energiewacht]: https://www.energiewacht.com/hoofdsite/home/nieuws/omnik-failliet/
 [poetry-install]: https://python-poetry.org/docs/#installation
 [poetry]: https://python-poetry.org
 [pre-commit]: https://pre-commit.com
