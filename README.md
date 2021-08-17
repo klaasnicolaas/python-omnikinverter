@@ -1,15 +1,69 @@
 ## Python - Omnik Inverter Client
 
+<!-- PROJECT SHIELDS -->
+[![GitHub Release][releases-shield]][releases]
+[![Python Versions][python-versions-shield]][pypi]
+![Project Stage][project-stage-shield]
+![Project Maintenance][maintenance-shield]
+[![License][license-shield]](LICENSE)
+
+[![GitHub Activity][commits-shield]][commits-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![Contributors][contributors-shield]][contributors-url]
+
+[![Code Quality][code-quality-shield]][code-quality]
+[![Maintainability][maintainability-shield]][maintainability-url]
+[![GitHub Last Commit][last-commit-shield]][commits-url]
+
 Asynchronous Python client for the Omnik Inverter.
 
 ## About
 
+A python package with which you can read the data from your Omnik Inverter. Keep in mind that this repository uses webscraping, this is **not** a neat way of data processing but due to the lack of a local API this is the only option.
+
+**NOTE**: In mid-2021, manufacturer Omnik was declared bankrupt. You can find more information about what your alternatives are [here][energiewacht].
+
+## Supported models
+
+- Omnik2000TL2
 
 ## Installation
 
 ```bash
 pip install omnikinverter
 ```
+
+## Usage
+
+```python
+import asyncio
+
+from omnikinverter import OmnikInverter
+
+
+async def main():
+    """Show example on getting Omnik Inverter data."""
+    async with OmnikInverter(host="example_host") as client:
+        inverter = await client.inverter()
+        print(inverter)
+
+
+if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
+```
+
+# Data
+
+You can read the following data with this package:
+
+- Serial Number
+- Inverter Model
+- Current Power Production (W)
+- Day Energy Production (kWh)
+- Total Energy Production (kWh)
 
 ## Setting up development environment
 
@@ -73,3 +127,32 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+<!-- MARKDOWN LINKS & IMAGES -->
+[code-quality-shield]: https://img.shields.io/lgtm/grade/python/g/klaasnicolaas/python-omnikinverter.svg?logo=lgtm&logoWidth=18
+[code-quality]: https://lgtm.com/projects/g/klaasnicolaas/python-omnikinverter/context:python
+[contributors-shield]: https://img.shields.io/github/contributors/klaasnicolaas/python-omnikinverter.svg
+[contributors-url]: https://github.com/klaasnicolaas/python-omnikinverter/graphs/contributors
+[commits-shield]: https://img.shields.io/github/commit-activity/y/klaasnicolaas/python-omnikinverter.svg
+[commits-url]: https://github.com/klaasnicolaas/python-omnikinverter/commits/master
+[forks-shield]: https://img.shields.io/github/forks/klaasnicolaas/python-omnikinverter.svg
+[forks-url]: https://github.com/klaasnicolaas/python-omnikinverter/network/members
+[issues-shield]: https://img.shields.io/github/issues/klaasnicolaas/python-omnikinverter.svg
+[issues-url]: https://github.com/klaasnicolaas/python-omnikinverter/issues
+[license-shield]: https://img.shields.io/github/license/klaasnicolaas/python-omnikinverter.svg
+[last-commit-shield]: https://img.shields.io/github/last-commit/klaasnicolaas/python-omnikinverter.svg
+[maintenance-shield]: https://img.shields.io/maintenance/yes/2021.svg
+[maintainability-shield]: https://api.codeclimate.com/v1/badges/443c476612a574d82467/maintainability
+[maintainability-url]: https://codeclimate.com/github/klaasnicolaas/python-omnikinverter/maintainability
+[project-stage-shield]: https://img.shields.io/badge/project%20stage-experimental-yellow.svg
+[pypi]: https://pypi.org/project/omnikinverter/
+[python-versions-shield]: https://img.shields.io/pypi/pyversions/omnikinverter
+[releases-shield]: https://img.shields.io/github/release/klaasnicolaas/python-omnikinverter.svg
+[releases]: https://github.com/klaasnicolaas/python-omnikinverter/releases
+[stars-shield]: https://img.shields.io/github/stars/klaasnicolaas/python-omnikinverter.svg
+[stars-url]: https://github.com/klaasnicolaas/python-omnikinverter/stargazers
+
+[energiewacht]: https://www.energiewacht.com/hoofdsite/home/nieuws/omnik-failliet/
+[poetry-install]: https://python-poetry.org/docs/#installation
+[poetry]: https://python-poetry.org
+[pre-commit]: https://pre-commit.com
