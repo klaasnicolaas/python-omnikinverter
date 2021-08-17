@@ -40,7 +40,7 @@ class OmnikInverter:
         *,
         params: Mapping[str, str] | None = None,
     ) -> dict[str, Any]:
-        """Handle a request to a P1 Monitor device.
+        """Handle a request to a Omnik Inverter device.
 
         Args:
             uri: Request URI, without '/', for example, 'status'
@@ -111,7 +111,7 @@ class OmnikInverter:
         """Async enter.
 
         Returns:
-            The P1 Monitor object.
+            The Omnik Inverter object.
         """
         return self
 
