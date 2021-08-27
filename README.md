@@ -61,6 +61,7 @@ You can read the following data with this package:
 
 - Serial Number
 - Inverter Model
+- Firmware Version
 - Current Power Production (W)
 - Day Energy Production (kWh)
 - Total Energy Production (kWh)
