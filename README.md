@@ -73,7 +73,7 @@ development.
 
 You need at least:
 
-- Python 3.7+
+- Python 3.8+
 - [Poetry][poetry-install]
 
 Create a virtualenv and enter it:
