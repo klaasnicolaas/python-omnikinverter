@@ -12,9 +12,9 @@ class Inverter:
 
     serial_number: str | None
     inverter_model: str | None
-    current_power: int | None
-    yield_today: float | None
-    yield_total: float | None
+    inverter_current_power: int | None
+    inverter_energy_today: float | None
+    inverter_energy_total: float | None
 
     @staticmethod
     def from_js(data: dict[str, Any]) -> Inverter:
@@ -41,7 +41,7 @@ class Inverter:
         return Inverter(
             serial_number=get_values(0),
             inverter_model=get_values(3),
-            current_power=get_values(5),
-            yield_today=get_values(6),
-            yield_total=get_values(7),
+            inverter_current_power=get_values(5),
+            inverter_energy_today=get_values(6),
+            inverter_energy_total=get_values(7),
         )
