@@ -13,9 +13,9 @@ class Inverter:
     serial_number: str | None
     model: str | None
     firmware: str | None
-    current_power: int | None
-    energy_today: float | None
-    energy_total: float | None
+    solar_current_power: int | None
+    solar_energy_today: float | None
+    solar_energy_total: float | None
 
     @staticmethod
     def from_js(data: dict[str, Any]) -> Inverter:
@@ -43,7 +43,7 @@ class Inverter:
             serial_number=get_values(0),
             model=get_values(3),
             firmware=get_values(2),
-            current_power=get_values(5),
-            energy_today=get_values(6),
-            energy_total=get_values(7),
+            solar_current_power=get_values(5),
+            solar_energy_today=get_values(6),
+            solar_energy_total=get_values(7),
         )
