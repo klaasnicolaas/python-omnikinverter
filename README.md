@@ -28,6 +28,7 @@ A python package with which you can read the data from your Omnik Inverter. Keep
 ## Supported models
 
 - Omnik2000TL2
+- Omnik4000TL2
 
 ## Installation
 
