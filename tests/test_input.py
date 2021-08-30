@@ -9,6 +9,7 @@ from . import load_fixtures
 
 @pytest.mark.asyncio
 async def test_js_input(aresponses):
+    """Test request from a JS input."""
     aresponses.add(
         "example.com",
         "/js/status.js",
@@ -33,6 +34,7 @@ async def test_js_input(aresponses):
 
 @pytest.mark.asyncio
 async def test_json_input(aresponses):
+    """Test request from a JSON input."""
     aresponses.add(
         "example.com",
         "/status.json",

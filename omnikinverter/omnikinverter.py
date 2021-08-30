@@ -29,6 +29,7 @@ class OmnikInverter:
 
         Args:
             host: Hostname or IP address of the Omnik Inverter.
+            json_input: Boolean to confirm you use a JSON input.
             request_timeout: An integer with the request timeout in seconds.
             session: Optional, shared, aiohttp client session.
         """
@@ -63,7 +64,7 @@ class OmnikInverter:
         url = URL.build(scheme="http", host=self.host, path="/").join(URL(uri))
 
         headers = {
-            "Accept": "text/html, application/xhtml+xml, application/xml, application/json",
+            "Accept": "text/html,application/xhtml+xml,application/xml",
         }
 
         if self._session is None:
@@ -108,9 +109,8 @@ class OmnikInverter:
         if self.json_input:
             data = await self.request("status.json")
             return Inverter.from_json(data)
-        else:
-            data = await self.request("js/status.js")
-            return Inverter.from_js(data)
+        data = await self.request("js/status.js")
+        return Inverter.from_js(data)
 
     async def close(self) -> None:
         """Close open client session."""
