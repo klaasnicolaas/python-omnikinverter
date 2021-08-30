@@ -19,7 +19,11 @@ class OmnikInverter:
     """Main class for handling connections with the Omnik Inverter."""
 
     def __init__(
-        self, host: str, request_timeout: int = 10, session: ClientSession | None = None
+        self,
+        host: str,
+        json_input: bool,
+        request_timeout: int = 10,
+        session: ClientSession | None = None,
     ) -> None:
         """Initialize connection with the Omnik Inverter.
 
@@ -32,6 +36,7 @@ class OmnikInverter:
         self._close_session = False
 
         self.host = host
+        self.json_input = json_input
         self.request_timeout = request_timeout
 
     async def request(
@@ -58,7 +63,7 @@ class OmnikInverter:
         url = URL.build(scheme="http", host=self.host, path="/").join(URL(uri))
 
         headers = {
-            "Accept": "text/html, application/xhtml+xml, application/xml",
+            "Accept": "text/html, application/xhtml+xml, application/xml, application/json",
         }
 
         if self._session is None:
@@ -83,8 +88,9 @@ class OmnikInverter:
                 "Error occurred while communicating with Omnik Inverter device"
             ) from exception
 
+        types = ["application/json", "application/x-javascript"]
         content_type = response.headers.get("Content-Type", "")
-        if "application/x-javascript" not in content_type:
+        if not any(item in content_type for item in types):
             text = await response.text()
             raise OmnikInverterError(
                 "Unexpected response from the Omnik Inverter device",
@@ -99,8 +105,12 @@ class OmnikInverter:
         Returns:
             A Inverter data object from the Omnik Inverter.
         """
-        data = await self.request("js/status.js")
-        return Inverter.from_js(data)
+        if self.json_input:
+            data = await self.request("status.json")
+            return Inverter.from_json(data)
+        else:
+            data = await self.request("js/status.js")
+            return Inverter.from_js(data)
 
     async def close(self) -> None:
         """Close open client session."""
