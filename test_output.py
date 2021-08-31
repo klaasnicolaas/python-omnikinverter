@@ -10,7 +10,7 @@ async def main():
     """Test."""
     async with OmnikInverter(
         host="example.com",
-        json_input=False,
+        use_json=False,
     ) as omnik:
         inverter: OmnikInverter = await omnik.inverter()
         print(f"Omnik Inverter: {inverter}")

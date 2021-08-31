@@ -21,7 +21,7 @@ class OmnikInverter:
     def __init__(
         self,
         host: str,
-        json_input: bool,
+        use_json: bool,
         request_timeout: int = 10,
         session: ClientSession | None = None,
     ) -> None:
@@ -29,7 +29,7 @@ class OmnikInverter:
 
         Args:
             host: Hostname or IP address of the Omnik Inverter.
-            json_input: Boolean to confirm you use a JSON input.
+            use_json: Boolean to confirm you use a JSON input.
             request_timeout: An integer with the request timeout in seconds.
             session: Optional, shared, aiohttp client session.
         """
@@ -37,7 +37,7 @@ class OmnikInverter:
         self._close_session = False
 
         self.host = host
-        self.json_input = json_input
+        self.use_json = use_json
         self.request_timeout = request_timeout
 
     async def request(
@@ -106,7 +106,7 @@ class OmnikInverter:
         Returns:
             A Inverter data object from the Omnik Inverter.
         """
-        if self.json_input:
+        if self.use_json:
             data = await self.request("status.json")
             return Inverter.from_json(data)
         data = await self.request("js/status.js")

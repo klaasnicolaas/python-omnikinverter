@@ -21,7 +21,7 @@ async def test_js_input(aresponses):
         ),
     )
     async with aiohttp.ClientSession() as session:
-        omnik = OmnikInverter(host="example.com", json_input=False, session=session)
+        omnik = OmnikInverter(host="example.com", use_json=False, session=session)
         inverter: Inverter = await omnik.inverter()
         assert inverter
         assert inverter.firmware == "V5.3-00157"
@@ -46,7 +46,7 @@ async def test_json_input(aresponses):
         ),
     )
     async with aiohttp.ClientSession() as session:
-        omnik = OmnikInverter(host="example.com", json_input=True, session=session)
+        omnik = OmnikInverter(host="example.com", use_json=True, session=session)
         inverter: Inverter = await omnik.inverter()
         assert inverter
         assert inverter.firmware == "V1.25Build23261"
