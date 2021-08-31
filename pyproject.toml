@@ -33,12 +33,16 @@ yarl = ">=1.6.0"
 aresponses = "^2.1.4"
 black = "^21.8b0"
 blacken-docs = "^1.11.0"
+coverage = {version = "^5.5", extras = ["toml"]}
 flake8 = "^3.8.4"
 flake8-docstrings = "^1.5.0"
 isort = "^5.9.3"
 pre-commit = "^2.14.1"
 pre-commit-hooks = "^4.0.1"
 pylint = "^2.10.2"
+pytest = "^6.2.4"
+pytest-asyncio = "^0.15.1"
+pytest-cov = "^2.12.1"
 yamllint = "^1.26.3"
 pyupgrade = "^2.25.0"
 flake8-simplify = "^0.14.0"
@@ -60,6 +64,17 @@ Changelog = "https://github.com/klaasnicolaas/python-omnikinverter/releases"
 
 [tool.black]
 target-version = ['py37']
+
+[tool.coverage.paths]
+source = ["omnikinverter"]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:"]
+
+[tool.coverage.run]
+branch = true
+source = ["omnikinverter"]
 
 [tool.isort]
 profile = "black"
@@ -95,6 +110,9 @@ max-line-length=88
 
 [tool.pylint.DESIGN]
 max-attributes=20
+
+[tool.pytest.ini_options]
+addopts = "--cov"
 
 [tool.vulture]
 min_confidence = 80

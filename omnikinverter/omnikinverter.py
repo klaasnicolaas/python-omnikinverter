@@ -19,12 +19,17 @@ class OmnikInverter:
     """Main class for handling connections with the Omnik Inverter."""
 
     def __init__(
-        self, host: str, request_timeout: int = 10, session: ClientSession | None = None
+        self,
+        host: str,
+        use_json: bool,
+        request_timeout: int = 10,
+        session: ClientSession | None = None,
     ) -> None:
         """Initialize connection with the Omnik Inverter.
 
         Args:
             host: Hostname or IP address of the Omnik Inverter.
+            use_json: Boolean to confirm you use a JSON input.
             request_timeout: An integer with the request timeout in seconds.
             session: Optional, shared, aiohttp client session.
         """
@@ -32,6 +37,7 @@ class OmnikInverter:
         self._close_session = False
 
         self.host = host
+        self.use_json = use_json
         self.request_timeout = request_timeout
 
     async def request(
@@ -58,7 +64,7 @@ class OmnikInverter:
         url = URL.build(scheme="http", host=self.host, path="/").join(URL(uri))
 
         headers = {
-            "Accept": "text/html, application/xhtml+xml, application/xml",
+            "Accept": "text/html,application/xhtml+xml,application/xml",
         }
 
         if self._session is None:
@@ -83,8 +89,9 @@ class OmnikInverter:
                 "Error occurred while communicating with Omnik Inverter device"
             ) from exception
 
+        types = ["application/json", "application/x-javascript"]
         content_type = response.headers.get("Content-Type", "")
-        if "application/x-javascript" not in content_type:
+        if not any(item in content_type for item in types):
             text = await response.text()
             raise OmnikInverterError(
                 "Unexpected response from the Omnik Inverter device",
@@ -99,6 +106,9 @@ class OmnikInverter:
         Returns:
             A Inverter data object from the Omnik Inverter.
         """
+        if self.use_json:
+            data = await self.request("status.json", params={"CMD": "inv_query"})
+            return Inverter.from_json(data)
         data = await self.request("js/status.js")
         return Inverter.from_js(data)
 
