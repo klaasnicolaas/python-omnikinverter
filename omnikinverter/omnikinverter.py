@@ -107,7 +107,7 @@ class OmnikInverter:
             A Inverter data object from the Omnik Inverter.
         """
         if self.use_json:
-            data = await self.request("status.json")
+            data = await self.request("status.json", params={"CMD": "inv_query"})
             return Inverter.from_json(data)
         data = await self.request("js/status.js")
         return Inverter.from_js(data)
