@@ -1,6 +1,6 @@
 """Asynchronous Python client for the Omnik Inverter."""
 
-from .models import Inverter
+from .models import Inverter, OmnikInverterWrongSourceError
 from .omnikinverter import (
     OmnikInverter,
     OmnikInverterConnectionError,
@@ -12,4 +12,5 @@ __all__ = [
     "OmnikInverter",
     "OmnikInverterError",
     "OmnikInverterConnectionError",
+    "OmnikInverterWrongSourceError",
 ]

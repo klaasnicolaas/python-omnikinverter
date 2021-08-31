@@ -6,6 +6,8 @@ import re
 from dataclasses import dataclass
 from typing import Any
 
+from .exceptions import OmnikInverterWrongSourceError
+
 
 @dataclass
 class Inverter:
@@ -60,12 +62,17 @@ class Inverter:
             else:
                 matches = re.search(r'(?<=myDeviceArray\[0\]=").*?(?=";)', data)
 
-            data_list = matches.group(0).split(",")
+            try:
+                data_list = matches.group(0).split(",")
                 if position in [4, 5, 6, 7]:
                     if position in [4, 5]:
-                    return int(data_list[position])
-                return float(data_list[position]) / 100
-            return data_list[position]
+                        return int(data_list[position])
+                    return float(data_list[position]) / 100
+                return data_list[position]
+            except AttributeError as exception:
+                raise OmnikInverterWrongSourceError(
+                    "Your inverter has no data source from a javascript file."
+                ) from exception
 
         return Inverter(
             serial_number=get_values(0),

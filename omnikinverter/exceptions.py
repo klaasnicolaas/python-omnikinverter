@@ -7,3 +7,7 @@ class OmnikInverterError(Exception):
 
 class OmnikInverterConnectionError(OmnikInverterError):
     """Omnik Inverter connection exception."""
+
+
+class OmnikInverterWrongSourceError(OmnikInverterError):
+    """Omnik Inverter wrong data source url exception."""
