@@ -11,11 +11,12 @@
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
-[![Contributors][contributors-shield]][contributors-url]
+[![GitHub Last Commit][last-commit-shield]][commits-url]
 
 [![Code Quality][code-quality-shield]][code-quality]
 [![Maintainability][maintainability-shield]][maintainability-url]
-[![GitHub Last Commit][last-commit-shield]][commits-url]
+[![Code Coverage][codecov-shield]][codecov-url]
+[![Build Status][build-shield]][build-url]
 
 Asynchronous Python client for the Omnik Inverter.
 
@@ -27,8 +28,12 @@ A python package with which you can read the data from your Omnik Inverter. Keep
 
 ## Supported models
 
+- Omnik1000TL
+- Omnik1500TL
+- Omnik2000TL
 - Omnik2000TL2
 - Omnik4000TL2
+- Ginlong stick (JSON)
 
 ## Installation
 
@@ -46,7 +51,7 @@ from omnikinverter import OmnikInverter
 
 async def main():
     """Show example on getting Omnik Inverter data."""
-    async with OmnikInverter(host="example_host") as client:
+    async with OmnikInverter(host="example_host", use_json=False) as client:
         inverter = await client.inverter()
         print(inverter)
 
@@ -62,7 +67,9 @@ You can read the following data with this package:
 
 - Serial Number
 - Inverter Model
-- Firmware Version
+- Firmware Version - Main
+- Firmware Version - Slave
+- Rated Power (W)
 - Current Power Production (W)
 - Day Energy Production (kWh)
 - Total Energy Production (kWh)
@@ -70,8 +77,7 @@ You can read the following data with this package:
 ## Setting up development environment
 
 This Python project is fully managed using the [Poetry][poetry] dependency
-manager. But also relies on the use of NodeJS for certain checks during
-development.
+manager.
 
 You need at least:
 
@@ -131,12 +137,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 <!-- MARKDOWN LINKS & IMAGES -->
+[build-shield]: https://github.com/klaasnicolaas/python-omnikinverter/actions/workflows/tests.yaml/badge.svg
+[build-url]: https://github.com/klaasnicolaas/python-omnikinverter/actions/workflows/tests.yaml
 [code-quality-shield]: https://img.shields.io/lgtm/grade/python/g/klaasnicolaas/python-omnikinverter.svg?logo=lgtm&logoWidth=18
 [code-quality]: https://lgtm.com/projects/g/klaasnicolaas/python-omnikinverter/context:python
-[contributors-shield]: https://img.shields.io/github/contributors/klaasnicolaas/python-omnikinverter.svg
-[contributors-url]: https://github.com/klaasnicolaas/python-omnikinverter/graphs/contributors
 [commits-shield]: https://img.shields.io/github/commit-activity/y/klaasnicolaas/python-omnikinverter.svg
 [commits-url]: https://github.com/klaasnicolaas/python-omnikinverter/commits/master
+[codecov-shield]: https://codecov.io/gh/klaasnicolaas/python-omnikinverter/branch/master/graph/badge.svg?token=VQTR24YFQ9
+[codecov-url]: https://codecov.io/gh/klaasnicolaas/python-omnikinverter
 [forks-shield]: https://img.shields.io/github/forks/klaasnicolaas/python-omnikinverter.svg
 [forks-url]: https://github.com/klaasnicolaas/python-omnikinverter/network/members
 [issues-shield]: https://img.shields.io/github/issues/klaasnicolaas/python-omnikinverter.svg
