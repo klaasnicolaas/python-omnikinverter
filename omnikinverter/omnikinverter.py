@@ -21,7 +21,7 @@ class OmnikInverter:
     def __init__(
         self,
         host: str,
-        use_json: bool,
+        use_json: bool = False,
         request_timeout: int = 10,
         session: ClientSession | None = None,
     ) -> None:
