@@ -39,7 +39,7 @@ class Inverter:
             model=data["i_modle"],
             firmware_main=data["i_ver_m"],
             firmware_slave=data["i_ver_s"],
-            solar_rated_power=int(data["i_pow"]),
+            solar_rated_power=data["i_pow"],
             solar_current_power=int(data["i_pow_n"]),
             solar_energy_today=float(data["i_eday"]),
             solar_energy_total=float(data["i_eall"]),
