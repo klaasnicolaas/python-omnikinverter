@@ -11,7 +11,7 @@ from aiohttp.client import ClientError, ClientResponseError, ClientSession
 from yarl import URL
 
 from .exceptions import OmnikInverterConnectionError, OmnikInverterError
-from .models import Inverter
+from .models import Device, Inverter
 
 
 @dataclass
@@ -101,7 +101,7 @@ class OmnikInverter:
         return await response.text()
 
     async def inverter(self) -> Inverter:
-        """Get the latest values from you Omnik Inverter.
+        """Get values from your Omnik Inverter.
 
         Returns:
             A Inverter data object from the Omnik Inverter.
@@ -111,6 +111,18 @@ class OmnikInverter:
             return Inverter.from_json(data)
         data = await self.request("js/status.js")
         return Inverter.from_js(data)
+
+    async def device(self) -> Device:
+        """Get values from the device.
+
+        Returns:
+            A Device data object from the Omnik Inverter.
+        """
+        if self.use_json:
+            data = await self.request("status.json", params={"CMD": "inv_query"})
+            return Device.from_json(data)
+        data = await self.request("js/status.js")
+        return Device.from_js(data)
 
     async def close(self) -> None:
         """Close open client session."""
