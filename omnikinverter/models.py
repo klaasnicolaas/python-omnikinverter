@@ -67,10 +67,13 @@ class Inverter:
                 if position in [4, 5, 6, 7]:
                     if position in [4, 5]:
                         return int(data_list[position])
+
                     if position == 6:
-                        return float(data_list[position]) / 100
+                        energy_value = float(data_list[position]) / 100
                     if position == 7:
-                        return float(data_list[position]) / 10
+                        energy_value = float(data_list[position]) / 10
+                    return energy_value
+
                 return data_list[position]
             except AttributeError as exception:
                 raise OmnikInverterWrongSourceError(
