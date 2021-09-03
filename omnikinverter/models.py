@@ -74,7 +74,7 @@ class Inverter:
                         energy_value = float(data_list[position]) / 10
                     return energy_value
 
-                return data_list[position]
+                return data_list[position].replace(" ", "")
             except AttributeError as exception:
                 raise OmnikInverterWrongSourceError(
                     "Your inverter has no data source from a javascript file."
