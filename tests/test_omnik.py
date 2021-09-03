@@ -37,7 +37,7 @@ async def test_js_input(aresponses):
         assert inverter.model == "omnik2000tl2"
         assert inverter.solar_current_power == 1010
         assert inverter.solar_energy_today == 4.88
-        assert inverter.solar_energy_total == 1053.19
+        assert inverter.solar_energy_total == 10531.9
 
 
 @pytest.mark.asyncio
