@@ -8,9 +8,7 @@ from omnikinverter import OmnikInverter
 
 async def main():
     """Test."""
-    async with OmnikInverter(
-        host="example.com", use_json=False
-    ) as client:
+    async with OmnikInverter(host="example.com", use_json=False) as client:
         inverter: OmnikInverter = await client.inverter()
         device: OmnikInverter = await client.device()
         print(inverter)
@@ -18,7 +16,7 @@ async def main():
         print("-- INVERTER --")
         print(f"Serial Number: {inverter.serial_number}")
         print(f"Model: {inverter.model}")
-        print(f"Firmware Main: {inverter.firmware_main}")
+        print(f"Firmware Main: {inverter.firmware}")
         print(f"Firmware Slave: {inverter.firmware_slave}")
         print(f"Rated Power: {inverter.solar_rated_power}")
         print(f"Current Power: {inverter.solar_current_power}")
