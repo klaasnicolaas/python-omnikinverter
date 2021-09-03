@@ -1,5 +1,6 @@
 """Basic tests for the Omnik Inverter device."""
 import asyncio
+from unittest.mock import patch
 
 import aiohttp
 import pytest
@@ -29,9 +30,9 @@ async def test_wrong_source(aresponses):
     )
 
     async with aiohttp.ClientSession() as session:
-        omnik = OmnikInverter(host="example.com", session=session)
+        client = OmnikInverter(host="example.com", session=session)
         with pytest.raises(OmnikInverterWrongSourceError):
-            assert await omnik.inverter()
+            assert await client.inverter()
 
 
 @pytest.mark.asyncio
@@ -47,9 +48,20 @@ async def test_timeout(aresponses):
     aresponses.add("example.com", "/js/status.js", "GET", response_handler)
 
     async with aiohttp.ClientSession() as session:
-        omnik = OmnikInverter(host="example.com", session=session)
+        client = OmnikInverter(host="example.com", session=session)
         with pytest.raises(OmnikInverterConnectionError):
-            assert await omnik.inverter()
+            assert await client.inverter()
+
+
+@pytest.mark.asyncio
+async def test_client_error():
+    """Test request client error from Omnik Inverter."""
+    async with aiohttp.ClientSession() as session:
+        client = OmnikInverter(host="example.com", session=session)
+        with patch.object(
+            session, "request", side_effect=aiohttp.ClientError
+        ), pytest.raises(OmnikInverterConnectionError):
+            assert await client.request("test")
 
 
 @pytest.mark.asyncio
@@ -63,9 +75,9 @@ async def test_http_error404(aresponses):
     )
 
     async with aiohttp.ClientSession() as session:
-        omnik = OmnikInverter(host="example.com", session=session)
+        client = OmnikInverter(host="example.com", session=session)
         with pytest.raises(OmnikInverterError):
-            assert await omnik.request("test")
+            assert await client.request("test")
 
 
 @pytest.mark.asyncio
@@ -79,6 +91,6 @@ async def test_unexpected_response(aresponses):
     )
 
     async with aiohttp.ClientSession() as session:
-        omnik = OmnikInverter(host="example.com", session=session)
+        client = OmnikInverter(host="example.com", session=session)
         with pytest.raises(OmnikInverterError):
-            assert await omnik.request("test")
+            assert await client.request("test")

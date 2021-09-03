@@ -53,7 +53,9 @@ async def main():
     """Show example on getting Omnik Inverter data."""
     async with OmnikInverter(host="example_host", use_json=False) as client:
         inverter = await client.inverter()
+        device = await client.device()
         print(inverter)
+        print(device)
 
 
 if __name__ == "__main__":
@@ -61,9 +63,11 @@ if __name__ == "__main__":
     loop.run_until_complete(main())
 ```
 
-# Data
+## Data
 
 You can read the following data with this package:
+
+### Inverter
 
 - Serial Number
 - Inverter Model
@@ -73,6 +77,12 @@ You can read the following data with this package:
 - Current Power Production (W)
 - Day Energy Production (kWh)
 - Total Energy Production (kWh)
+
+### Device
+
+- Signal Quality (only JS)
+- Firmware Version
+- IP Address
 
 ## Setting up development environment
 
