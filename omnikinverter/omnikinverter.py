@@ -4,13 +4,18 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Mapping
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any
 
 import async_timeout
 from aiohttp.client import ClientError, ClientResponseError, ClientSession
 from yarl import URL
 
-from .exceptions import OmnikInverterConnectionError, OmnikInverterError
+from .exceptions import (
+    OmnikInverterConnectionError,
+    OmnikInverterError,
+    OmnikInverterOfflineError,
+)
 from .models import Device, Inverter
 
 
@@ -60,7 +65,27 @@ class OmnikInverter:
             OmnikInverterConnectionError: An error occurred while communicating
                 with the Omnik Inverter.
             OmnikInverterError: Received an unexpected response from the Omnik Inverter.
+            OmnikInverterOfflineError: Error occurred, because your inverter
+                is switched off.
         """
+
+        def is_between(time, time_range):
+            """Check if your time is between a range.
+
+            Args:
+                time: The current time.
+                time_range: A time range with which to compare.
+
+            Returns:
+                A bool value.
+            """
+            if time_range[1] < time_range[0]:
+                return time >= time_range[0] or time <= time_range[1]
+            return time_range[0] <= time <= time_range[1]
+
+        now = datetime.now()
+        current_time = now.strftime("%H:%M:%S")
+
         url = URL.build(scheme="http", host=self.host, path="/").join(URL(uri))
 
         headers = {
@@ -85,6 +110,10 @@ class OmnikInverter:
                 "Timeout occurred while connecting to Omnik Inverter device"
             ) from exception
         except (ClientError, ClientResponseError) as exception:
+            if is_between(current_time, ("22:00", "05:00")):
+                raise OmnikInverterOfflineError(
+                    "Error occurred, because your inverter is switched off"
+                ) from exception
             raise OmnikInverterConnectionError(
                 "Error occurred while communicating with Omnik Inverter device"
             ) from exception
