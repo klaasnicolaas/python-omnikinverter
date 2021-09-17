@@ -29,6 +29,7 @@ async def test_inverter_js_webdata(aresponses):
         assert inverter.firmware == "NL2-V9.8-5931"
         assert inverter.firmware_slave == "V5.3-00157"
         assert inverter.model == "omnik2000tl2"
+        assert inverter.solar_rated_power is None
         assert inverter.solar_current_power == 1010
         assert inverter.solar_energy_today == 4.88
         assert inverter.solar_energy_total == 10531.9
@@ -79,6 +80,7 @@ async def test_inverter_js_devicearray(aresponses):
         assert inverter.firmware == "V4.08Build215"
         assert inverter.firmware_slave == "V4.12Build246"
         assert inverter.model == "Omnik1500tl"
+        assert inverter.solar_rated_power is None
         assert inverter.solar_current_power == 850
         assert inverter.solar_energy_today == 2.32
         assert inverter.solar_energy_total == 5200.2
@@ -125,10 +127,11 @@ async def test_inverter_json(aresponses):
         omnik = OmnikInverter(host="example.com", use_json=True, session=session)
         inverter: Inverter = await omnik.inverter()
         assert inverter
-        assert inverter.serial_number == "12345678910"
+        assert inverter.serial_number is None
         assert inverter.firmware == "V1.25Build23261"
         assert inverter.firmware_slave == "V1.40Build52927"
         assert inverter.model == "omnik2000tl2"
+        assert inverter.solar_rated_power is None
         assert inverter.solar_current_power == 1225
         assert inverter.solar_energy_today == 10.90
         assert inverter.solar_energy_total == 8674.0

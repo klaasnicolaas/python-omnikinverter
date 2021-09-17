@@ -94,18 +94,18 @@ You need at least:
 - Python 3.8+
 - [Poetry][poetry-install]
 
-Create a virtualenv and enter it:
-
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
-
 To install all packages, including all development requirements:
 
 ```bash
 poetry install
 pre-commit install
+```
+
+Poetry creates by default an virtual environment where it installs all necessary pip packages, to enter or exit the venv run the following commands:
+
+```bash
+poetry shell
+exit
 ```
 
 As this repository uses the [pre-commit][pre-commit] framework, all changes

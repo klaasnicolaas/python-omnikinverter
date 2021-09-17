@@ -33,16 +33,21 @@ class Inverter:
             An Inverter object.
         """
 
+        def get_value(search):
+            if data[search] != "":
+                return data[search]
+            return None
+
         data = json.loads(data)
         return Inverter(
-            serial_number=data["i_sn"],
-            model=data["i_modle"],
-            firmware=data["i_ver_m"],
-            firmware_slave=data["i_ver_s"],
-            solar_rated_power=data["i_pow"],
-            solar_current_power=int(data["i_pow_n"]),
-            solar_energy_today=float(data["i_eday"]),
-            solar_energy_total=float(data["i_eall"]),
+            serial_number=get_value("i_sn"),
+            model=get_value("i_modle"),
+            firmware=get_value("i_ver_m"),
+            firmware_slave=get_value("i_ver_s"),
+            solar_rated_power=get_value("i_pow"),
+            solar_current_power=int(get_value("i_pow_n")),
+            solar_energy_today=float(get_value("i_eday")),
+            solar_energy_total=float(get_value("i_eall")),
         )
 
     @staticmethod
@@ -56,7 +61,7 @@ class Inverter:
             An Inverter object.
         """
 
-        def get_values(position):
+        def get_value(position):
             if data.find("webData") != -1:
                 matches = re.search(r'(?<=webData=").*?(?=";)', data)
             else:
@@ -64,31 +69,32 @@ class Inverter:
 
             try:
                 data_list = matches.group(0).split(",")
-                if position in [4, 5, 6, 7]:
-                    if position in [4, 5]:
-                        return int(data_list[position])
+                if data_list[position] != "":
+                    if position in [4, 5, 6, 7]:
+                        if position in [4, 5]:
+                            return int(data_list[position])
 
-                    if position == 6:
-                        energy_value = float(data_list[position]) / 100
-                    if position == 7:
-                        energy_value = float(data_list[position]) / 10
-                    return energy_value
-
-                return data_list[position].replace(" ", "")
+                        if position == 6:
+                            energy_value = float(data_list[position]) / 100
+                        if position == 7:
+                            energy_value = float(data_list[position]) / 10
+                        return energy_value
+                    return data_list[position].replace(" ", "")
+                return None
             except AttributeError as exception:
                 raise OmnikInverterWrongSourceError(
                     "Your inverter has no data source from a javascript file."
                 ) from exception
 
         return Inverter(
-            serial_number=get_values(0),
-            model=get_values(3),
-            firmware=get_values(1),
-            firmware_slave=get_values(2),
-            solar_rated_power=get_values(4),
-            solar_current_power=get_values(5),
-            solar_energy_today=get_values(6),
-            solar_energy_total=get_values(7),
+            serial_number=get_value(0),
+            model=get_value(3),
+            firmware=get_value(1),
+            firmware_slave=get_value(2),
+            solar_rated_power=get_value(4),
+            solar_current_power=get_value(5),
+            solar_energy_today=get_value(6),
+            solar_energy_total=get_value(7),
         )
 
 
@@ -129,7 +135,7 @@ class Device:
             An Device object.
         """
 
-        def get_values(value_type):
+        def get_value(value_type):
             if value_type == "ip" and data.find("wanIp") != -1:
                 match = re.search(r'(?<=wanIp=").*?(?=";)', data.replace(" ", ""))
                 value = match.group(0)
@@ -143,7 +149,7 @@ class Device:
             return value
 
         return Device(
-            signal_quality=get_values("signal"),
-            firmware=get_values("version"),
-            ip_address=get_values("ip"),
+            signal_quality=get_value("signal"),
+            firmware=get_value("version"),
+            ip_address=get_value("ip"),
         )
