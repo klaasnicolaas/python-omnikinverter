@@ -29,7 +29,7 @@ class OmnikInverter:
 
         Args:
             host: Hostname or IP address of the Omnik Inverter.
-            use_json: Boolean to confirm you use a JSON input.
+            use_json: Boolean to confirm you use a JSON source.
             request_timeout: An integer with the request timeout in seconds.
             session: Optional, shared, aiohttp client session.
         """
