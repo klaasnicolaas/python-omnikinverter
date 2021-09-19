@@ -6,7 +6,7 @@ import re
 from dataclasses import dataclass
 from typing import Any
 
-from .exceptions import OmnikInverterWrongSourceError
+from .exceptions import OmnikInverterWrongSourceError, OmnikInverterWrongValuesError
 
 
 @dataclass
@@ -31,14 +31,35 @@ class Inverter:
 
         Returns:
             An Inverter object.
+
+        Raises:
+            OmnikInverterWrongValuesError: Inverter pass on
+                incorrect data (day and total are equal).
         """
+        data = json.loads(data)
 
         def get_value(search):
             if data[search] != "":
                 return data[search]
             return None
 
-        data = json.loads(data)
+        def validation(data_list):
+            """Check if the values are not equal to each other.
+
+            Args:
+                data_list: List of values to check.
+
+            Returns:
+                Boolean value.
+            """
+            res = all(ele == data_list[0] for ele in data_list)
+            return res
+
+        if validation([data["i_eday"], data["i_eall"]]):
+            raise OmnikInverterWrongValuesError(
+                "Inverter pass on incorrect data (day and total are equal)"
+            )
+
         return Inverter(
             serial_number=get_value("i_sn"),
             model=get_value("i_modle"),
