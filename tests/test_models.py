@@ -3,6 +3,7 @@ import aiohttp
 import pytest
 
 from omnikinverter import Device, Inverter, OmnikInverter
+from omnikinverter.exceptions import OmnikInverterWrongValuesError
 
 from . import load_fixtures
 
@@ -124,8 +125,8 @@ async def test_inverter_json(aresponses):
     )
 
     async with aiohttp.ClientSession() as session:
-        omnik = OmnikInverter(host="example.com", use_json=True, session=session)
-        inverter: Inverter = await omnik.inverter()
+        client = OmnikInverter(host="example.com", use_json=True, session=session)
+        inverter: Inverter = await client.inverter()
         assert inverter
         assert inverter.serial_number is None
         assert inverter.firmware == "V1.25Build23261"
@@ -152,9 +153,29 @@ async def test_device_json(aresponses):
     )
 
     async with aiohttp.ClientSession() as session:
-        omnik = OmnikInverter(host="example.com", use_json=True, session=session)
-        device: Device = await omnik.device()
+        client = OmnikInverter(host="example.com", use_json=True, session=session)
+        device: Device = await client.device()
         assert device
         assert device.signal_quality is None
         assert device.firmware == "ME-111001-V1.0.6(2015-10-16)"
         assert device.ip_address == "192.168.0.10"
+
+
+@pytest.mark.asyncio
+async def test_wrong_values(aresponses):
+    """Test on wrong inverter values."""
+    aresponses.add(
+        "example.com",
+        "/status.json",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/json"},
+            text=load_fixtures("wrong_status.json"),
+        ),
+    )
+
+    async with aiohttp.ClientSession() as session:
+        client = OmnikInverter(host="example.com", use_json=True, session=session)
+        with pytest.raises(OmnikInverterWrongValuesError):
+            assert await client.inverter()
