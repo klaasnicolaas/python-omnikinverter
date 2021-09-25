@@ -16,7 +16,7 @@ from . import load_fixtures
 
 
 @pytest.mark.asyncio
-async def test_wrong_source(aresponses):
+async def test_wrong_js_source(aresponses):
     """Test on wrong data source error raise."""
     aresponses.add(
         "example.com",
@@ -36,6 +36,32 @@ async def test_wrong_source(aresponses):
 
 
 @pytest.mark.asyncio
+async def test_wrong_html_source(aresponses):
+    """Test on wrong data source error raise."""
+    aresponses.add(
+        "example.com",
+        "/status.html",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "text/html"},
+            text=load_fixtures("wrong_status.html"),
+        ),
+    )
+
+    async with aiohttp.ClientSession() as session:
+        client = OmnikInverter(  # noqa: S106
+            host="example.com",
+            source_type="html",
+            username="klaas",
+            password="supercool",
+            session=session,
+        )
+        with pytest.raises(OmnikInverterWrongSourceError):
+            assert await client.inverter()
+
+
+@pytest.mark.asyncio
 async def test_timeout(aresponses):
     """Test request timeout from Omnik Inverter."""
     # Faking a timeout by sleeping
@@ -50,6 +76,25 @@ async def test_timeout(aresponses):
     async with aiohttp.ClientSession() as session:
         client = OmnikInverter(host="example.com", session=session)
         with pytest.raises(OmnikInverterConnectionError):
+            assert await client.inverter()
+
+
+@pytest.mark.asyncio
+async def test_content_type(aresponses):
+    """Test request content type error from Omnik Inverter."""
+    aresponses.add(
+        "example.com",
+        "/js/status.js",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "blabla/blabla"},
+        ),
+    )
+
+    async with aiohttp.ClientSession() as session:
+        client = OmnikInverter(host="example.com", session=session)
+        with pytest.raises(OmnikInverterError):
             assert await client.inverter()
 
 
