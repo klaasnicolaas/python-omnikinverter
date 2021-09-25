@@ -51,7 +51,9 @@ from omnikinverter import OmnikInverter
 
 async def main():
     """Show example on getting Omnik Inverter data."""
-    async with OmnikInverter(host="example_host", use_json=False) as client:
+    async with OmnikInverter(
+        host="example_host", source_type="js", username="omnik", password="inverter"
+    ) as client:
         inverter = await client.inverter()
         device = await client.device()
         print(inverter)
@@ -94,19 +96,27 @@ You need at least:
 - Python 3.8+
 - [Poetry][poetry-install]
 
-To install all packages, including all development requirements:
+Install all packages, including all development requirements:
 
 ```bash
 poetry install
-pre-commit install
 ```
 
-Poetry creates by default an virtual environment where it installs all necessary pip packages, to enter or exit the venv run the following commands:
+Poetry creates by default an virtual environment where it installs all
+necessary pip packages, to enter or exit the venv run the following commands:
 
 ```bash
 poetry shell
 exit
 ```
+
+Setup the pre-commit check, you must run this inside the virtual environment:
+
+```bash
+pre-commit install
+```
+
+*Now you're all set to get started!*
 
 As this repository uses the [pre-commit][pre-commit] framework, all changes
 are linted and tested with each commit. You can run all checks and tests
