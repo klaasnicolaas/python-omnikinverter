@@ -5,6 +5,10 @@ class OmnikInverterError(Exception):
     """Generic Omnik Inverter exception."""
 
 
+class OmnikInverterAuthError(OmnikInverterError):
+    """Omnik Inverter Authentication exception."""
+
+
 class OmnikInverterConnectionError(OmnikInverterError):
     """Omnik Inverter connection exception."""
 

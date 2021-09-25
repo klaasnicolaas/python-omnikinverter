@@ -8,7 +8,10 @@ from omnikinverter import OmnikInverter
 
 async def main():
     """Test."""
-    async with OmnikInverter(host="example.com", use_json=False) as client:
+    async with OmnikInverter(
+        host="examples.com",
+        source_type="js",
+    ) as client:
         inverter: OmnikInverter = await client.inverter()
         device: OmnikInverter = await client.device()
         print(inverter)
