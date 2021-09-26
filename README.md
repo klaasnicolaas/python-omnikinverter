@@ -52,7 +52,10 @@ from omnikinverter import OmnikInverter
 async def main():
     """Show example on getting Omnik Inverter data."""
     async with OmnikInverter(
-        host="example_host", source_type="js", username="omnik", password="inverter"
+        host="example_host",
+        source_type="javascript",
+        username="omnik",
+        password="inverter",
     ) as client:
         inverter = await client.inverter()
         device = await client.device()
@@ -64,6 +67,8 @@ if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
 ```
+
+For the **source type** you can choose between: `javascript` (default), `json` and `html`.
 
 ## Data
 
@@ -82,7 +87,7 @@ You can read the following data with this package:
 
 ### Device
 
-- Signal Quality (only JS)
+- Signal Quality (only with JS)
 - Firmware Version
 - IP Address
 
