@@ -6,6 +6,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
 
+import aiohttp
 import async_timeout
 from aiohttp.client import ClientError, ClientResponseError, ClientSession
 from yarl import URL
@@ -18,10 +19,13 @@ from .models import Device, Inverter
 class OmnikInverter:
     """Main class for handling connections with the Omnik Inverter."""
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         host: str,
-        use_json: bool = False,
+        username: str | None = None,
+        password: str | None = None,
+        source_type: str = "javascript",
         request_timeout: int = 10,
         session: ClientSession | None = None,
     ) -> None:
@@ -29,7 +33,10 @@ class OmnikInverter:
 
         Args:
             host: Hostname or IP address of the Omnik Inverter.
-            use_json: Boolean to confirm you use a JSON source.
+            username: Username for HTTP auth, if enabled.
+            password: Password for HTTP auth, if enabled.
+            source_type: Whisch source your inverter uses
+                [javascript (default), html, json].
             request_timeout: An integer with the request timeout in seconds.
             session: Optional, shared, aiohttp client session.
         """
@@ -37,7 +44,9 @@ class OmnikInverter:
         self._close_session = False
 
         self.host = host
-        self.use_json = use_json
+        self.username = username
+        self.password = password
+        self.source_type = source_type
         self.request_timeout = request_timeout
 
     async def request(
@@ -71,11 +80,16 @@ class OmnikInverter:
             self._session = ClientSession()
             self._close_session = True
 
+        auth = None
+        if self.username and self.password:
+            auth = aiohttp.BasicAuth(self.username, self.password)
+
         try:
             with async_timeout.timeout(self.request_timeout):
                 response = await self._session.request(
                     "GET",
                     url,
+                    auth=auth,
                     params=params,
                     headers=headers,
                 )
@@ -89,7 +103,7 @@ class OmnikInverter:
                 "Error occurred while communicating with Omnik Inverter device"
             ) from exception
 
-        types = ["application/json", "application/x-javascript"]
+        types = ["application/json", "application/x-javascript", "text/html"]
         content_type = response.headers.get("Content-Type", "")
         if not any(item in content_type for item in types):
             text = await response.text()
@@ -106,9 +120,12 @@ class OmnikInverter:
         Returns:
             A Inverter data object from the Omnik Inverter.
         """
-        if self.use_json:
+        if self.source_type == "json":
             data = await self.request("status.json", params={"CMD": "inv_query"})
             return Inverter.from_json(data)
+        if self.source_type == "html":
+            data = await self.request("status.html")
+            return Inverter.from_html(data)
         data = await self.request("js/status.js")
         return Inverter.from_js(data)
 
@@ -118,9 +135,12 @@ class OmnikInverter:
         Returns:
             A Device data object from the Omnik Inverter.
         """
-        if self.use_json:
+        if self.source_type == "json":
             data = await self.request("status.json", params={"CMD": "inv_query"})
             return Device.from_json(data)
+        if self.source_type == "html":
+            data = await self.request("status.html")
+            return Device.from_html(data)
         data = await self.request("js/status.js")
         return Device.from_js(data)
 

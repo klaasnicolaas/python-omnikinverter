@@ -72,6 +72,44 @@ class Inverter:
         )
 
     @staticmethod
+    def from_html(data: dict[str, Any]) -> Inverter:
+        """Return Inverter object from the Omnik Inverter response.
+
+        Args:
+            data: The HTML (webscraping) data from the Omnik Inverter.
+
+        Returns:
+            An Inverter object.
+        """
+
+        def get_value(search_key):
+            match = re.search(f'(?<={search_key}=").*?(?=";)', data.replace(" ", ""))
+            try:
+                value = match.group(0)
+                if value != "":
+                    if search_key in ["webdata_now_p", "webdata_rate_p"]:
+                        return int(value)
+                    if search_key in ["webdata_today_e", "webdata_total_e"]:
+                        return float(value)
+                    return value
+                return None
+            except AttributeError as exception:
+                raise OmnikInverterWrongSourceError(
+                    "Your inverter has no data source from a html file."
+                ) from exception
+
+        return Inverter(
+            serial_number=get_value("webdata_sn"),
+            model=get_value("webdata_pv_type"),
+            firmware=get_value("webdata_msvn"),
+            firmware_slave=get_value("webdata_ssvn"),
+            solar_rated_power=get_value("webdata_rate_p"),
+            solar_current_power=get_value("webdata_now_p"),
+            solar_energy_today=get_value("webdata_today_e"),
+            solar_energy_total=get_value("webdata_total_e"),
+        )
+
+    @staticmethod
     def from_js(data: dict[str, Any]) -> Inverter:
         """Return Inverter object from the Omnik Inverter response.
 
@@ -146,6 +184,33 @@ class Device:
         )
 
     @staticmethod
+    def from_html(data: dict[str, Any]) -> Device:
+        """Return Device object from the Omnik Inverter response.
+
+        Args:
+            data: The HTML (webscraping) data from the Omnik Inverter.
+
+        Returns:
+            An Device object.
+        """
+
+        for correction in [" ", "%"]:
+            data = data.replace(correction, "")
+
+        def get_value(search_key):
+            match = re.search(f'(?<={search_key}=").*?(?=";)', data)
+            value = match.group(0)
+            if value != "":
+                return value
+            return None
+
+        return Device(
+            signal_quality=get_value("cover_sta_rssi"),
+            firmware=get_value("cover_ver"),
+            ip_address=get_value("cover_sta_ip"),
+        )
+
+    @staticmethod
     def from_js(data: dict[str, Any]) -> Device:
         """Return Device object from the Omnik Inverter response.
 
@@ -155,22 +220,20 @@ class Device:
         Returns:
             An Device object.
         """
+        for correction in [" ", "%"]:
+            data = data.replace(correction, "")
 
-        def get_value(value_type):
-            if value_type == "ip" and data.find("wanIp") != -1:
-                match = re.search(r'(?<=wanIp=").*?(?=";)', data.replace(" ", ""))
-                value = match.group(0)
-            if value_type == "signal" and data.find("m2mRssi") != -1:
-                match = re.search(r'(?<=m2mRssi=").*?(?=";)', data.replace(" ", ""))
-                value = match.group(0).replace("%", "")
-                return int(value)
-            if value_type == "version" and data.find("version") != -1:
-                match = re.search(r'(?<=version=").*?(?=";)', data.replace(" ", ""))
-                value = match.group(0)
-            return value
+        def get_value(search_key):
+            match = re.search(f'(?<={search_key}=").*?(?=";)', data)
+            value = match.group(0)
+            if value != "":
+                if search_key == "m2mRssi":
+                    return int(value)
+                return value
+            return None
 
         return Device(
-            signal_quality=get_value("signal"),
+            signal_quality=get_value("m2mRssi"),
             firmware=get_value("version"),
-            ip_address=get_value("ip"),
+            ip_address=get_value("wanIp"),
         )
