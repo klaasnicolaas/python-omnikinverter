@@ -25,7 +25,7 @@ class OmnikInverter:
         host: str,
         username: str | None = None,
         password: str | None = None,
-        source_type: str = "js",
+        source_type: str = "javascript",
         request_timeout: int = 10,
         session: ClientSession | None = None,
     ) -> None:
@@ -35,7 +35,8 @@ class OmnikInverter:
             host: Hostname or IP address of the Omnik Inverter.
             username: Username for HTTP auth, if enabled.
             password: Password for HTTP auth, if enabled.
-            source_type: Whisch source your inverter uses [js, html, json].
+            source_type: Whisch source your inverter uses
+                [javascript (default), html, json].
             request_timeout: An integer with the request timeout in seconds.
             session: Optional, shared, aiohttp client session.
         """
