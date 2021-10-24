@@ -63,9 +63,13 @@ class OmnikInverter:
             "Accept": "text/html,application/xhtml+xml,application/xml",
         }
 
-        if self.session is None:
-            self.session = ClientSession()
-            self._close_session = True
+        # if self._session is None:
+        #     self._session = ClientSession()
+        #     self._close_session = True
+
+        # Don't reuse session as Wifi stick does not seem to support it (on some firmware versions?)
+        self._session = ClientSession()
+        self._close_session = True
 
         if self.source_type == "html" and (
             self.username is None or self.password is None
