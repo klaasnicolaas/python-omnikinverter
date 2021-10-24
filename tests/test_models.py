@@ -123,6 +123,69 @@ async def test_device_html(aresponses):
 
 
 @pytest.mark.asyncio
+async def test_inverter_html_solis(aresponses):
+    """Test request from a Inverter - HTML source."""
+    aresponses.add(
+        "example.com",
+        "/status.html",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "text/html"},
+            text=load_fixtures("status_solis.html"),
+        ),
+    )
+
+    async with aiohttp.ClientSession() as session:
+        client = OmnikInverter(  # noqa: S106
+            host="example.com",
+            source_type="html",
+            username="klaas",
+            password="supercool",
+            session=session,
+        )
+        inverter: Inverter = await client.inverter()
+        assert inverter
+        assert inverter.serial_number == "1234567890ABCDE"
+        assert inverter.firmware == "001F"
+        assert inverter.firmware_slave == "002F"
+        assert inverter.model == "0079"
+        assert inverter.solar_rated_power == None
+        assert inverter.solar_current_power == 5850
+        assert inverter.solar_energy_today == 9.80
+        assert inverter.solar_energy_total == 44.0
+
+
+@pytest.mark.asyncio
+async def test_device_html_solis(aresponses):
+    """Test request from a Inverter - HTML source."""
+    aresponses.add(
+        "example.com",
+        "/status.html",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "text/html"},
+            text=load_fixtures("status_solis.html"),
+        ),
+    )
+
+    async with aiohttp.ClientSession() as session:
+        client = OmnikInverter(  # noqa: S106
+            host="example.com",
+            source_type="html",
+            username="klaas",
+            password="supercool",
+            session=session,
+        )
+        device: Device = await client.device()
+        assert device
+        assert device.signal_quality == 96
+        assert device.firmware == "MW_08_512_0501_1.82"
+        assert device.ip_address == "192.168.178.3"
+
+
+@pytest.mark.asyncio
 async def test_inverter_js_devicearray(aresponses):
     """Test request from a Inverter - JS DeviceArray source."""
     aresponses.add(
