@@ -200,9 +200,9 @@ class Device:
         def get_value(search_key):
             match = re.search(f'(?<={search_key}=").*?(?=";)', data)
             value = match.group(0)
-            if search_key in ["cover_sta_rssi"]:
-                return int(value) if value else None
             if value != "":
+                if search_key in ["cover_sta_rssi"]:
+                    return int(value)
                 return value
             return None
 
