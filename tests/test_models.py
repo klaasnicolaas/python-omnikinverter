@@ -1,5 +1,4 @@
 """Test the models."""
-import aiohttp
 import pytest
 
 from omnikinverter import Device, Inverter, OmnikInverter
@@ -142,7 +141,7 @@ async def test_inverter_html_solis(aresponses):
     assert inverter.firmware == "001F"
     assert inverter.firmware_slave == "002F"
     assert inverter.model == "0079"
-    assert inverter.solar_rated_power == None
+    assert inverter.solar_rated_power is None
     assert inverter.solar_current_power == 5850
     assert inverter.solar_energy_today == 9.80
     assert inverter.solar_energy_total == 44.0
