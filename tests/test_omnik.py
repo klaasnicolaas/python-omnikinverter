@@ -65,10 +65,9 @@ async def test_wrong_js_source(aresponses):
         ),
     )
 
-    async with aiohttp.ClientSession() as session:
-        client = OmnikInverter(host="example.com", session=session)
-        with pytest.raises(OmnikInverterWrongSourceError):
-            assert await client.inverter()
+    client = OmnikInverter(host="example.com")
+    with pytest.raises(OmnikInverterWrongSourceError):
+        assert await client.inverter()
 
 
 @pytest.mark.asyncio
@@ -85,16 +84,14 @@ async def test_wrong_html_source(aresponses):
         ),
     )
 
-    async with aiohttp.ClientSession() as session:
-        client = OmnikInverter(  # noqa: S106
-            host="example.com",
-            source_type="html",
-            username="klaas",
-            password="supercool",
-            session=session,
-        )
-        with pytest.raises(OmnikInverterWrongSourceError):
-            assert await client.inverter()
+    client = OmnikInverter(  # noqa: S106
+        host="example.com",
+        source_type="html",
+        username="klaas",
+        password="supercool",
+    )
+    with pytest.raises(OmnikInverterWrongSourceError):
+        assert await client.inverter()
 
 
 @pytest.mark.asyncio
@@ -128,10 +125,9 @@ async def test_timeout(aresponses):
 
     aresponses.add("example.com", "/js/status.js", "GET", response_handler)
 
-    async with aiohttp.ClientSession() as session:
-        client = OmnikInverter(host="example.com", session=session, request_timeout=0.1)
-        with pytest.raises(OmnikInverterConnectionError):
-            assert await client.inverter()
+    client = OmnikInverter(host="example.com", request_timeout=0.1)
+    with pytest.raises(OmnikInverterConnectionError):
+        assert await client.inverter()
 
 
 @pytest.mark.asyncio
@@ -147,21 +143,19 @@ async def test_content_type(aresponses):
         ),
     )
 
-    async with aiohttp.ClientSession() as session:
-        client = OmnikInverter(host="example.com", session=session)
-        with pytest.raises(OmnikInverterError):
-            assert await client.inverter()
+    client = OmnikInverter(host="example.com")
+    with pytest.raises(OmnikInverterError):
+        assert await client.inverter()
 
 
 @pytest.mark.asyncio
 async def test_client_error():
     """Test request client error from Omnik Inverter."""
-    async with aiohttp.ClientSession() as session:
-        client = OmnikInverter(host="example.com", session=session)
-        with patch.object(
-            session, "request", side_effect=aiohttp.ClientError
-        ), pytest.raises(OmnikInverterConnectionError):
-            assert await client.request("test")
+    client = OmnikInverter(host="example.com")
+    with patch.object(
+        aiohttp, "request", side_effect=aiohttp.ClientError
+    ), pytest.raises(OmnikInverterConnectionError):
+        assert await client.request("test")
 
 
 @pytest.mark.asyncio
@@ -174,10 +168,9 @@ async def test_http_error404(aresponses):
         aresponses.Response(text="Give me energy!", status=404),
     )
 
-    async with aiohttp.ClientSession() as session:
-        client = OmnikInverter(host="example.com", session=session)
-        with pytest.raises(OmnikInverterError):
-            assert await client.request("test")
+    client = OmnikInverter(host="example.com")
+    with pytest.raises(OmnikInverterError):
+        assert await client.request("test")
 
 
 @pytest.mark.asyncio
@@ -190,7 +183,6 @@ async def test_unexpected_response(aresponses):
         aresponses.Response(text="Give me energy!", status=200),
     )
 
-    async with aiohttp.ClientSession() as session:
-        client = OmnikInverter(host="example.com", session=session)
-        with pytest.raises(OmnikInverterError):
-            assert await client.request("test")
+    client = OmnikInverter(host="example.com")
+    with pytest.raises(OmnikInverterError):
+        assert await client.request("test")

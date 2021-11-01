@@ -82,15 +82,31 @@ class OmnikInverter:
             auth = aiohttp.BasicAuth(self.username, self.password)
 
         try:
-            async with async_timeout.timeout(self.request_timeout):
-                response = await self.session.request(
-                    method,
+            with async_timeout.timeout(self.request_timeout):
+                async with aiohttp.request(
+                    "GET",
                     url,
                     auth=auth,
                     params=params,
                     headers=headers,
-                )
-                response.raise_for_status()
+                ) as response:
+                    response.raise_for_status()
+
+                    types = [
+                        "application/json",
+                        "application/x-javascript",
+                        "text/html",
+                    ]
+                    content_type = response.headers.get("Content-Type", "")
+                    if not any(item in content_type for item in types):
+                        text = await response.text()
+                        raise OmnikInverterError(
+                            "Unexpected response from the Omnik Inverter device",
+                            {"Content-Type": content_type, "response": text},
+                        )
+
+                    return await response.text()
+
         except asyncio.TimeoutError as exception:
             raise OmnikInverterConnectionError(
                 "Timeout occurred while connecting to Omnik Inverter device"
@@ -99,18 +115,6 @@ class OmnikInverter:
             raise OmnikInverterConnectionError(
                 "Error occurred while communicating with Omnik Inverter device"
             ) from exception
-
-        types = ["application/json", "application/x-javascript", "text/html"]
-        content_type = response.headers.get("Content-Type", "")
-        if not any(item in content_type for item in types):
-            text = await response.text()
-            raise OmnikInverterError(
-                "Unexpected response from the Omnik Inverter device",
-                {"Content-Type": content_type, "response": text},
-            )
-
-        raw_response = await response.read()
-        return raw_response.decode("ascii", "ignore")
 
     async def inverter(self) -> Inverter:
         """Get values from your Omnik Inverter.
@@ -142,11 +146,6 @@ class OmnikInverter:
         data = await self.request("js/status.js")
         return Device.from_js(data)
 
-    async def close(self) -> None:
-        """Close open client session."""
-        if self.session and self._close_session:
-            await self.session.close()
-
     async def __aenter__(self) -> OmnikInverter:
         """Async enter.
 
@@ -161,4 +160,3 @@ class OmnikInverter:
         Args:
             _exc_info: Exec type.
         """
-        await self.close()

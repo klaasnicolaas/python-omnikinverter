@@ -22,18 +22,17 @@ async def test_inverter_js_webdata(aresponses):
         ),
     )
 
-    async with aiohttp.ClientSession() as session:
-        client = OmnikInverter(host="example.com", session=session)
-        inverter: Inverter = await client.inverter()
-        assert inverter
-        assert inverter.serial_number == "12345678910"
-        assert inverter.firmware == "NL2-V9.8-5931"
-        assert inverter.firmware_slave == "V5.3-00157"
-        assert inverter.model == "omnik2000tl2"
-        assert inverter.solar_rated_power is None
-        assert inverter.solar_current_power == 1010
-        assert inverter.solar_energy_today == 4.88
-        assert inverter.solar_energy_total == 10531.9
+    client = OmnikInverter(host="example.com")
+    inverter: Inverter = await client.inverter()
+    assert inverter
+    assert inverter.serial_number == "12345678910"
+    assert inverter.firmware == "NL2-V9.8-5931"
+    assert inverter.firmware_slave == "V5.3-00157"
+    assert inverter.model == "omnik2000tl2"
+    assert inverter.solar_rated_power is None
+    assert inverter.solar_current_power == 1010
+    assert inverter.solar_energy_today == 4.88
+    assert inverter.solar_energy_total == 10531.9
 
 
 @pytest.mark.asyncio
@@ -50,13 +49,12 @@ async def test_device_js_webdata(aresponses):
         ),
     )
 
-    async with aiohttp.ClientSession() as session:
-        client = OmnikInverter(host="example.com", session=session)
-        device: Device = await client.device()
-        assert device
-        assert device.signal_quality == 96
-        assert device.firmware == "H4.01.38Y1.0.09W1.0.08"
-        assert device.ip_address == "192.168.0.10"
+    client = OmnikInverter(host="example.com")
+    device: Device = await client.device()
+    assert device
+    assert device.signal_quality == 96
+    assert device.firmware == "H4.01.38Y1.0.09W1.0.08"
+    assert device.ip_address == "192.168.0.10"
 
 
 @pytest.mark.asyncio
@@ -73,24 +71,22 @@ async def test_inverter_html(aresponses):
         ),
     )
 
-    async with aiohttp.ClientSession() as session:
-        client = OmnikInverter(  # noqa: S106
-            host="example.com",
-            source_type="html",
-            username="klaas",
-            password="supercool",
-            session=session,
-        )
-        inverter: Inverter = await client.inverter()
-        assert inverter
-        assert inverter.serial_number == "12345678910"
-        assert inverter.firmware == "V5.07Build245"
-        assert inverter.firmware_slave is None
-        assert inverter.model == "Omnik2500tl"
-        assert inverter.solar_rated_power == 2500
-        assert inverter.solar_current_power == 219
-        assert inverter.solar_energy_today == 0.23
-        assert inverter.solar_energy_total == 6454.5
+    client = OmnikInverter(  # noqa: S106
+        host="example.com",
+        source_type="html",
+        username="klaas",
+        password="supercool",
+    )
+    inverter: Inverter = await client.inverter()
+    assert inverter
+    assert inverter.serial_number == "12345678910"
+    assert inverter.firmware == "V5.07Build245"
+    assert inverter.firmware_slave is None
+    assert inverter.model == "Omnik2500tl"
+    assert inverter.solar_rated_power == 2500
+    assert inverter.solar_current_power == 219
+    assert inverter.solar_energy_today == 0.23
+    assert inverter.solar_energy_total == 6454.5
 
 
 @pytest.mark.asyncio
@@ -107,19 +103,17 @@ async def test_device_html(aresponses):
         ),
     )
 
-    async with aiohttp.ClientSession() as session:
-        client = OmnikInverter(  # noqa: S106
-            host="example.com",
-            source_type="html",
-            username="klaas",
-            password="supercool",
-            session=session,
-        )
-        device: Device = await client.device()
-        assert device
-        assert device.signal_quality is None
-        assert device.firmware == "ME_08_0102_2.03"
-        assert device.ip_address == "192.168.0.106"
+    client = OmnikInverter(  # noqa: S106
+        host="example.com",
+        source_type="html",
+        username="klaas",
+        password="supercool",
+    )
+    device: Device = await client.device()
+    assert device
+    assert device.signal_quality is None
+    assert device.firmware == "ME_08_0102_2.03"
+    assert device.ip_address == "192.168.0.106"
 
 
 @pytest.mark.asyncio
@@ -136,24 +130,22 @@ async def test_inverter_html_solis(aresponses):
         ),
     )
 
-    async with aiohttp.ClientSession() as session:
-        client = OmnikInverter(  # noqa: S106
-            host="example.com",
-            source_type="html",
-            username="klaas",
-            password="supercool",
-            session=session,
-        )
-        inverter: Inverter = await client.inverter()
-        assert inverter
-        assert inverter.serial_number == "1234567890ABCDE"
-        assert inverter.firmware == "001F"
-        assert inverter.firmware_slave == "002F"
-        assert inverter.model == "0079"
-        assert inverter.solar_rated_power == None
-        assert inverter.solar_current_power == 5850
-        assert inverter.solar_energy_today == 9.80
-        assert inverter.solar_energy_total == 44.0
+    client = OmnikInverter(  # noqa: S106
+        host="example.com",
+        source_type="html",
+        username="klaas",
+        password="supercool",
+    )
+    inverter: Inverter = await client.inverter()
+    assert inverter
+    assert inverter.serial_number == "1234567890ABCDE"
+    assert inverter.firmware == "001F"
+    assert inverter.firmware_slave == "002F"
+    assert inverter.model == "0079"
+    assert inverter.solar_rated_power == None
+    assert inverter.solar_current_power == 5850
+    assert inverter.solar_energy_today == 9.80
+    assert inverter.solar_energy_total == 44.0
 
 
 @pytest.mark.asyncio
@@ -170,19 +162,17 @@ async def test_device_html_solis(aresponses):
         ),
     )
 
-    async with aiohttp.ClientSession() as session:
-        client = OmnikInverter(  # noqa: S106
-            host="example.com",
-            source_type="html",
-            username="klaas",
-            password="supercool",
-            session=session,
-        )
-        device: Device = await client.device()
-        assert device
-        assert device.signal_quality == 96
-        assert device.firmware == "MW_08_512_0501_1.82"
-        assert device.ip_address == "192.168.178.3"
+    client = OmnikInverter(  # noqa: S106
+        host="example.com",
+        source_type="html",
+        username="klaas",
+        password="supercool",
+    )
+    device: Device = await client.device()
+    assert device
+    assert device.signal_quality == 96
+    assert device.firmware == "MW_08_512_0501_1.82"
+    assert device.ip_address == "192.168.178.3"
 
 
 @pytest.mark.asyncio
@@ -199,18 +189,17 @@ async def test_inverter_js_devicearray(aresponses):
         ),
     )
 
-    async with aiohttp.ClientSession() as session:
-        client = OmnikInverter(host="example.com", session=session)
-        inverter: Inverter = await client.inverter()
-        assert inverter
-        assert inverter.serial_number == "12345678910"
-        assert inverter.firmware == "V4.08Build215"
-        assert inverter.firmware_slave == "V4.12Build246"
-        assert inverter.model == "Omnik1500tl"
-        assert inverter.solar_rated_power is None
-        assert inverter.solar_current_power == 850
-        assert inverter.solar_energy_today == 2.32
-        assert inverter.solar_energy_total == 5200.2
+    client = OmnikInverter(host="example.com")
+    inverter: Inverter = await client.inverter()
+    assert inverter
+    assert inverter.serial_number == "12345678910"
+    assert inverter.firmware == "V4.08Build215"
+    assert inverter.firmware_slave == "V4.12Build246"
+    assert inverter.model == "Omnik1500tl"
+    assert inverter.solar_rated_power is None
+    assert inverter.solar_current_power == 850
+    assert inverter.solar_energy_today == 2.32
+    assert inverter.solar_energy_total == 5200.2
 
 
 @pytest.mark.asyncio
@@ -227,13 +216,12 @@ async def test_device_js_devicearray(aresponses):
         ),
     )
 
-    async with aiohttp.ClientSession() as session:
-        client = OmnikInverter(host="example.com", session=session)
-        device: Device = await client.device()
-        assert device
-        assert device.signal_quality == 39
-        assert device.firmware == "H4.01.51MW.2.01W1.0.64(2018-01-251-D)"
-        assert device.ip_address is None
+    client = OmnikInverter(host="example.com")
+    device: Device = await client.device()
+    assert device
+    assert device.signal_quality == 39
+    assert device.firmware == "H4.01.51MW.2.01W1.0.64(2018-01-251-D)"
+    assert device.ip_address is None
 
 
 @pytest.mark.asyncio
@@ -250,18 +238,17 @@ async def test_inverter_json(aresponses):
         ),
     )
 
-    async with aiohttp.ClientSession() as session:
-        client = OmnikInverter(host="example.com", source_type="json", session=session)
-        inverter: Inverter = await client.inverter()
-        assert inverter
-        assert inverter.serial_number is None
-        assert inverter.firmware == "V1.25Build23261"
-        assert inverter.firmware_slave == "V1.40Build52927"
-        assert inverter.model == "omnik2000tl2"
-        assert inverter.solar_rated_power is None
-        assert inverter.solar_current_power == 1225
-        assert inverter.solar_energy_today == 10.90
-        assert inverter.solar_energy_total == 8674.0
+    client = OmnikInverter(host="example.com", source_type="json")
+    inverter: Inverter = await client.inverter()
+    assert inverter
+    assert inverter.serial_number is None
+    assert inverter.firmware == "V1.25Build23261"
+    assert inverter.firmware_slave == "V1.40Build52927"
+    assert inverter.model == "omnik2000tl2"
+    assert inverter.solar_rated_power is None
+    assert inverter.solar_current_power == 1225
+    assert inverter.solar_energy_today == 10.90
+    assert inverter.solar_energy_total == 8674.0
 
 
 @pytest.mark.asyncio
@@ -278,13 +265,12 @@ async def test_device_json(aresponses):
         ),
     )
 
-    async with aiohttp.ClientSession() as session:
-        client = OmnikInverter(host="example.com", source_type="json", session=session)
-        device: Device = await client.device()
-        assert device
-        assert device.signal_quality is None
-        assert device.firmware == "ME-111001-V1.0.6(2015-10-16)"
-        assert device.ip_address == "192.168.0.10"
+    client = OmnikInverter(host="example.com", source_type="json")
+    device: Device = await client.device()
+    assert device
+    assert device.signal_quality is None
+    assert device.firmware == "ME-111001-V1.0.6(2015-10-16)"
+    assert device.ip_address == "192.168.0.10"
 
 
 @pytest.mark.asyncio
@@ -301,7 +287,6 @@ async def test_wrong_values(aresponses):
         ),
     )
 
-    async with aiohttp.ClientSession() as session:
-        client = OmnikInverter(host="example.com", source_type="json", session=session)
-        with pytest.raises(OmnikInverterWrongValuesError):
-            assert await client.inverter()
+    client = OmnikInverter(host="example.com", source_type="json")
+    with pytest.raises(OmnikInverterWrongValuesError):
+        assert await client.inverter()
