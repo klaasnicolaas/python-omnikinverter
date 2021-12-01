@@ -74,7 +74,7 @@ async def test_timeout(aresponses):
     aresponses.add("example.com", "/js/status.js", "GET", response_handler)
 
     async with aiohttp.ClientSession() as session:
-        client = OmnikInverter(host="example.com", session=session)
+        client = OmnikInverter(host="example.com", session=session, request_timeout=0.1)
         with pytest.raises(OmnikInverterConnectionError):
             assert await client.inverter()
 

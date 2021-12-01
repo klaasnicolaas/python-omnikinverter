@@ -76,9 +76,8 @@ class OmnikInverter:
             "Accept": "text/html,application/xhtml+xml,application/xml",
         }
 
-        if self._session is None:
-            self._session = ClientSession()
-            self._close_session = True
+        # Don't reuse session as Wifi stick does not seem to support it
+        self._session = ClientSession()
 
         auth = None
         if self.username and self.password:
@@ -112,7 +111,10 @@ class OmnikInverter:
                 {"Content-Type": content_type, "response": text},
             )
 
-        return await response.text()
+        raw_response = await response.read()
+        # Close the client session
+        await self._session.close()
+        return raw_response.decode("ascii", "ignore")
 
     async def inverter(self) -> Inverter:
         """Get values from your Omnik Inverter.

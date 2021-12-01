@@ -63,7 +63,7 @@ bandit = "^1.7.0"
 Changelog = "https://github.com/klaasnicolaas/python-omnikinverter/releases"
 
 [tool.black]
-target-version = ['py37']
+target-version = ['py38']
 
 [tool.coverage.paths]
 source = ["omnikinverter"]
