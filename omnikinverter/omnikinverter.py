@@ -9,6 +9,7 @@ from typing import Any
 import aiohttp
 import async_timeout
 from aiohttp.client import ClientError, ClientResponseError, ClientSession
+from aiohttp.hdrs import METH_GET
 from yarl import URL
 
 from .exceptions import OmnikInverterConnectionError, OmnikInverterError
@@ -19,46 +20,27 @@ from .models import Device, Inverter
 class OmnikInverter:
     """Main class for handling connections with the Omnik Inverter."""
 
-    # pylint: disable=too-many-arguments
-    def __init__(
-        self,
-        host: str,
-        username: str | None = None,
-        password: str | None = None,
-        source_type: str = "javascript",
-        request_timeout: int = 10,
-        session: ClientSession | None = None,
-    ) -> None:
-        """Initialize connection with the Omnik Inverter.
+    host: str
+    username: str | None = None
+    password: str | None = None
+    source_type: str = "javascript"
+    request_timeout: int = 10
+    session: ClientSession | None = None
 
-        Args:
-            host: Hostname or IP address of the Omnik Inverter.
-            username: Username for HTTP auth, if enabled.
-            password: Password for HTTP auth, if enabled.
-            source_type: Whisch source your inverter uses
-                [javascript (default), html, json].
-            request_timeout: An integer with the request timeout in seconds.
-            session: Optional, shared, aiohttp client session.
-        """
-        self._session = session
-        self._close_session = False
-
-        self.host = host
-        self.username = username
-        self.password = password
-        self.source_type = source_type
-        self.request_timeout = request_timeout
+    _close_session: bool = False
 
     async def request(
         self,
         uri: str,
         *,
+        method: str = METH_GET,
         params: Mapping[str, str] | None = None,
     ) -> dict[str, Any]:
         """Handle a request to a Omnik Inverter device.
 
         Args:
             uri: Request URI, without '/', for example, 'status'
+            method: HTTP Method to use.
             params: Extra options to improve or limit the response.
 
         Returns:
@@ -76,17 +58,18 @@ class OmnikInverter:
             "Accept": "text/html,application/xhtml+xml,application/xml",
         }
 
-        # Don't reuse session as Wifi stick does not seem to support it
-        self._session = ClientSession()
+        if self.session is None:
+            self.session = ClientSession()
+            self._close_session = True
 
         auth = None
         if self.username and self.password:
             auth = aiohttp.BasicAuth(self.username, self.password)
 
         try:
-            with async_timeout.timeout(self.request_timeout):
-                response = await self._session.request(
-                    "GET",
+            async with async_timeout.timeout(self.request_timeout):
+                response = await self.session.request(
+                    method,
                     url,
                     auth=auth,
                     params=params,
@@ -112,8 +95,6 @@ class OmnikInverter:
             )
 
         raw_response = await response.read()
-        # Close the client session
-        await self._session.close()
         return raw_response.decode("ascii", "ignore")
 
     async def inverter(self) -> Inverter:
@@ -148,8 +129,8 @@ class OmnikInverter:
 
     async def close(self) -> None:
         """Close open client session."""
-        if self._session and self._close_session:
-            await self._session.close()
+        if self.session and self._close_session:
+            await self.session.close()
 
     async def __aenter__(self) -> OmnikInverter:
         """Async enter.
