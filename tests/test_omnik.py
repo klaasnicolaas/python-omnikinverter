@@ -16,6 +16,42 @@ from . import load_fixtures
 
 
 @pytest.mark.asyncio
+async def test_json_request(aresponses):
+    """Test JSON response is handled correctly."""
+    aresponses.add(
+        "example.com",
+        "/test",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/json"},
+            text='{"status": "ok"}',
+        ),
+    )
+    async with aiohttp.ClientSession() as session:
+        omnik_inverter = OmnikInverter("example.com", session=session)
+        await omnik_inverter.request("test")
+        await omnik_inverter.close()
+
+
+@pytest.mark.asyncio
+async def test_internal_session(aresponses):
+    """Test JSON response is handled correctly."""
+    aresponses.add(
+        "example.com",
+        "/test",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/json"},
+            text='{"status": "ok"}',
+        ),
+    )
+    async with OmnikInverter("example.com") as omnik_inverter:
+        await omnik_inverter.request("test")
+
+
+@pytest.mark.asyncio
 async def test_wrong_js_source(aresponses):
     """Test on wrong data source error raise."""
     aresponses.add(
@@ -74,7 +110,7 @@ async def test_timeout(aresponses):
     aresponses.add("example.com", "/js/status.js", "GET", response_handler)
 
     async with aiohttp.ClientSession() as session:
-        client = OmnikInverter(host="example.com", session=session)
+        client = OmnikInverter(host="example.com", session=session, request_timeout=0.1)
         with pytest.raises(OmnikInverterConnectionError):
             assert await client.inverter()
 
