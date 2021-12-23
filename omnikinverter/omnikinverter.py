@@ -12,7 +12,11 @@ from aiohttp.client import ClientError, ClientResponseError, ClientSession
 from aiohttp.hdrs import METH_GET
 from yarl import URL
 
-from .exceptions import OmnikInverterConnectionError, OmnikInverterError
+from .exceptions import (
+    OmnikInverterAuthError,
+    OmnikInverterConnectionError,
+    OmnikInverterError,
+)
 from .models import Device, Inverter
 
 
@@ -50,6 +54,7 @@ class OmnikInverter:
         Raises:
             OmnikInverterConnectionError: An error occurred while communicating
                 with the Omnik Inverter.
+            OmnikInverterAuthError: Authentication failed with the Omnik Inverter.
             OmnikInverterError: Received an unexpected response from the Omnik Inverter.
         """
         url = URL.build(scheme="http", host=self.host, path="/").join(URL(uri))
@@ -62,6 +67,12 @@ class OmnikInverter:
             self.session = ClientSession()
             self._close_session = True
 
+        if self.source_type == "html" and (
+            self.username is None or self.password is None
+        ):
+            raise OmnikInverterAuthError(
+                "A username and/or password is missing from the request"
+            )
         auth = None
         if self.username and self.password:
             auth = aiohttp.BasicAuth(self.username, self.password)
