@@ -10,7 +10,7 @@ from omnikinverter import (
     OmnikInverterConnectionError,
     OmnikInverterWrongSourceError,
 )
-from omnikinverter.exceptions import OmnikInverterError
+from omnikinverter.exceptions import OmnikInverterAuthError, OmnikInverterError
 
 from . import load_fixtures
 
@@ -94,6 +94,25 @@ async def test_wrong_html_source(aresponses):
             session=session,
         )
         with pytest.raises(OmnikInverterWrongSourceError):
+            assert await client.inverter()
+
+
+@pytest.mark.asyncio
+async def test_html_no_auth(aresponses):
+    """Test on html request without auth."""
+    aresponses.add(
+        "example.com",
+        "/status.html",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "text/html"},
+        ),
+    )
+
+    async with aiohttp.ClientSession() as session:
+        client = OmnikInverter(host="example.com", source_type="html", session=session)
+        with pytest.raises(OmnikInverterAuthError):
             assert await client.inverter()
 
 
