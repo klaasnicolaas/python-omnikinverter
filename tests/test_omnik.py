@@ -28,10 +28,8 @@ async def test_json_request(aresponses):
             text='{"status": "ok"}',
         ),
     )
-    async with aiohttp.ClientSession() as session:
-        omnik_inverter = OmnikInverter("example.com", session=session)
-        await omnik_inverter.request("test")
-        await omnik_inverter.close()
+    omnik_inverter = OmnikInverter("example.com")
+    await omnik_inverter.request("test")
 
 
 @pytest.mark.asyncio
@@ -107,10 +105,9 @@ async def test_html_no_auth(aresponses):
         ),
     )
 
-    async with aiohttp.ClientSession() as session:
-        client = OmnikInverter(host="example.com", source_type="html", session=session)
-        with pytest.raises(OmnikInverterAuthError):
-            assert await client.inverter()
+    client = OmnikInverter(host="example.com", source_type="html")
+    with pytest.raises(OmnikInverterAuthError):
+        assert await client.inverter()
 
 
 @pytest.mark.asyncio

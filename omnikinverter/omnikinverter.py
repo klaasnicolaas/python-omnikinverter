@@ -8,7 +8,7 @@ from typing import Any
 
 import aiohttp
 import async_timeout
-from aiohttp.client import ClientError, ClientResponseError, ClientSession
+from aiohttp.client import ClientError, ClientResponseError
 from aiohttp.hdrs import METH_GET
 from yarl import URL
 
@@ -29,9 +29,6 @@ class OmnikInverter:
     password: str | None = None
     source_type: str = "javascript"
     request_timeout: int = 10
-    session: ClientSession | None = None
-
-    _close_session: bool = False
 
     async def request(
         self,
@@ -63,14 +60,6 @@ class OmnikInverter:
             "Accept": "text/html,application/xhtml+xml,application/xml",
         }
 
-        # if self._session is None:
-        #     self._session = ClientSession()
-        #     self._close_session = True
-
-        # Don't reuse session as Wifi stick does not seem to support it (on some firmware versions?)
-        self._session = ClientSession()
-        self._close_session = True
-
         if self.source_type == "html" and (
             self.username is None or self.password is None
         ):
@@ -84,7 +73,7 @@ class OmnikInverter:
         try:
             with async_timeout.timeout(self.request_timeout):
                 async with aiohttp.request(
-                    "GET",
+                    method,
                     url,
                     auth=auth,
                     params=params,
