@@ -167,8 +167,8 @@ SOFTWARE.
 [code-quality-shield]: https://img.shields.io/lgtm/grade/python/g/klaasnicolaas/python-omnikinverter.svg?logo=lgtm&logoWidth=18
 [code-quality]: https://lgtm.com/projects/g/klaasnicolaas/python-omnikinverter/context:python
 [commits-shield]: https://img.shields.io/github/commit-activity/y/klaasnicolaas/python-omnikinverter.svg
-[commits-url]: https://github.com/klaasnicolaas/python-omnikinverter/commits/master
-[codecov-shield]: https://codecov.io/gh/klaasnicolaas/python-omnikinverter/branch/master/graph/badge.svg?token=VQTR24YFQ9
+[commits-url]: https://github.com/klaasnicolaas/python-omnikinverter/commits/main
+[codecov-shield]: https://codecov.io/gh/klaasnicolaas/python-omnikinverter/branch/main/graph/badge.svg?token=VQTR24YFQ9
 [codecov-url]: https://codecov.io/gh/klaasnicolaas/python-omnikinverter
 [forks-shield]: https://img.shields.io/github/forks/klaasnicolaas/python-omnikinverter.svg
 [forks-url]: https://github.com/klaasnicolaas/python-omnikinverter/network/members
