@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - master
+      - main
     paths:
       - .github/labels.yml
 

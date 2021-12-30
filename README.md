@@ -167,8 +167,8 @@ SOFTWARE.
 [code-quality-shield]: https://img.shields.io/lgtm/grade/python/g/klaasnicolaas/python-omnikinverter.svg?logo=lgtm&logoWidth=18
 [code-quality]: https://lgtm.com/projects/g/klaasnicolaas/python-omnikinverter/context:python
 [commits-shield]: https://img.shields.io/github/commit-activity/y/klaasnicolaas/python-omnikinverter.svg
-[commits-url]: https://github.com/klaasnicolaas/python-omnikinverter/commits/master
-[codecov-shield]: https://codecov.io/gh/klaasnicolaas/python-omnikinverter/branch/master/graph/badge.svg?token=VQTR24YFQ9
+[commits-url]: https://github.com/klaasnicolaas/python-omnikinverter/commits/main
+[codecov-shield]: https://codecov.io/gh/klaasnicolaas/python-omnikinverter/branch/main/graph/badge.svg?token=VQTR24YFQ9
 [codecov-url]: https://codecov.io/gh/klaasnicolaas/python-omnikinverter
 [forks-shield]: https://img.shields.io/github/forks/klaasnicolaas/python-omnikinverter.svg
 [forks-url]: https://github.com/klaasnicolaas/python-omnikinverter/network/members
@@ -177,7 +177,7 @@ SOFTWARE.
 [license-shield]: https://img.shields.io/github/license/klaasnicolaas/python-omnikinverter.svg
 [last-commit-shield]: https://img.shields.io/github/last-commit/klaasnicolaas/python-omnikinverter.svg
 [maintenance-shield]: https://img.shields.io/maintenance/yes/2021.svg
-[maintainability-shield]: https://api.codeclimate.com/v1/badges/443c476612a574d82467/maintainability
+[maintainability-shield]: https://api.codeclimate.com/v1/badges/ec5166b74a63f375d1a1/maintainability
 [maintainability-url]: https://codeclimate.com/github/klaasnicolaas/python-omnikinverter/maintainability
 [project-stage-shield]: https://img.shields.io/badge/project%20stage-experimental-yellow.svg
 [pypi]: https://pypi.org/project/omnikinverter/
