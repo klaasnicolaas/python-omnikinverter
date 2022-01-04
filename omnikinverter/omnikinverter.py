@@ -110,7 +110,9 @@ class OmnikInverter:
             raw_response = await response.read()
         finally:
             if self.session and self._close_session:
-                await self.close()
+                await self.session.close()
+                self.session = None
+                self._close_session = False
 
         return raw_response.decode("ascii", "ignore")
 
@@ -148,8 +150,6 @@ class OmnikInverter:
         """Close open client session."""
         if self.session and self._close_session:
             await self.session.close()
-            self.session = None
-            self._close_session = False
 
     async def __aenter__(self) -> OmnikInverter:
         """Async enter.

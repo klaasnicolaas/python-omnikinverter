@@ -52,6 +52,25 @@ async def test_internal_session(aresponses):
 
 
 @pytest.mark.asyncio
+async def test_internal_session_error(aresponses):
+    """Test JSON response is handled correctly."""
+    aresponses.add(
+        "example.com",
+        "/test",
+        "GET",
+        aresponses.Response(
+            status=500,
+            headers={"Content-Type": "application/json"},
+            text='{"status": "ok"}',
+        ),
+    )
+
+    with pytest.raises(OmnikInverterConnectionError):
+        async with OmnikInverter("example.com") as omnik_inverter:
+            await omnik_inverter.request("test")
+
+
+@pytest.mark.asyncio
 async def test_wrong_js_source(aresponses):
     """Test on wrong data source error raise."""
     aresponses.add(
