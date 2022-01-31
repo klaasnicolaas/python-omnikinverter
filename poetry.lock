@@ -154,11 +154,11 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "blacken-docs"
-version = "1.12.0"
+version = "1.12.1"
 description = "Run `black` on python code blocks in documentation files"
 category = "dev"
 optional = false
-python-versions = ">=3.6.1"
+python-versions = ">=3.7"
 
 [package.dependencies]
 black = ">=19.3b0"
@@ -932,7 +932,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "35baa17a76a236c782007831b19b7161df32b03bff39977580c0c763cc8a4c09"
+content-hash = "d31779451b2ffeed5c4a1c22b50802fdad3d597f2d5f34caa3c9141b8686d1ab"
 
 [metadata.files]
 aiohttp = [
@@ -1050,8 +1050,8 @@ black = [
     {file = "black-21.12b0.tar.gz", hash = "sha256:77b80f693a569e2e527958459634f18df9b0ba2625ba4e0c2d5da5be42e6f2b3"},
 ]
 blacken-docs = [
-    {file = "blacken_docs-1.12.0-py2.py3-none-any.whl", hash = "sha256:a81e0abc9771521f445ee582f469c8ec2f5880c19c369d766bb151f79f642d7b"},
-    {file = "blacken_docs-1.12.0.tar.gz", hash = "sha256:3e8138b22c33406cef5946058e535a8aca45cd64b8e7d392b3bd1329fc1f4af8"},
+    {file = "blacken_docs-1.12.1-py2.py3-none-any.whl", hash = "sha256:385eb3db60faddceb218e54e2677821e1dbd441d0473f95cc4b7206a52d5bb62"},
+    {file = "blacken_docs-1.12.1.tar.gz", hash = "sha256:5fd22ba1f3ab10d7013427019b4e7b83f6f4aca00c898645e0481ce7966b0aa4"},
 ]
 certifi = [
     {file = "certifi-2021.5.30-py2.py3-none-any.whl", hash = "sha256:50b1e4f8446b06f41be7dd6338db18e0990601dce795c2b1686458aa7e8fa7d8"},
