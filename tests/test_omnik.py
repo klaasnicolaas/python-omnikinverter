@@ -49,6 +49,29 @@ async def test_internal_session(aresponses):
     )
     async with OmnikInverter("example.com") as omnik_inverter:
         await omnik_inverter.request("test")
+        assert omnik_inverter.session is None
+
+
+@pytest.mark.asyncio
+async def test_internal_session_close_while_in_progress(aresponses):
+    """Test internal session is closed/cleaned up when closed during request."""
+
+    # Delay response so connection can be closed during request
+    async def response_handler(_):
+        await asyncio.sleep(0.2)
+        return aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/json"},
+            text='{"status": "ok"}',
+        )
+
+    aresponses.add("example.com", "/test", "GET", response_handler)
+
+    omnik_inverter = OmnikInverter(host="example.com")
+    await asyncio.gather(
+        omnik_inverter.request("test"), omnik_inverter.close(), return_exceptions=True
+    )
+    assert omnik_inverter.session is None
 
 
 @pytest.mark.asyncio
