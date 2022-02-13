@@ -67,45 +67,53 @@ class OmnikInverter:
             self.session = ClientSession()
             self._close_session = True
 
-        if self.source_type == "html" and (
-            self.username is None or self.password is None
-        ):
-            raise OmnikInverterAuthError(
-                "A username and/or password is missing from the request"
-            )
-        auth = None
-        if self.username and self.password:
-            auth = aiohttp.BasicAuth(self.username, self.password)
-
+        # Use big try to make sure manual session is always cleaned up
         try:
-            async with async_timeout.timeout(self.request_timeout):
-                response = await self.session.request(
-                    method,
-                    url,
-                    auth=auth,
-                    params=params,
-                    headers=headers,
+            if self.source_type == "html" and (
+                self.username is None or self.password is None
+            ):
+                raise OmnikInverterAuthError(
+                    "A username and/or password is missing from the request"
                 )
-                response.raise_for_status()
-        except asyncio.TimeoutError as exception:
-            raise OmnikInverterConnectionError(
-                "Timeout occurred while connecting to Omnik Inverter device"
-            ) from exception
-        except (ClientError, ClientResponseError) as exception:
-            raise OmnikInverterConnectionError(
-                "Error occurred while communicating with Omnik Inverter device"
-            ) from exception
+            auth = None
+            if self.username and self.password:
+                auth = aiohttp.BasicAuth(self.username, self.password)
 
-        types = ["application/json", "application/x-javascript", "text/html"]
-        content_type = response.headers.get("Content-Type", "")
-        if not any(item in content_type for item in types):
-            text = await response.text()
-            raise OmnikInverterError(
-                "Unexpected response from the Omnik Inverter device",
-                {"Content-Type": content_type, "response": text},
-            )
+            try:
+                async with async_timeout.timeout(self.request_timeout):
+                    response = await self.session.request(
+                        method,
+                        url,
+                        auth=auth,
+                        params=params,
+                        headers=headers,
+                    )
+                    response.raise_for_status()
+            except asyncio.TimeoutError as exception:
+                raise OmnikInverterConnectionError(
+                    "Timeout occurred while connecting to Omnik Inverter device"
+                ) from exception
+            except (ClientError, ClientResponseError) as exception:
+                raise OmnikInverterConnectionError(
+                    "Error occurred while communicating with Omnik Inverter device"
+                ) from exception
 
-        raw_response = await response.read()
+            types = ["application/json", "application/x-javascript", "text/html"]
+            content_type = response.headers.get("Content-Type", "")
+            if not any(item in content_type for item in types):
+                text = await response.text()
+                raise OmnikInverterError(
+                    "Unexpected response from the Omnik Inverter device",
+                    {"Content-Type": content_type, "response": text},
+                )
+
+            raw_response = await response.read()
+        finally:
+            if self.session and self._close_session:
+                await self.session.close()
+                self.session = None
+                self._close_session = False
+
         return raw_response.decode("ascii", "ignore")
 
     async def inverter(self) -> Inverter:
