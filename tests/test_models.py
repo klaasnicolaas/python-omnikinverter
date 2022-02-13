@@ -124,7 +124,7 @@ async def test_device_html(aresponses):
 
 @pytest.mark.asyncio
 async def test_inverter_without_session(aresponses):
-    """Test request from a Inverter - HTML source and without session"""
+    """Test request from a Inverter - HTML source and without session."""
     aresponses.add(
         "example.com",
         "/status.html",
@@ -156,7 +156,7 @@ async def test_inverter_without_session(aresponses):
 
 @pytest.mark.asyncio
 async def test_device_without_session(aresponses):
-    """Test request from a Inverter - HTML source and without session"""
+    """Test request from a Inverter - HTML source and without session."""
     aresponses.add(
         "example.com",
         "/status.html",
