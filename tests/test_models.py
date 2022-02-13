@@ -123,8 +123,8 @@ async def test_device_html(aresponses):
 
 
 @pytest.mark.asyncio
-async def test_inverter_html_solis(aresponses):
-    """Test request from a Inverter - HTML source."""
+async def test_inverter_without_session(aresponses):
+    """Test request from a Inverter - HTML source and without session"""
     aresponses.add(
         "example.com",
         "/status.html",
@@ -155,8 +155,8 @@ async def test_inverter_html_solis(aresponses):
 
 
 @pytest.mark.asyncio
-async def test_device_html_solis(aresponses):
-    """Test request from a Inverter - HTML source."""
+async def test_device_without_session(aresponses):
+    """Test request from a Inverter - HTML source and without session"""
     aresponses.add(
         "example.com",
         "/status.html",
@@ -168,19 +168,17 @@ async def test_device_html_solis(aresponses):
         ),
     )
 
-    async with aiohttp.ClientSession() as session:
-        client = OmnikInverter(  # noqa: S106
-            host="example.com",
-            source_type="html",
-            username="klaas",
-            password="supercool",
-            session=session,
-        )
-        device: Device = await client.device()
-        assert device
-        assert device.signal_quality == 96
-        assert device.firmware == "MW_08_512_0501_1.82"
-        assert device.ip_address == "192.168.178.3"
+    client = OmnikInverter(  # noqa: S106
+        host="example.com",
+        source_type="html",
+        username="klaas",
+        password="supercool",
+    )
+    device: Device = await client.device()
+    assert device
+    assert device.signal_quality == 96
+    assert device.firmware == "MW_08_512_0501_1.82"
+    assert device.ip_address == "192.168.178.3"
 
 
 @pytest.mark.asyncio
