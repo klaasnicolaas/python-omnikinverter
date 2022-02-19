@@ -21,6 +21,20 @@ class Inverter:
     solar_energy_today: float | None
     solar_energy_total: float | None
 
+    # TCP only
+    inverter_active: bool | None = None
+    solar_hours_total: int | None = None
+
+    temperature: float | None = None
+
+    dc_input_voltage: list[float] | None = None
+    dc_input_current: list[float] | None = None
+
+    ac_output_voltage: list[float] | None = None
+    ac_output_current: list[float] | None = None
+    ac_output_frequency: list[float] | None = None
+    ac_output_power: list[float] | None = None
+
     @staticmethod
     def from_json(data: dict[str, Any]) -> Inverter:
         """Return Inverter object from the Omnik Inverter response.
@@ -166,14 +180,33 @@ class Inverter:
             solar_energy_total=get_value(7),
         )
 
+    @staticmethod
+    def from_tcp(data: dict[str, Any]) -> Inverter:
+        """Return Inverter object from the Omnik Inverter response.
+
+        Args:
+            data: The binary data from the Omnik Inverter.
+
+        Returns:
+            An Inverter object.
+        """
+
+        return Inverter(
+            **data,
+            solar_rated_power=None,
+            solar_current_power=sum(
+                p for p in data["ac_output_power"] if p is not None
+            ),
+        )
+
 
 @dataclass
 class Device:
     """Object representing an Device response from Omnik Inverter."""
 
-    signal_quality: int | None
-    firmware: str | None
-    ip_address: str | None
+    signal_quality: int | None = None
+    firmware: str | None = None
+    ip_address: str | None = None
 
     @staticmethod
     def from_json(data: dict[str, Any]) -> Device:

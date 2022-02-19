@@ -13,6 +13,7 @@ from aiohttp.client import ClientError, ClientResponseError, ClientSession
 from aiohttp.hdrs import METH_GET
 from yarl import URL
 
+from . import tcp
 from .exceptions import (
     OmnikInverterAuthError,
     OmnikInverterConnectionError,
@@ -31,8 +32,12 @@ class OmnikInverter:
     source_type: str = "javascript"
     request_timeout: float = 10.0
     session: ClientSession | None = None
+    serial_number: int | None = None  # Optional, only for TCP backend
+    tcp_port: int = 8899
 
     _close_session: bool = False
+
+    _socket_mock: None = None
 
     async def request(
         self,
@@ -117,11 +122,55 @@ class OmnikInverter:
 
         return raw_response.decode("ascii", "ignore")
 
+    async def tcp_request(self) -> dict[str, Any]:
+        """Perform a raw TCP request to the Omnik device.
+
+        Returns:
+            A Python dictionary (text) with the response from
+            the Omnik Inverter.
+
+        Raises:
+            OmnikInverterAuthError: Serial number is required to communicate
+                with the Omnik Inverter.
+            OmnikInverterConnectionError: An error occurred while communicating
+                with the Omnik Inverter.
+        """
+        if self.serial_number is None:
+            raise OmnikInverterAuthError("serial_number is missing from the request")
+
+        try:
+            if self._socket_mock is not None:
+                reader, writer = await asyncio.open_connection(sock=self._socket_mock)
+            else:  # pragma: no cover
+                reader, writer = await asyncio.open_connection(self.host, self.tcp_port)
+        except Exception as exception:
+            raise OmnikInverterConnectionError(
+                "Failed to open a TCP connection to the Omnik Inverter device"
+            ) from exception
+
+        try:
+            writer.write(tcp.create_information_request(self.serial_number))
+            await writer.drain()
+
+            raw_msg = await reader.read(1024)
+        except Exception as exception:
+            raise OmnikInverterConnectionError(
+                "Failed to communicate with the Omnik Inverter device over TCP"
+            ) from exception
+        finally:
+            writer.close()
+            await writer.wait_closed()
+
+        return tcp.parse_information_reply(self.serial_number, raw_msg)
+
     async def inverter(self) -> Inverter:
         """Get values from your Omnik Inverter.
 
         Returns:
             A Inverter data object from the Omnik Inverter.
+
+        Raises:
+            OmnikInverterError: Unknown source type.
         """
         if self.source_type == "json":
             data = await self.request("status.json", params={"CMD": "inv_query"})
@@ -129,14 +178,23 @@ class OmnikInverter:
         if self.source_type == "html":
             data = await self.request("status.html")
             return Inverter.from_html(data)
-        data = await self.request("js/status.js")
-        return Inverter.from_js(data)
+        if self.source_type == "javascript":
+            data = await self.request("js/status.js")
+            return Inverter.from_js(data)
+        if self.source_type == "tcp":
+            fields = await self.tcp_request()
+            return Inverter.from_tcp(fields)
+
+        raise OmnikInverterError(f"Unknown source type `{self.source_type}`")
 
     async def device(self) -> Device:
         """Get values from the device.
 
         Returns:
-            A Device data object from the Omnik Inverter.
+            A Device data object from the Omnik Inverter. None on the "tcp" source_type.
+
+        Raises:
+            OmnikInverterError: Unknown source type.
         """
         if self.source_type == "json":
             data = await self.request("status.json", params={"CMD": "inv_query"})
@@ -144,8 +202,14 @@ class OmnikInverter:
         if self.source_type == "html":
             data = await self.request("status.html")
             return Device.from_html(data)
-        data = await self.request("js/status.js")
-        return Device.from_js(data)
+        if self.source_type == "javascript":
+            data = await self.request("js/status.js")
+            return Device.from_js(data)
+        if self.source_type == "tcp":
+            # None of the fields are available through a TCP data dump.
+            return Device()
+
+        raise OmnikInverterError(f"Unknown source type `{self.source_type}`")
 
     async def close(self) -> None:
         """Close open client session."""

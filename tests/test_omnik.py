@@ -239,3 +239,13 @@ async def test_unexpected_response(aresponses: ResponsesMockServer) -> None:
         client = OmnikInverter(host="example.com", session=session)
         with pytest.raises(OmnikInverterError):
             assert await client.request("test")
+
+
+@pytest.mark.asyncio
+async def test_tcp_serial_number_unset() -> None:
+    """Make sure exception is raised when serial_number is needed but not provided."""
+    client = OmnikInverter(host="example.com", source_type="tcp")
+    with pytest.raises(OmnikInverterAuthError) as excinfo:
+        assert await client.tcp_request()
+
+    assert str(excinfo.value) == "serial_number is missing from the request"
