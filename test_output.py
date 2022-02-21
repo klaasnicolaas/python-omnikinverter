@@ -10,7 +10,7 @@ async def main():
     """Test."""
     async with OmnikInverter(
         host="examples.com",
-        source_type="js",
+        source_type="javascript",
     ) as client:
         inverter: OmnikInverter = await client.inverter()
         device: OmnikInverter = await client.device()
