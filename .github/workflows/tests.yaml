@@ -10,7 +10,7 @@ jobs:
     runs-on: ${{ matrix.os }}-latest
     strategy:
       matrix:
-        os: [ubuntu, windows, macos]
+        os: [ubuntu, macos]
         python: ['3.9', '3.10']
     steps:
       - name: ⤵️ Check out code from GitHub

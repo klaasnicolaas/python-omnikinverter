@@ -28,12 +28,18 @@ A python package with which you can read the data from your Omnik Inverter. Keep
 
 ## Supported models
 
-- Omnik1000TL
-- Omnik1500TL
-- Omnik2000TL
-- Omnik2000TL2
-- Omnik4000TL2
-- Ginlong stick (JSON)
+| Brand    | Model            | Datasource |
+|----------|------------------|------------|
+| Omnik    | Omniksol 1000TL  | JS         |
+| Omnik    | Omniksol 1500TL  | JS         |
+| Omnik    | Omniksol 2000TL  | JS         |
+| Omnik    | Omniksol 2000TL2 | JSON       |
+| Omnik    | Omniksol 2500TL  | HTML       |
+| Omnik    | Omniksol 3000TL  | JS         |
+| Omnik    | Omniksol 4000TL2 | JS         |
+| Ginlong  | Solis-DLS-WiFi   | JSON/HTML  |
+| Hosola   | 1500TL           | JS         |
+| Bosswerk | BW-MI600         | HTML       |
 
 ## Installation
 
@@ -90,6 +96,12 @@ You can read the following data with this package:
 - Signal Quality (only with JS)
 - Firmware Version
 - IP Address
+
+## Use cases
+
+This python package is used in the following projects, among others:
+
+- [home-assistant-omnik-inverter][omnik-inverter] by Robbin Janssen
 
 ## Contributing
 
@@ -198,6 +210,7 @@ SOFTWARE.
 [stars-url]: https://github.com/klaasnicolaas/python-omnikinverter/stargazers
 
 [energiewacht]: https://www.energiewacht.com/hoofdsite/home/nieuws/omnik-failliet/
+[omnik-inverter]: https://github.com/robbinjanssen/home-assistant-omnik-inverter
 [poetry-install]: https://python-poetry.org/docs/#installation
 [poetry]: https://python-poetry.org
 [pre-commit]: https://pre-commit.com
