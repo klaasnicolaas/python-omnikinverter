@@ -1,10 +1,9 @@
 """Models for Omnik Inverter."""
 from __future__ import annotations
 
-import json
 import re
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
 from .exceptions import OmnikInverterWrongSourceError, OmnikInverterWrongValuesError
 
@@ -36,14 +35,13 @@ class Inverter:
             OmnikInverterWrongValuesError: Inverter pass on
                 incorrect data (day and total are equal).
         """
-        data = json.loads(data)
 
-        def get_value(search):
+        def get_value(search: str) -> Any:
             if data[search] != "":
                 return data[search]
             return None
 
-        def validation(data_list):
+        def validation(data_list: list[Any]) -> bool:
             """Check if the values are not equal to each other.
 
             Args:
@@ -72,7 +70,7 @@ class Inverter:
         )
 
     @staticmethod
-    def from_html(data: dict[str, Any]) -> Inverter:
+    def from_html(data: str) -> Inverter:
         """Return Inverter object from the Omnik Inverter response.
 
         Args:
@@ -82,16 +80,18 @@ class Inverter:
             An Inverter object.
         """
 
-        def get_value(search_key):
-            match = re.search(f'(?<={search_key}=").*?(?=";)', data.replace(" ", ""))
+        def get_value(search_key: str) -> Any:
             try:
-                value = match.group(0)
-                if value != "":
+                match = cast(
+                    re.Match[str],
+                    re.search(f'(?<={search_key}=").*?(?=";)', data.replace(" ", "")),
+                ).group(0)
+                if match != "":
                     if search_key in ["webdata_now_p", "webdata_rate_p"]:
-                        return int(value)
+                        return int(match)
                     if search_key in ["webdata_today_e", "webdata_total_e"]:
-                        return float(value)
-                    return value
+                        return float(match)
+                    return match
                 return None
             except AttributeError as exception:
                 raise OmnikInverterWrongSourceError(
@@ -110,7 +110,7 @@ class Inverter:
         )
 
     @staticmethod
-    def from_js(data: dict[str, Any]) -> Inverter:
+    def from_js(data: str) -> Inverter:
         """Return Inverter object from the Omnik Inverter response.
 
         Args:
@@ -120,25 +120,35 @@ class Inverter:
             An Inverter object.
         """
 
-        def get_value(position):
-            if data.find("webData") != -1:
-                matches = re.search(r'(?<=webData=").*?(?=";)', data)
-            else:
-                matches = re.search(r'(?<=myDeviceArray\[0\]=").*?(?=";)', data)
-
+        def get_value(position: int) -> Any:
             try:
-                data_list = matches.group(0).split(",")
-                if data_list[position] != "":
+                if data.find("webData") != -1:
+                    matches = (
+                        cast(re.Match[str], re.search(r'(?<=webData=").*?(?=";)', data))
+                        .group(0)
+                        .split(",")
+                    )
+                else:
+                    matches = (
+                        cast(
+                            re.Match[str],
+                            re.search(r'(?<=myDeviceArray\[0\]=").*?(?=";)', data),
+                        )
+                        .group(0)
+                        .split(",")
+                    )
+
+                if matches[position] != "":
                     if position in [4, 5, 6, 7]:
                         if position in [4, 5]:
-                            return int(data_list[position])
+                            return int(matches[position])
 
                         if position == 6:
-                            energy_value = float(data_list[position]) / 100
+                            energy_value = float(matches[position]) / 100
                         if position == 7:
-                            energy_value = float(data_list[position]) / 10
+                            energy_value = float(matches[position]) / 10
                         return energy_value
-                    return data_list[position].replace(" ", "")
+                    return matches[position].replace(" ", "")
                 return None
             except AttributeError as exception:
                 raise OmnikInverterWrongSourceError(
@@ -175,8 +185,6 @@ class Device:
         Returns:
             An Device object.
         """
-
-        data = json.loads(data)
         return Device(
             signal_quality=None,
             firmware=data["g_ver"].replace("VER:", ""),
@@ -184,7 +192,7 @@ class Device:
         )
 
     @staticmethod
-    def from_html(data: dict[str, Any]) -> Device:
+    def from_html(data: str) -> Device:
         """Return Device object from the Omnik Inverter response.
 
         Args:
@@ -197,13 +205,15 @@ class Device:
         for correction in [" ", "%"]:
             data = data.replace(correction, "")
 
-        def get_value(search_key):
-            match = re.search(f'(?<={search_key}=").*?(?=";)', data)
-            value = match.group(0)
-            if value != "":
+        def get_value(search_key: str) -> Any:
+            match = cast(
+                re.Match[str], re.search(f'(?<={search_key}=").*?(?=";)', data)
+            ).group(0)
+
+            if match != "":
                 if search_key in ["cover_sta_rssi"]:
-                    return int(value)
-                return value
+                    return int(match)
+                return match
             return None
 
         return Device(
@@ -213,7 +223,7 @@ class Device:
         )
 
     @staticmethod
-    def from_js(data: dict[str, Any]) -> Device:
+    def from_js(data: str) -> Device:
         """Return Device object from the Omnik Inverter response.
 
         Args:
@@ -225,13 +235,15 @@ class Device:
         for correction in [" ", "%"]:
             data = data.replace(correction, "")
 
-        def get_value(search_key):
-            match = re.search(f'(?<={search_key}=").*?(?=";)', data)
-            value = match.group(0)
-            if value != "":
+        def get_value(search_key: str) -> Any:
+            match = cast(
+                re.Match[str], re.search(f'(?<={search_key}=").*?(?=";)', data)
+            ).group(0)
+
+            if match != "":
                 if search_key == "m2mRssi":
-                    return int(value)
-                return value
+                    return int(match)
+                return match
             return None
 
         return Device(
