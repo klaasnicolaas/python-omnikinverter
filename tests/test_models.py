@@ -1,6 +1,7 @@
 """Test the models."""
 import aiohttp
 import pytest
+from aresponses import ResponsesMockServer
 
 from omnikinverter import Device, Inverter, OmnikInverter
 from omnikinverter.exceptions import OmnikInverterWrongValuesError
@@ -9,7 +10,7 @@ from . import load_fixtures
 
 
 @pytest.mark.asyncio
-async def test_inverter_js_webdata(aresponses):
+async def test_inverter_js_webdata(aresponses: ResponsesMockServer) -> None:
     """Test request from a Inverter - JS Webdata source."""
     aresponses.add(
         "example.com",
@@ -37,7 +38,7 @@ async def test_inverter_js_webdata(aresponses):
 
 
 @pytest.mark.asyncio
-async def test_device_js_webdata(aresponses):
+async def test_device_js_webdata(aresponses: ResponsesMockServer) -> None:
     """Test request from a Device - JS Webdata source."""
     aresponses.add(
         "example.com",
@@ -60,7 +61,7 @@ async def test_device_js_webdata(aresponses):
 
 
 @pytest.mark.asyncio
-async def test_inverter_html(aresponses):
+async def test_inverter_html(aresponses: ResponsesMockServer) -> None:
     """Test request from a Inverter - HTML source."""
     aresponses.add(
         "example.com",
@@ -94,7 +95,7 @@ async def test_inverter_html(aresponses):
 
 
 @pytest.mark.asyncio
-async def test_device_html(aresponses):
+async def test_device_html(aresponses: ResponsesMockServer) -> None:
     """Test request from a Inverter - HTML source."""
     aresponses.add(
         "example.com",
@@ -123,7 +124,7 @@ async def test_device_html(aresponses):
 
 
 @pytest.mark.asyncio
-async def test_inverter_without_session(aresponses):
+async def test_inverter_without_session(aresponses: ResponsesMockServer) -> None:
     """Test request from a Inverter - HTML source and without session."""
     aresponses.add(
         "example.com",
@@ -155,7 +156,7 @@ async def test_inverter_without_session(aresponses):
 
 
 @pytest.mark.asyncio
-async def test_device_without_session(aresponses):
+async def test_device_without_session(aresponses: ResponsesMockServer) -> None:
     """Test request from a Inverter - HTML source and without session."""
     aresponses.add(
         "example.com",
@@ -182,7 +183,7 @@ async def test_device_without_session(aresponses):
 
 
 @pytest.mark.asyncio
-async def test_inverter_js_devicearray(aresponses):
+async def test_inverter_js_devicearray(aresponses: ResponsesMockServer) -> None:
     """Test request from a Inverter - JS DeviceArray source."""
     aresponses.add(
         "example.com",
@@ -210,7 +211,7 @@ async def test_inverter_js_devicearray(aresponses):
 
 
 @pytest.mark.asyncio
-async def test_device_js_devicearray(aresponses):
+async def test_device_js_devicearray(aresponses: ResponsesMockServer) -> None:
     """Test request from a Device - JS DeviceArray source."""
     aresponses.add(
         "example.com",
@@ -233,7 +234,7 @@ async def test_device_js_devicearray(aresponses):
 
 
 @pytest.mark.asyncio
-async def test_inverter_json(aresponses):
+async def test_inverter_json(aresponses: ResponsesMockServer) -> None:
     """Test request from a Inverter - JSON source."""
     aresponses.add(
         "example.com",
@@ -261,7 +262,7 @@ async def test_inverter_json(aresponses):
 
 
 @pytest.mark.asyncio
-async def test_device_json(aresponses):
+async def test_device_json(aresponses: ResponsesMockServer) -> None:
     """Test request from a Inverter - JSON source."""
     aresponses.add(
         "example.com",
@@ -284,7 +285,7 @@ async def test_device_json(aresponses):
 
 
 @pytest.mark.asyncio
-async def test_wrong_values(aresponses):
+async def test_wrong_values(aresponses: ResponsesMockServer) -> None:
     """Test on wrong inverter values."""
     aresponses.add(
         "example.com",

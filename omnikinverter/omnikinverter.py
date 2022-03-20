@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
@@ -28,7 +29,7 @@ class OmnikInverter:
     username: str | None = None
     password: str | None = None
     source_type: str = "javascript"
-    request_timeout: int = 10
+    request_timeout: float = 10.0
     session: ClientSession | None = None
 
     _close_session: bool = False
@@ -38,8 +39,8 @@ class OmnikInverter:
         uri: str,
         *,
         method: str = METH_GET,
-        params: Mapping[str, str] | None = None,
-    ) -> dict[str, Any]:
+        params: Mapping[str, Any] | None = None,
+    ) -> str:
         """Handle a request to a Omnik Inverter device.
 
         Args:
@@ -124,7 +125,7 @@ class OmnikInverter:
         """
         if self.source_type == "json":
             data = await self.request("status.json", params={"CMD": "inv_query"})
-            return Inverter.from_json(data)
+            return Inverter.from_json(json.loads(data))
         if self.source_type == "html":
             data = await self.request("status.html")
             return Inverter.from_html(data)
@@ -139,7 +140,7 @@ class OmnikInverter:
         """
         if self.source_type == "json":
             data = await self.request("status.json", params={"CMD": "inv_query"})
-            return Device.from_json(data)
+            return Device.from_json(json.loads(data))
         if self.source_type == "html":
             data = await self.request("status.html")
             return Device.from_html(data)
@@ -159,7 +160,7 @@ class OmnikInverter:
         """
         return self
 
-    async def __aexit__(self, *_exc_info) -> None:
+    async def __aexit__(self, *_exc_info: str) -> None:
         """Async exit.
 
         Args:
