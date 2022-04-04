@@ -3,17 +3,17 @@
 
 import asyncio
 
-from omnikinverter import OmnikInverter
+from omnikinverter import Device, Inverter, OmnikInverter
 
 
-async def main():
+async def main() -> None:
     """Test."""
     async with OmnikInverter(
         host="examples.com",
         source_type="javascript",
     ) as client:
-        inverter: OmnikInverter = await client.inverter()
-        device: OmnikInverter = await client.device()
+        inverter: Inverter = await client.inverter()
+        device: Device = await client.device()
         print(inverter)
         print()
         print("-- INVERTER --")

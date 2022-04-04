@@ -153,3 +153,8 @@ repos:
         language: system
         types: [yaml]
         entry: poetry run yamllint
+      - id: mypy
+        name: 🆎 Static type checking using mypy
+        language: system
+        types: [python]
+        entry: poetry run mypy
