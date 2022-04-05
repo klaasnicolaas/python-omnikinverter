@@ -40,6 +40,7 @@ A python package with which you can read the data from your Omnik Inverter. Keep
 | Ginlong  | Solis-DLS-WiFi   | JSON/HTML  |
 | Hosola   | 1500TL           | JS         |
 | Bosswerk | BW-MI600         | HTML       |
+| Sofar    | 3600TLM          | HTML       |
 
 ## Installation
 
