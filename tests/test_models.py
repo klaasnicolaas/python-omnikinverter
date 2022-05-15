@@ -578,11 +578,10 @@ async def test_connection_failed() -> None:
     serial_number = 1
 
     client = OmnikInverter(
-        host="example.com",
+        # Pass an invalid address to simulate a failed connection attempt
+        host="!!!",
         source_type="tcp",
         serial_number=serial_number,
-        # Pass an invalid port number to simulate a failed connection attempt
-        tcp_port=123456,
     )
 
     with pytest.raises(Exception) as excinfo:

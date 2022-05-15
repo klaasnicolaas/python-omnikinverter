@@ -146,7 +146,7 @@ class OmnikInverter:
                 reader, writer = await asyncio.open_connection(sock=self._socket_mock)
             else:  # pragma: no cover
                 reader, writer = await asyncio.open_connection(self.host, self.tcp_port)
-        except Exception as exception:
+        except OSError as exception:
             raise OmnikInverterConnectionError(
                 "Failed to open a TCP connection to the Omnik Inverter device"
             ) from exception
@@ -156,7 +156,7 @@ class OmnikInverter:
             await writer.drain()
 
             raw_msg = await reader.read(1024)
-        except Exception as exception:
+        except OSError as exception:
             raise OmnikInverterConnectionError(
                 "Failed to communicate with the Omnik Inverter device over TCP"
             ) from exception
