@@ -1,7 +1,7 @@
 """Data model and conversions for tcp-based communication with the Omnik Inverter."""
 import logging
 from ctypes import BigEndianStructure, c_char, c_ubyte, c_uint, c_ushort
-from typing import Any, Generator, Optional, Tuple
+from typing import Any, Generator, Optional
 
 from .exceptions import OmnikInverterPacketInvalidError
 
@@ -94,7 +94,7 @@ def _pack_message(
     return request_data
 
 
-def _unpack_message(message: bytearray) -> Tuple[int, int, bytearray]:
+def _unpack_message(message: bytearray) -> tuple[int, int, bytearray]:
     _LOGGER.debug("Handling message `%s`", message)
 
     message_checksum = message.pop()
@@ -128,7 +128,7 @@ def _unpack_message(message: bytearray) -> Tuple[int, int, bytearray]:
 
 def _unpack_messages(
     data: bytearray,
-) -> Generator[Tuple[int, int, bytearray], None, None]:
+) -> Generator[tuple[int, int, bytearray], None, None]:
     while len(data):
         message_start = data.pop(0)
         # Whenever my Omnik sends an INFORMATION_REPLY followed by a STRING
