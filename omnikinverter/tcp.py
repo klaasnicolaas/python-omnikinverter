@@ -1,4 +1,5 @@
 """Data model and conversions for tcp-based communication with the Omnik Inverter."""
+import logging
 from ctypes import BigEndianStructure, c_char, c_ubyte, c_uint, c_ushort
 from typing import Any, Optional
 
@@ -7,6 +8,7 @@ from .exceptions import OmnikInverterPacketInvalidError
 MESSAGE_END = 0x16
 MESSAGE_START = 0x68
 UINT16_MAX = 65535
+_LOGGER = logging.getLogger(__name__)
 
 
 class _AcOutput(BigEndianStructure):
@@ -131,10 +133,10 @@ def parse_information_reply(serial_number: int, data: bytes) -> dict[str, Any]:
         raise OmnikInverterPacketInvalidError("Serial number mismatch in reply")
 
     if tcp_data.unknown0 != UINT16_MAX:  # pragma: no cover
-        print(f"Unexpected unknown0 `{tcp_data.unknown0}`")
+        _LOGGER.warning("Unexpected unknown0 `%s`", tcp_data.unknown0)
 
     if tcp_data.padding0 != b"\x81\x02\x01":  # pragma: no cover
-        print(f"Unexpected padding0 `{tcp_data.padding0}`")
+        _LOGGER.warning("Unexpected padding0 `%s`", tcp_data.padding0)
 
     # For all data that's expected to be zero, print it if it's not. Perhaps
     # there are more interesting fields on different inverters waiting to be
@@ -143,7 +145,7 @@ def parse_information_reply(serial_number: int, data: bytes) -> dict[str, Any]:
         name = f"padding{idx}"
         padding = getattr(tcp_data, name)
         if sum(padding):
-            print(f"Unexpected `{name}`: `{padding}`")
+            _LOGGER.warning("Unexpected `%s`: `%s`", name, padding)
 
     def extract_model(magic: bytes) -> str:
         return {

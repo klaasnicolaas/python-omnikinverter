@@ -2,8 +2,11 @@
 """Asynchronous Python client for the Omnik Inverter."""
 
 import asyncio
+import logging
 
 from omnikinverter import Device, Inverter, OmnikInverter
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 async def main() -> None:
