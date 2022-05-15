@@ -568,11 +568,13 @@ class TestTcpWithSocketMock(asynctest.TestCase):  # type: ignore
         socket_mock.send.side_effect = send_side_effect
         socket_mock.recv.side_effect = OSError("Connection broken")
 
-        # TODO: The OSError should be rewrapped in OmnikInverterConnectionError...
-        with pytest.raises(OSError) as excinfo:
+        with pytest.raises(OmnikInverterConnectionError) as excinfo:
             assert await client.inverter()
 
-        assert str(excinfo.value) == "Connection broken"
+        assert (
+            str(excinfo.value)
+            == "Failed to communicate with the Omnik Inverter device over TCP"
+        )
 
 
 async def test_connection_failed() -> None:

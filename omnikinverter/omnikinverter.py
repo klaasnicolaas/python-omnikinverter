@@ -156,13 +156,14 @@ class OmnikInverter:
             await writer.drain()
 
             raw_msg = await reader.read(1024)
-        except OSError as exception:
-            raise OmnikInverterConnectionError(
-                "Failed to communicate with the Omnik Inverter device over TCP"
-            ) from exception
         finally:
             writer.close()
-            await writer.wait_closed()
+            try:
+                await writer.wait_closed()
+            except OSError as exception:
+                raise OmnikInverterConnectionError(
+                    "Failed to communicate with the Omnik Inverter device over TCP"
+                ) from exception
 
         return tcp.parse_messages(self.serial_number, raw_msg)
 
