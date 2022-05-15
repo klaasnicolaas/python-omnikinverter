@@ -8,6 +8,7 @@ from aresponses import ResponsesMockServer
 
 from omnikinverter import Device, Inverter, OmnikInverter, tcp
 from omnikinverter.exceptions import (
+    OmnikInverterConnectionError,
     OmnikInverterError,
     OmnikInverterPacketInvalidError,
     OmnikInverterWrongValuesError,
@@ -565,9 +566,10 @@ class TestTcpWithSocketMock(asynctest.TestCase):  # type: ignore
             return len(data)
 
         socket_mock.send.side_effect = send_side_effect
-        socket_mock.recv.side_effect = Exception("Connection broken")
+        socket_mock.recv.side_effect = OSError("Connection broken")
 
-        with pytest.raises(Exception) as excinfo:
+        # TODO: The OSError should be rewrapped in OmnikInverterConnectionError...
+        with pytest.raises(OSError) as excinfo:
             assert await client.inverter()
 
         assert str(excinfo.value) == "Connection broken"
@@ -584,7 +586,7 @@ async def test_connection_failed() -> None:
         serial_number=serial_number,
     )
 
-    with pytest.raises(Exception) as excinfo:
+    with pytest.raises(OmnikInverterConnectionError) as excinfo:
         assert await client.inverter()
 
     assert (
