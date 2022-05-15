@@ -1,14 +1,27 @@
 """Data model and conversions for tcp-based communication with the Omnik Inverter."""
 import logging
 from ctypes import BigEndianStructure, c_char, c_ubyte, c_uint, c_ushort
-from typing import Any, Optional
+from typing import Any, Generator, Optional, Tuple
 
 from .exceptions import OmnikInverterPacketInvalidError
 
-MESSAGE_END = 0x16
-MESSAGE_START = 0x68
-UINT16_MAX = 65535
 _LOGGER = logging.getLogger(__name__)
+
+MESSAGE_START = 0x68
+MESSAGE_END = 0x16
+MESSAGE_SEND_SEP = 0x40
+MESSAGE_RECV_SEP = 0x41
+MESSAGE_TYPE_INFORMATION_REQUEST = 0x30
+MESSAGE_TYPE_INFORMATION_REPLY = 0xB0
+MESSAGE_TYPE_STRING = 0xF0  # Message seems to consist of pure text
+UINT16_MAX = 65535
+# Message length field does not include the "header":
+# - Length (1 byte)
+# - Separator (1 byte)
+# - Message type (1 byte)
+# - Repeated integer serial number (2 * 4 bytes)
+# - CRC in suffix (1 byte)
+MESSAGE_HEADER_SIZE = 3 + 2 * 4 + 1
 
 
 class _AcOutput(BigEndianStructure):
@@ -37,11 +50,6 @@ class _AcOutput(BigEndianStructure):
 class _TcpData(BigEndianStructure):
     _pack_ = 1
     _fields_ = [
-        # Unlikely for all these bytes to represent the model,
-        # this mapping has to be built out over time.
-        ("model", c_char * 3),
-        # The s/n from the request, twice, in little-endian
-        ("double_serial_number", (c_ubyte * 4) * 2),
         ("padding0", c_char * 3),
         ("serial_number", c_char * 16),
         ("temperature", c_ushort),
@@ -64,21 +72,30 @@ class _TcpData(BigEndianStructure):
     ]
 
 
-def _pack_message(message: bytearray) -> bytearray:
-    checksum = sum(message) & 0xFF
+def _pack_message(
+    message_type: int, serial_number: int, message: bytearray
+) -> bytearray:
+    # Prepend message "header"
+    request_data = bytearray([len(message), MESSAGE_SEND_SEP, message_type])
+    serial_bytes = serial_number.to_bytes(4, "little")
+    request_data.extend(serial_bytes)
+    request_data.extend(serial_bytes)
 
-    message.insert(0, MESSAGE_START)
-    message.append(checksum)
-    message.append(MESSAGE_END)
+    request_data.extend(message)
 
-    return message
+    checksum = sum(request_data) & 0xFF
+
+    # Finally, prepend message with a start marker, and append the CRC
+    # and end marker.
+    request_data.insert(0, MESSAGE_START)
+    request_data.append(checksum)
+    request_data.append(MESSAGE_END)
+
+    return request_data
 
 
-def _unpack_message(message: bytearray) -> bytearray:
-    if message.pop(0) != MESSAGE_START:
-        raise OmnikInverterPacketInvalidError("Invalid start byte")
-    if message.pop() != MESSAGE_END:
-        raise OmnikInverterPacketInvalidError("Invalid end byte")
+def _unpack_message(message: bytearray) -> Tuple[int, int, bytearray]:
+    _LOGGER.debug("Handling message `%s`", message)
 
     message_checksum = message.pop()
     checksum = sum(message) & 0xFF
@@ -87,7 +104,62 @@ def _unpack_message(message: bytearray) -> bytearray:
             f"Checksum mismatch (calculated `{checksum}` got `{message_checksum}`)"
         )
 
-    return message
+    # Now that the checksum has been computed remove the length,
+    # separator, message type and repeated serial number
+
+    length = message.pop(0)  # Length
+    if message.pop(0) != MESSAGE_RECV_SEP:
+        raise OmnikInverterPacketInvalidError("Invalid receiver separator")
+
+    message_type = message.pop(0)
+    _LOGGER.debug(
+        "Message type %02x, length %s, checksum %02x", message_type, length, checksum
+    )
+
+    serial0 = int.from_bytes(message[:4], "little")
+    serial1 = int.from_bytes(message[4:8], "little")
+    if serial0 != serial1:
+        raise OmnikInverterPacketInvalidError(
+            f"Serial number mismatch in reply {serial0} != {serial1}"
+        )
+
+    return (message_type, serial0, message[8:])
+
+
+def _unpack_messages(
+    data: bytearray,
+) -> Generator[Tuple[int, int, bytearray], None, None]:
+    while len(data):
+        message_start = data.pop(0)
+        # Whenever my Omnik sends an INFORMATION_REPLY followed by a STRING
+        # text message, there's a bunch of trailing 0xFF garbage
+        if message_start == 0xFF:  # pragma: no cover
+            if not all(d == 0xFF for d in data):
+                raise OmnikInverterPacketInvalidError(
+                    "(Next) message starts with `0xFF` but the remainder "
+                    f"is not strictly 0xFF: {data}"
+                )
+            # We're done
+            return
+
+        if message_start != MESSAGE_START:
+            raise OmnikInverterPacketInvalidError("Invalid start byte")
+
+        length = data[0] + MESSAGE_HEADER_SIZE
+
+        message = data[:length]
+        if len(message) != length:
+            raise OmnikInverterPacketInvalidError(
+                f"Could only read {len(message)} out of {length} "
+                "expected bytes from TCP stream",
+            )
+
+        yield _unpack_message(message)
+
+        # Prepare for the next message by stripping off the end byte
+        data = data[length:]
+        if data.pop(0) != MESSAGE_END:
+            raise OmnikInverterPacketInvalidError("Invalid end byte")
 
 
 def create_information_request(serial_number: int) -> bytearray:
@@ -99,15 +171,12 @@ def create_information_request(serial_number: int) -> bytearray:
     Returns:
         A bytearray with the raw message data, to be sent over a TCP socket.
     """
-    request_data = bytearray([0x02, 0x40, 0x30])
-    serial_bytes = serial_number.to_bytes(length=4, byteorder="little")
-    request_data.extend(serial_bytes)
-    request_data.extend(serial_bytes)
-    request_data.extend([0x01, 0x00])
-    return _pack_message(request_data)
+    return _pack_message(
+        MESSAGE_TYPE_INFORMATION_REQUEST, serial_number, bytearray([0x01, 0x00])
+    )
 
 
-def parse_information_reply(serial_number: int, data: bytes) -> dict[str, Any]:
+def parse_messages(serial_number: int, data: bytes) -> dict[str, Any]:
     """Perform a raw TCP request to the Omnik device.
 
     Args:
@@ -123,14 +192,41 @@ def parse_information_reply(serial_number: int, data: bytes) -> dict[str, Any]:
         OmnikInverterPacketInvalidError: Received data fails basic validity checks.
     """
 
-    data = _unpack_message(bytearray(data))
-    tcp_data = _TcpData.from_buffer_copy(data)
+    info = None
 
-    if any(
-        serial_number != int.from_bytes(b, byteorder="little")
-        for b in tcp_data.double_serial_number
+    for (message_type, reply_serial_number, message) in _unpack_messages(
+        bytearray(data)
     ):
-        raise OmnikInverterPacketInvalidError("Serial number mismatch in reply")
+        if reply_serial_number != serial_number:
+            raise OmnikInverterPacketInvalidError(
+                f"Replied serial number {reply_serial_number} "
+                f"not equal to request {serial_number}"
+            )
+
+        if message_type == MESSAGE_TYPE_INFORMATION_REPLY:
+            if info is not None:  # pragma: no cover
+                _LOGGER.warning("Omnik sent multiple INFORMATION_REPLY messages")
+            info = _parse_information_reply(message)
+        elif message_type == MESSAGE_TYPE_STRING:  # pragma: no cover
+            _LOGGER.warning(
+                "Omnik sent text message `%s`", message.decode("utf8").strip()
+            )
+        else:
+            raise OmnikInverterPacketInvalidError(
+                f"Unknown Omnik message type {message_type:02x} "
+                f"with contents `{message}`",
+            )
+
+    if info is None:
+        raise OmnikInverterPacketInvalidError(
+            "None of the messages contained an information reply!"
+        )
+
+    return info
+
+
+def _parse_information_reply(data: bytes) -> dict[str, Any]:
+    tcp_data = _TcpData.from_buffer_copy(data)
 
     if tcp_data.unknown0 != UINT16_MAX:  # pragma: no cover
         _LOGGER.warning("Unexpected unknown0 `%s`", tcp_data.unknown0)
@@ -147,14 +243,6 @@ def parse_information_reply(serial_number: int, data: bytes) -> dict[str, Any]:
         if sum(padding):
             _LOGGER.warning("Unexpected `%s`: `%s`", name, padding)
 
-    def extract_model(magic: bytes) -> str:
-        return {
-            b"\x7d\x41\xb0": "omnik3000tl",
-            # http://www.mb200d.nl/wordpress/2015/11/omniksol-4k-tl-wifi-kit/#more-590:
-            b"\x81\x41\xb0": "omnik4000tl",
-            b"\x9a\x41\xb0": "omnik4000tl2",
-        }.get(magic, f"Unknown device model from magic {magic!r}")
-
     def list_divide_10(integers: list[int]) -> list[Optional[float]]:
         return [None if v == UINT16_MAX else v * 0.1 for v in integers]
 
@@ -166,7 +254,6 @@ def parse_information_reply(serial_number: int, data: bytes) -> dict[str, Any]:
 
     # Only these fields will be extracted from the structure
     field_extractors = {
-        "model": extract_model,
         "serial_number": None,
         "temperature": 0.1,
         "dc_input_voltage": list_divide_10,

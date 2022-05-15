@@ -193,6 +193,7 @@ class Inverter:
 
         return Inverter(
             **data,
+            model=None,  # Not able to deduce this from raw message yet
             solar_rated_power=None,
             solar_current_power=sum(
                 p for p in data["ac_output_power"] if p is not None

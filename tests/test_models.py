@@ -324,7 +324,7 @@ class TestTcpWithSocketMock(asynctest.TestCase):  # type: ignore
         assert inverter.solar_rated_power is None
         assert inverter.solar_current_power == 2615
 
-        assert inverter.model == "omnik3000tl"
+        assert inverter.model is None
         assert inverter.serial_number == "NLDN012345CS4321"
         assert inverter.temperature == 43.1
         assert inverter.dc_input_voltage == [187.3, 188.9, None]
@@ -358,7 +358,7 @@ class TestTcpWithSocketMock(asynctest.TestCase):  # type: ignore
             asynctest.set_read_ready(socket_mock, self.loop)
             return len(data)
 
-        # Validate message start and end markers
+        # Require message start marker
 
         socket_mock.send.side_effect = send_side_effect
         socket_mock.recv.side_effect = lambda _: b"broken data"
@@ -368,16 +368,33 @@ class TestTcpWithSocketMock(asynctest.TestCase):  # type: ignore
 
         assert str(excinfo.value) == "Invalid start byte"
 
-        socket_mock.recv.side_effect = lambda _: bytearray([tcp.MESSAGE_START, 0])
+        # Require enough bytes to be available according to length field
+
+        socket_mock.recv.side_effect = lambda _: bytearray([tcp.MESSAGE_START, 20])
 
         with pytest.raises(OmnikInverterPacketInvalidError) as excinfo:
             assert await client.inverter()
 
-        assert str(excinfo.value) == "Invalid end byte"
+        assert (
+            str(excinfo.value)
+            == "Could only read 1 out of 32 expected bytes from TCP stream"
+        )
 
         # Test checksum calculation through false checksum
 
-        test_message = b"foo"
+        # Serial number, twice
+        serial_number_bytes = list(serial_number.to_bytes(4, "little") * 2)
+
+        test_message_contents = list(b"foo")
+        test_message = (
+            [
+                len(test_message_contents),  # Length
+                tcp.MESSAGE_RECV_SEP,
+                tcp.MESSAGE_TYPE_STRING,
+            ]
+            + serial_number_bytes
+            + test_message_contents
+        )
         false_checksum = 0xFE
         checksum = sum(test_message) & 0xFF
 
@@ -393,7 +410,64 @@ class TestTcpWithSocketMock(asynctest.TestCase):  # type: ignore
             == f"Checksum mismatch (calculated `{checksum}` got `{false_checksum}`)"
         )
 
-        # Test receiving valid data, but with mismatching serial number
+        # Require matching "separator" between length and message_type
+
+        separator_test_message = [
+            0,  # Length
+            123,  # Invalid separator
+            tcp.MESSAGE_TYPE_STRING,
+        ] + serial_number_bytes
+        separator_checksum = sum(separator_test_message) & 0xFF
+
+        socket_mock.recv.side_effect = lambda _: bytearray(
+            [tcp.MESSAGE_START]
+            + list(separator_test_message)
+            + [separator_checksum, tcp.MESSAGE_END]
+        )
+
+        with pytest.raises(OmnikInverterPacketInvalidError) as excinfo:
+            assert await client.inverter()
+
+        assert str(excinfo.value) == "Invalid receiver separator"
+
+        # Require both serial numbers in the received buffer to be identical
+
+        serial_mismatch_test_message = (
+            [
+                0,  # Length
+                tcp.MESSAGE_RECV_SEP,
+                tcp.MESSAGE_TYPE_STRING,
+            ]
+            + list((1).to_bytes(4, "little"))
+            + list((2).to_bytes(4, "little"))
+        )
+        serial_mismatch_checksum = sum(serial_mismatch_test_message) & 0xFF
+
+        socket_mock.recv.side_effect = lambda _: bytearray(
+            [tcp.MESSAGE_START]
+            + list(serial_mismatch_test_message)
+            + [serial_mismatch_checksum, tcp.MESSAGE_END]
+        )
+
+        with pytest.raises(OmnikInverterPacketInvalidError) as excinfo:
+            assert await client.inverter()
+
+        assert str(excinfo.value) == "Serial number mismatch in reply 1 != 2"
+
+        # Require matching end byte
+
+        socket_mock.recv.side_effect = lambda _: bytearray(
+            [tcp.MESSAGE_START]
+            + list(test_message)
+            + [checksum, 123]  # Invalid end byte
+        )
+
+        with pytest.raises(OmnikInverterPacketInvalidError) as excinfo:
+            assert await client.inverter()
+
+        assert str(excinfo.value) == "Invalid end byte"
+
+        # Require valid incoming data to have a matching serial number
 
         def recv_side_effect(_max_bytes: int) -> bytes:
             return load_fixture_bytes("tcp_reply.data")
@@ -403,7 +477,48 @@ class TestTcpWithSocketMock(asynctest.TestCase):  # type: ignore
         with pytest.raises(OmnikInverterPacketInvalidError) as excinfo:
             assert await client.inverter()
 
-        assert str(excinfo.value) == "Serial number mismatch in reply"
+        assert (
+            str(excinfo.value)
+            == "Replied serial number 987654321 not equal to request 1"
+        )
+
+        # Require messages to only include known types
+
+        unknown_message_type_test_message = [
+            0,  # Length
+            tcp.MESSAGE_RECV_SEP,
+            0,  # Unknown message type
+        ] + serial_number_bytes
+        unknown_message_type_checksum = sum(unknown_message_type_test_message) & 0xFF
+
+        socket_mock.recv.side_effect = lambda _: bytearray(
+            [tcp.MESSAGE_START]
+            + list(unknown_message_type_test_message)
+            + [unknown_message_type_checksum, tcp.MESSAGE_END]
+        )
+
+        with pytest.raises(OmnikInverterPacketInvalidError) as excinfo:
+            assert await client.inverter()
+
+        assert (
+            str(excinfo.value) == "Unknown Omnik message type 00 "
+            "with contents `bytearray(b'')`"
+        )
+
+        # Require at least one of the messages to be an information reply
+
+        socket_mock.recv.side_effect = lambda _: bytearray(
+            [tcp.MESSAGE_START]
+            + list(test_message)  # Only contains a STRING message, no INFORMATION_REPLY
+            + [checksum, tcp.MESSAGE_END]
+        )
+
+        with pytest.raises(OmnikInverterPacketInvalidError) as excinfo:
+            assert await client.inverter()
+
+        assert (
+            str(excinfo.value) == "None of the messages contained an information reply!"
+        )
 
     async def test_connection_broken(self) -> None:
         """Test on connection broken after success - TCP source."""
