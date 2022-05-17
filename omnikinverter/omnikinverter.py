@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import asyncio
 import json
-import logging
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
@@ -21,8 +20,6 @@ from .exceptions import (
     OmnikInverterError,
 )
 from .models import Device, Inverter
-
-_LOGGER = logging.getLogger(__name__)
 
 
 @dataclass

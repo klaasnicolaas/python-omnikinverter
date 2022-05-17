@@ -1,11 +1,9 @@
 """Data model and conversions for tcp-based communication with the Omnik Inverter."""
-import logging
 from ctypes import BigEndianStructure, c_char, c_ubyte, c_uint, c_ushort
 from typing import Any, Generator, Optional
 
+from .const import LOGGER
 from .exceptions import OmnikInverterPacketInvalidError
-
-_LOGGER = logging.getLogger(__name__)
 
 MESSAGE_START = 0x68
 MESSAGE_END = 0x16
@@ -95,7 +93,7 @@ def _pack_message(
 
 
 def _unpack_message(message: bytearray) -> tuple[int, int, bytearray]:
-    _LOGGER.debug("Handling message `%s`", message)
+    LOGGER.debug("Handling message `%s`", message)
 
     message_checksum = message.pop()
     checksum = sum(message) & 0xFF
@@ -112,7 +110,7 @@ def _unpack_message(message: bytearray) -> tuple[int, int, bytearray]:
         raise OmnikInverterPacketInvalidError("Invalid receiver separator")
 
     message_type = message.pop(0)
-    _LOGGER.debug(
+    LOGGER.debug(
         "Message type %02x, length %s, checksum %02x", message_type, length, checksum
     )
 
@@ -205,10 +203,10 @@ def parse_messages(serial_number: int, data: bytes) -> dict[str, Any]:
 
         if message_type == MESSAGE_TYPE_INFORMATION_REPLY:
             if info is not None:  # pragma: no cover
-                _LOGGER.warning("Omnik sent multiple INFORMATION_REPLY messages")
+                LOGGER.warning("Omnik sent multiple INFORMATION_REPLY messages")
             info = _parse_information_reply(message)
         elif message_type == MESSAGE_TYPE_STRING:  # pragma: no cover
-            _LOGGER.warning(
+            LOGGER.warning(
                 "Omnik sent text message `%s`", message.decode("utf8").strip()
             )
         else:
@@ -229,10 +227,10 @@ def _parse_information_reply(data: bytes) -> dict[str, Any]:
     tcp_data = _TcpData.from_buffer_copy(data)
 
     if tcp_data.unknown0 != UINT16_MAX:  # pragma: no cover
-        _LOGGER.warning("Unexpected unknown0 `%s`", tcp_data.unknown0)
+        LOGGER.warning("Unexpected unknown0 `%s`", tcp_data.unknown0)
 
     if tcp_data.padding0 != b"\x81\x02\x01":  # pragma: no cover
-        _LOGGER.warning("Unexpected padding0 `%s`", tcp_data.padding0)
+        LOGGER.warning("Unexpected padding0 `%s`", tcp_data.padding0)
 
     # For all data that's expected to be zero, print it if it's not. Perhaps
     # there are more interesting fields on different inverters waiting to be
@@ -241,7 +239,7 @@ def _parse_information_reply(data: bytes) -> dict[str, Any]:
         name = f"padding{idx}"
         padding = getattr(tcp_data, name)
         if sum(padding):
-            _LOGGER.warning("Unexpected `%s`: `%s`", name, padding)
+            LOGGER.warning("Unexpected `%s`: `%s`", name, padding)
 
     def list_divide_10(integers: list[int]) -> list[Optional[float]]:
         return [None if v == UINT16_MAX else v * 0.1 for v in integers]
