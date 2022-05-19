@@ -4,7 +4,7 @@
 import asyncio
 import logging
 
-from omnikinverter import Device, Inverter, OmnikInverter
+from omnikinverter import Inverter, OmnikInverter
 
 logging.basicConfig(level=logging.DEBUG)
 
