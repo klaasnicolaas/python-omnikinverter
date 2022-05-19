@@ -17,7 +17,8 @@ async def main() -> None:
         serial_number=123456789,
     ) as client:
         inverter: Inverter = await client.inverter()
-        device: Device = await client.device()
+        # TCP backend (currently?) doesn't provide WiFi module statistics,
+        # so we're not querying .device() here.
         print(inverter)
         print()
         print("-- INVERTER --")
@@ -53,9 +54,6 @@ async def main() -> None:
                     print(f"{name}: {val:.1f}{unit}")
                 else:
                     print(f"{name}: {val}{unit}")
-
-        # TCP backend (currently?) doesn't provide WiFi module statistics
-        assert device is None
 
 
 if __name__ == "__main__":
