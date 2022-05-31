@@ -429,18 +429,6 @@ async def test_inverter_tcp_end_marker() -> None:
     assert str(excinfo.value) == "Invalid end byte"
 
 
-async def test_inverter_tcp_reply_identical_serial() -> None:
-    """Require replied serial to be identical to the request."""
-
-    with pytest.raises(OmnikInverterPacketInvalidError) as excinfo:
-        assert tcp.parse_messages(1234, load_fixture_bytes("tcp_reply.data"))
-
-    assert (
-        str(excinfo.value)
-        == "Replied serial number 987654321 not equal to request 1234"
-    )
-
-
 async def test_inverter_tcp_known_message_type() -> None:
     """Require message type to be known."""
 
