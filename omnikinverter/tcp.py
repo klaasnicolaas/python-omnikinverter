@@ -226,7 +226,7 @@ def parse_messages(serial_number: int, data: bytes) -> dict[str, Any]:
 def _parse_information_reply(data: bytes) -> dict[str, Any]:
     tcp_data = _TcpData.from_buffer_copy(data)
 
-    if tcp_data.unknown0 != UINT16_MAX:  # pragma: no cover
+    if tcp_data.unknown0 not in [0, UINT16_MAX]:  # pragma: no cover
         LOGGER.warning("Unexpected unknown0 `%s`", tcp_data.unknown0)
 
     if tcp_data.padding0 != b"\x81\x02\x01":  # pragma: no cover
