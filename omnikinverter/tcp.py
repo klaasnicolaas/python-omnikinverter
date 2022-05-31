@@ -195,10 +195,14 @@ def parse_messages(serial_number: int, data: bytes) -> dict[str, Any]:
     for (message_type, reply_serial_number, message) in _unpack_messages(
         bytearray(data)
     ):
-        if reply_serial_number != serial_number:
-            raise OmnikInverterPacketInvalidError(
-                f"Replied serial number {reply_serial_number} "
-                f"not equal to request {serial_number}"
+        if reply_serial_number != serial_number:  # pragma: no cover
+            # This is allowed as it does not seem to be required to pass the serial
+            # number in the request - though empirical testing has to point out whether
+            # the request takes longer this way.
+            LOGGER.debug(
+                "Replied serial number %s not equal to request %s",
+                reply_serial_number,
+                serial_number,
             )
 
         if message_type == MESSAGE_TYPE_INFORMATION_REPLY:
