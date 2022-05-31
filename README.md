@@ -35,7 +35,7 @@ A python package with which you can read the data from your Omnik Inverter. Keep
 | Omnik    | Omniksol 2000TL  | JS         |
 | Omnik    | Omniksol 2000TL2 | JSON       |
 | Omnik    | Omniksol 2500TL  | HTML       |
-| Omnik    | Omniksol 3000TL  | JS         |
+| Omnik    | Omniksol 3000TL  | TCP        |
 | Omnik    | Omniksol 4000TL2 | JS         |
 | Ginlong  | Solis-DLS-WiFi   | JSON/HTML  |
 | Hosola   | 1500TL           | JS         |
@@ -72,11 +72,10 @@ async def main():
 
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    asyncio.run(main())
 ```
 
-For the **source type** you can choose between: `javascript` (default), `json` and `html`.
+For the **source type** you can choose between: `javascript` (default), `json`, `html` and `tcp`.
 
 ## Data
 
@@ -92,6 +91,13 @@ You can read the following data with this package:
 - Current Power Production (W)
 - Day Energy Production (kWh)
 - Total Energy Production (kWh)
+
+On the `tcp` source type you can also find:
+
+- Inverter temperature;
+- Voltage and current for the DC input strings (up to 3)
+- Voltage, current, frequency and power for all AC outputs (also up to 3)
+- Total number of runtime hours.
 
 ### Device
 

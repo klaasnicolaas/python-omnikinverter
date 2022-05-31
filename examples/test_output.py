@@ -7,7 +7,7 @@ from omnikinverter import Device, Inverter, OmnikInverter
 
 
 async def main() -> None:
-    """Test."""
+    """Locally gather statistics using JavaScript."""
     async with OmnikInverter(
         host="examples.com",
         source_type="javascript",
@@ -35,5 +35,4 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    asyncio.run(main())

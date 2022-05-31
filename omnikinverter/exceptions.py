@@ -24,3 +24,11 @@ class OmnikInverterWrongValuesError(OmnikInverterError):
     shows the same value for both day and
     total production.
     """
+
+
+class OmnikInverterPacketInvalidError(OmnikInverterError):
+    """Omnik Inverter replied with invalid data.
+
+    This error appears on the "tcp" source when received
+    data cannot be validated.
+    """
