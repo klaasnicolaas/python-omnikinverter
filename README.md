@@ -69,8 +69,9 @@ async def main():
         username="omnik",
         password="inverter",
     ) as client:
-        inverter = await client.inverter()
-        device = await client.device()
+        response = await client.perform_request()
+        inverter = response.inverter()
+        device = response.device()
         print(inverter)
         print(device)
 
