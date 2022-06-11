@@ -139,20 +139,34 @@ class OmnikInverter:
             raise OmnikInverterAuthError("serial_number is missing from the request")
 
         try:
-            if self._socket_mock is not None:
-                reader, writer = await asyncio.open_connection(sock=self._socket_mock)
-            else:  # pragma: no cover
-                reader, writer = await asyncio.open_connection(self.host, self.tcp_port)
+            async with async_timeout.timeout(self.request_timeout):
+                if self._socket_mock is not None:
+                    reader, writer = await asyncio.open_connection(
+                        sock=self._socket_mock
+                    )
+                else:  # pragma: no cover
+                    reader, writer = await asyncio.open_connection(
+                        self.host, self.tcp_port
+                    )
         except OSError as exception:
             raise OmnikInverterConnectionError(
                 "Failed to open a TCP connection to the Omnik Inverter device"
             ) from exception
+        except asyncio.TimeoutError as exception:
+            raise OmnikInverterConnectionError(
+                "Timeout occurred while connecting to Omnik Inverter device"
+            ) from exception
 
         try:
-            writer.write(tcp.create_information_request(self.serial_number))
-            await writer.drain()
+            async with async_timeout.timeout(self.request_timeout):
+                writer.write(tcp.create_information_request(self.serial_number))
+                await writer.drain()
 
-            raw_msg = await reader.read(1024)
+                raw_msg = await reader.read(1024)
+        except asyncio.TimeoutError as exception:
+            raise OmnikInverterConnectionError(
+                "Timeout occurred while connecting to Omnik Inverter device"
+            ) from exception
         finally:
             writer.close()
             try:
