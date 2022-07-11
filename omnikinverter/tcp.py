@@ -1,6 +1,7 @@
 """Data model and conversions for tcp-based communication with the Omnik Inverter."""
+from collections.abc import Generator
 from ctypes import BigEndianStructure, c_char, c_ubyte, c_uint, c_ushort
-from typing import Any, Generator, Optional
+from typing import Any, Optional
 
 from .const import LOGGER
 from .exceptions import OmnikInverterPacketInvalidError
