@@ -745,7 +745,7 @@ testing = ["fields", "hunter", "process-tests", "six", "pytest-xdist", "virtuale
 
 [[package]]
 name = "pyupgrade"
-version = "2.34.0"
+version = "2.37.1"
 description = "A tool to automatically upgrade syntax for newer versions."
 category = "dev"
 optional = false
@@ -970,7 +970,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "5600438b8cf33b8830bb5d7400d6966aa830f86213afa14b8120fcba2fce1a07"
+content-hash = "777851f953334a3fd45df5b585c8a7fbdeb5fb53b6104fc5251c6dbf914a70ce"
 
 [metadata.files]
 aiohttp = []
