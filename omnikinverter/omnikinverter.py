@@ -86,19 +86,14 @@ class OmnikInverter:
                 auth = aiohttp.BasicAuth(self.username, self.password)
 
             try:
-                async with async_timeout.timeout(self.request_timeout):
-                    response = await self.session.request(
-                        method,
-                        url,
-                        auth=auth,
-                        params=params,
-                        headers=headers,
-                    )
-                    response.raise_for_status()
-            except asyncio.TimeoutError as exception:
-                raise OmnikInverterConnectionError(
-                    "Timeout occurred while connecting to Omnik Inverter device"
-                ) from exception
+                response = await self.session.request(
+                    method,
+                    url,
+                    auth=auth,
+                    params=params,
+                    headers=headers,
+                )
+                response.raise_for_status()
             except (ClientError, ClientResponseError) as exception:
                 raise OmnikInverterConnectionError(
                     "Error occurred while communicating with Omnik Inverter device"
@@ -171,20 +166,30 @@ class OmnikInverter:
             A Inverter data object from the Omnik Inverter.
 
         Raises:
+            OmnikInverterConnectionError: An error occurred while communicating
+                with the Omnik Inverter.
             OmnikInverterError: Unknown source type.
         """
-        if self.source_type == "json":
-            data = await self.request("status.json", params={"CMD": "inv_query"})
-            return Inverter.from_json(json.loads(data))
-        if self.source_type == "html":
-            data = await self.request("status.html")
-            return Inverter.from_html(data)
-        if self.source_type == "javascript":
-            data = await self.request("js/status.js")
-            return Inverter.from_js(data)
-        if self.source_type == "tcp":
-            fields = await self.tcp_request()
-            return Inverter.from_tcp(fields)
+        try:
+            async with async_timeout.timeout(self.request_timeout):
+                if self.source_type == "json":
+                    data = await self.request(
+                        "status.json", params={"CMD": "inv_query"}
+                    )
+                    return Inverter.from_json(json.loads(data))
+                if self.source_type == "html":
+                    data = await self.request("status.html")
+                    return Inverter.from_html(data)
+                if self.source_type == "javascript":
+                    data = await self.request("js/status.js")
+                    return Inverter.from_js(data)
+                if self.source_type == "tcp":
+                    fields = await self.tcp_request()
+                    return Inverter.from_tcp(fields)
+        except asyncio.TimeoutError as exception:
+            raise OmnikInverterConnectionError(
+                "Timeout occurred while connecting to Omnik Inverter device"
+            ) from exception
 
         raise OmnikInverterError(f"Unknown source type `{self.source_type}`")
 
@@ -195,20 +200,30 @@ class OmnikInverter:
             A Device data object from the Omnik Inverter. None on the "tcp" source_type.
 
         Raises:
+            OmnikInverterConnectionError: An error occurred while communicating
+                with the Omnik Inverter.
             OmnikInverterError: Unknown source type.
         """
-        if self.source_type == "json":
-            data = await self.request("status.json", params={"CMD": "inv_query"})
-            return Device.from_json(json.loads(data))
-        if self.source_type == "html":
-            data = await self.request("status.html")
-            return Device.from_html(data)
-        if self.source_type == "javascript":
-            data = await self.request("js/status.js")
-            return Device.from_js(data)
-        if self.source_type == "tcp":
-            # None of the fields are available through a TCP data dump.
-            return Device()
+        try:
+            async with async_timeout.timeout(self.request_timeout):
+                if self.source_type == "json":
+                    data = await self.request(
+                        "status.json", params={"CMD": "inv_query"}
+                    )
+                    return Device.from_json(json.loads(data))
+                if self.source_type == "html":
+                    data = await self.request("status.html")
+                    return Device.from_html(data)
+                if self.source_type == "javascript":
+                    data = await self.request("js/status.js")
+                    return Device.from_js(data)
+                if self.source_type == "tcp":
+                    # None of the fields are available through a TCP data dump.
+                    return Device()
+        except asyncio.TimeoutError as exception:
+            raise OmnikInverterConnectionError(
+                "Timeout occurred while connecting to Omnik Inverter device"
+            ) from exception
 
         raise OmnikInverterError(f"Unknown source type `{self.source_type}`")
 
