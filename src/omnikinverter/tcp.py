@@ -213,7 +213,7 @@ def _unpack_message(message: bytearray) -> tuple[int, int, bytearray]:
 
     message_type = message.pop(0)
     LOGGER.debug(
-        "Message type %02x, length %s, checksum %02x",
+        "Message type %#02x, length %s, checksum %#02x",
         message_type,
         length,
         checksum,
@@ -330,7 +330,7 @@ def parse_messages(serial_number: int, data: bytes) -> dict[str, Any]:
             )
         else:
             msg = (
-                f"Unknown Omnik message type {message_type:02x} "
+                f"Unknown Omnik message type {message_type:#02x} "
                 f"with contents `{message}`"
             )
             raise OmnikInverterPacketInvalidError(msg)

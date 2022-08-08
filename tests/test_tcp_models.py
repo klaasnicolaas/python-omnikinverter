@@ -178,7 +178,7 @@ async def test_inverter_tcp_known_message_type() -> None:
         )
 
     assert (
-        str(excinfo.value) == "Unknown Omnik message type 00 "
+        str(excinfo.value) == "Unknown Omnik message type 0x0 "
         "with contents `bytearray(b'')`"
     )
 
