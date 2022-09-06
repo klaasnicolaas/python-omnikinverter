@@ -38,11 +38,12 @@ async def test_inverter_js_webdata(aresponses: ResponsesMockServer) -> None:
         assert inverter.serial_number == "12345678910"
         assert inverter.firmware == "NL2-V9.8-5931"
         assert inverter.firmware_slave == "V5.3-00157"
-        assert inverter.model == "omnik2000tl2"
-        assert inverter.solar_rated_power is None
-        assert inverter.solar_current_power == 1010
-        assert inverter.solar_energy_today == 4.88
-        assert inverter.solar_energy_total == 10531.9
+        assert inverter.model == "omnik4000tl2"
+        assert inverter.alarm_code == "F13"
+        assert inverter.solar_rated_power == 4000
+        assert inverter.solar_current_power == 140
+        assert inverter.solar_energy_today == 0.3
+        assert inverter.solar_energy_total == 15363.7
 
 
 @pytest.mark.asyncio
@@ -96,6 +97,7 @@ async def test_inverter_html(aresponses: ResponsesMockServer) -> None:
         assert inverter.firmware == "V5.07Build245"
         assert inverter.firmware_slave is None
         assert inverter.model == "Omnik2500tl"
+        assert inverter.alarm_code == "F13"
         assert inverter.solar_rated_power == 2500
         assert inverter.solar_current_power == 219
         assert inverter.solar_energy_today == 0.23
@@ -157,6 +159,7 @@ async def test_inverter_without_session(aresponses: ResponsesMockServer) -> None
     assert inverter.firmware == "001F"
     assert inverter.firmware_slave == "002F"
     assert inverter.model == "0079"
+    assert inverter.alarm_code is None
     assert inverter.solar_rated_power is None
     assert inverter.solar_current_power == 5850
     assert inverter.solar_energy_today == 9.80
@@ -263,7 +266,8 @@ async def test_inverter_json(aresponses: ResponsesMockServer) -> None:
         assert inverter.firmware == "V1.25Build23261"
         assert inverter.firmware_slave == "V1.40Build52927"
         assert inverter.model == "omnik2000tl2"
-        assert inverter.solar_rated_power is None
+        assert inverter.alarm_code == "F23"
+        assert inverter.solar_rated_power == 2000
         assert inverter.solar_current_power == 1225
         assert inverter.solar_energy_today == 10.90
         assert inverter.solar_energy_total == 8674.0
