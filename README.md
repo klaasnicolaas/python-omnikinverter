@@ -8,10 +8,10 @@
 [![License][license-shield]](LICENSE)
 
 [![GitHub Activity][commits-shield]][commits-url]
-[![Forks][forks-shield]][forks-url]
+[![PyPi Downloads][downloads-shield]][downloads-url]
+[![GitHub Last Commit][last-commit-shield]][commits-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
-[![GitHub Last Commit][last-commit-shield]][commits-url]
 
 [![Code Quality][code-quality-shield]][code-quality]
 [![Maintainability][maintainability-shield]][maintainability-url]
@@ -201,8 +201,8 @@ SOFTWARE.
 [commits-url]: https://github.com/klaasnicolaas/python-omnikinverter/commits/main
 [codecov-shield]: https://codecov.io/gh/klaasnicolaas/python-omnikinverter/branch/main/graph/badge.svg?token=VQTR24YFQ9
 [codecov-url]: https://codecov.io/gh/klaasnicolaas/python-omnikinverter
-[forks-shield]: https://img.shields.io/github/forks/klaasnicolaas/python-omnikinverter.svg
-[forks-url]: https://github.com/klaasnicolaas/python-omnikinverter/network/members
+[downloads-shield]: https://img.shields.io/pypi/dm/omnikinverter
+[downloads-url]: https://pypistats.org/packages/omnikinverter
 [issues-shield]: https://img.shields.io/github/issues/klaasnicolaas/python-omnikinverter.svg
 [issues-url]: https://github.com/klaasnicolaas/python-omnikinverter/issues
 [license-shield]: https://img.shields.io/github/license/klaasnicolaas/python-omnikinverter.svg
