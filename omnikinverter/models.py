@@ -214,12 +214,18 @@ class Inverter:
         split_data = data.split(";")
         if len(split_data) < 7:
             raise OmnikInverterWrongSourceError(
-                    "Your inverter has no data source from cgi."
-                )     
+                "Your inverter has no data source from cgi."
+            )
 
-        def try_parse_float(item) -> float | None:
+        def try_parse_float(item: str) -> float | None:
             try:
                 return float(item)
+            except:
+                return None
+
+        def try_parse_int(item: str) -> int | None:
+            try:
+                return int(item)
             except:
                 return None
 
@@ -229,10 +235,10 @@ class Inverter:
             firmware=split_data[1],
             firmware_slave=None,
             solar_rated_power=None,
-            solar_current_power=try_parse_float(split_data[4]),
+            solar_current_power=try_parse_int(split_data[4]),
             solar_energy_today=try_parse_float(split_data[5]),
             solar_energy_total=try_parse_float(split_data[6]),
-            temperature=try_parse_float(split_data[3])
+            temperature=try_parse_float(split_data[3]),
         )
 
 
@@ -335,15 +341,15 @@ class Device:
         split_data = data.split(";")
         if len(split_data) < 9:
             raise OmnikInverterWrongSourceError(
-                    "Your inverter has no device data from cgi."
-                )
+                "Your inverter has no device data from cgi."
+            )
 
-        def try_parse_int(item):
+        def try_parse_int(item: str) -> int | None:
             try:
                 return int(item)
             except:
                 return None
-                
+
         return Device(
             signal_quality=try_parse_int(split_data[8]),
             firmware=split_data[1],
