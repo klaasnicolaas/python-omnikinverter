@@ -200,6 +200,40 @@ class Inverter:
             ),
         )
 
+    @staticmethod
+    def from_cgi(data: str) -> Inverter:
+        """Return Inverter object from the Omnik Inverter response.
+
+        Args:
+            data: The CGI (webscraping) data from the Omnik Inverter.
+
+        Returns:
+            An Inverter object.
+        """
+
+        split_data = data.split(";")
+        if len(split_data) < 7:
+            raise OmnikInverterWrongSourceError(
+                    "Your inverter has no data source from cgi."
+                )      
+
+        def try_parse_float(item):
+            try:
+                return float(item)
+            except:
+                return None
+
+        return Inverter(
+            serial_number=split_data[0],
+            model=split_data[2],
+            firmware=split_data[1],
+            firmware_slave=None,
+            solar_rated_power=None,
+            solar_current_power=try_parse_float(split_data[4]),
+            solar_energy_today=try_parse_float(split_data[5]),
+            solar_energy_total=try_parse_float(split_data[6]),
+        )
+
 
 @dataclass
 class Device:
@@ -284,4 +318,33 @@ class Device:
             signal_quality=get_value("m2mRssi"),
             firmware=get_value("version"),
             ip_address=get_value("wanIp"),
+        )
+
+    @staticmethod
+    def from_cgi(data: str) -> Device:
+        """Return Device object from the Omnik Inverter response.
+
+        Args:
+            data: The CGI (webscraping) data from the Omnik Inverter.
+
+        Returns:
+            A Device object.
+        """
+
+        split_data = data.split(";")
+        if len(split_data) < 9:
+            raise OmnikInverterWrongSourceError(
+                    "Your inverter has no device data from cgi."
+                )
+
+        def try_parse_int(item):
+            try:
+                return int(item)
+            except:
+                return None
+                
+        return Device(
+            signal_quality=try_parse_int(split_data[8]),
+            firmware=split_data[1],
+            ip_address=split_data[9],
         )

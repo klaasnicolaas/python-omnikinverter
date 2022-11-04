@@ -130,6 +130,67 @@ async def test_device_html(aresponses: ResponsesMockServer) -> None:
         assert device.firmware == "ME_08_0102_2.03"
         assert device.ip_address == "192.168.0.106"
 
+@pytest.mark.asyncio
+async def test_inverter_cgi(aresponses: ResponsesMockServer) -> None:
+    """Test request from an Inverter - CGI source."""
+    aresponses.add(
+        "example.com",
+        "/inverter.cgi",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "text/html"},
+            text=load_fixtures("inverter.cgi"),
+        ),
+    )
+
+    async with aiohttp.ClientSession() as session:
+        client = OmnikInverter(
+            host="example.com",
+            source_type="cgi",
+            username="klaas",
+            password="supercool",
+            session=session,
+        )
+        inverter: Inverter = await client.inverter()
+        assert inverter
+        assert inverter.serial_number == "12345678910"
+        assert inverter.firmware == "3280031"
+        assert inverter.firmware_slave is None
+        assert inverter.model == "205"
+        assert inverter.solar_rated_power is None
+        assert inverter.solar_current_power == 780
+        assert inverter.solar_energy_today == 23.799999
+        assert inverter.solar_energy_total is None
+
+
+@pytest.mark.asyncio
+async def test_device_cgi(aresponses: ResponsesMockServer) -> None:
+    """Test request from a Device - CGI source."""
+    aresponses.add(
+        "example.com",
+        "/moniter.cgi",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "text/html"},
+            text=load_fixtures("moniter.cgi"),
+        ),
+    )
+
+    async with aiohttp.ClientSession() as session:
+        client = OmnikInverter(
+            host="example.com",
+            source_type="cgi",
+            username="klaas",
+            password="supercool",
+            session=session,
+        )
+        device: Device = await client.device()
+        assert device
+        assert device.signal_quality == 60
+        assert device.firmware == "00010130"
+        assert device.ip_address == "192.168.0.106"
 
 @pytest.mark.asyncio
 async def test_inverter_without_session(aresponses: ResponsesMockServer) -> None:

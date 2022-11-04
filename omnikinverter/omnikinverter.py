@@ -75,7 +75,7 @@ class OmnikInverter:
 
         # Use big try to make sure manual session is always cleaned up
         try:
-            if self.source_type == "html" and (
+            if (self.source_type == "html" or self.source_type == "cgi") and (
                 self.username is None or self.password is None
             ):
                 raise OmnikInverterAuthError(
@@ -179,6 +179,9 @@ class OmnikInverter:
         if self.source_type == "html":
             data = await self.request("status.html")
             return Inverter.from_html(data)
+        if self.source_type == "cgi":
+            data = await self.request("inverter.cgi", params={"t": "123"})
+            return Inverter.from_cgi(data)
         if self.source_type == "javascript":
             data = await self.request("js/status.js")
             return Inverter.from_js(data)
@@ -203,6 +206,9 @@ class OmnikInverter:
         if self.source_type == "html":
             data = await self.request("status.html")
             return Device.from_html(data)
+        if self.source_type == "cgi":
+            data = await self.request("moniter.cgi", params={"t": "123"})
+            return Device.from_cgi(data)
         if self.source_type == "javascript":
             data = await self.request("js/status.js")
             return Device.from_js(data)
