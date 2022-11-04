@@ -162,6 +162,7 @@ async def test_inverter_cgi(aresponses: ResponsesMockServer) -> None:
         assert inverter.solar_current_power == 780
         assert inverter.solar_energy_today == 23.799999
         assert inverter.solar_energy_total is None
+        assert inverter.temperature == 38.4
 
 
 @pytest.mark.asyncio

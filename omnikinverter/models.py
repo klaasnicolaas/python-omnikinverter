@@ -215,9 +215,9 @@ class Inverter:
         if len(split_data) < 7:
             raise OmnikInverterWrongSourceError(
                     "Your inverter has no data source from cgi."
-                )      
+                )     
 
-        def try_parse_float(item):
+        def try_parse_float(item) -> float | None:
             try:
                 return float(item)
             except:
@@ -232,6 +232,7 @@ class Inverter:
             solar_current_power=try_parse_float(split_data[4]),
             solar_energy_today=try_parse_float(split_data[5]),
             solar_energy_total=try_parse_float(split_data[6]),
+            temperature=try_parse_float(split_data[3])
         )
 
 
