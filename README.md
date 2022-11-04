@@ -38,6 +38,7 @@ A python package with which you can read the data from your Omnik Inverter. Keep
 | Omnik    | Omniksol 3000TL  | TCP        |
 | Omnik    | Omniksol 4000TL2 | JS         |
 | Ginlong  | Solis-DLS-WiFi   | JSON/HTML  |
+| Ginlong  | S3-WIFI-ST       | CGI        |
 | Hosola   | 1500TL           | JS         |
 | Bosswerk | BW-MI300         | HTML       |
 | Bosswerk | BW-MI600         | HTML       |
@@ -93,9 +94,12 @@ You can read the following data with this package:
 - Day Energy Production (kWh)
 - Total Energy Production (kWh)
 
+On the `cgi` source type you can also find:
+- Inverter temperature
+
 On the `tcp` source type you can also find:
 
-- Inverter temperature;
+- Inverter temperature
 - Voltage and current for the DC input strings (up to 3)
 - Voltage, current, frequency and power for all AC outputs (also up to 3)
 - Total number of runtime hours.
