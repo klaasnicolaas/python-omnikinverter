@@ -102,7 +102,7 @@ On the `tcp` source type you can also find:
 - Inverter temperature
 - Voltage and current for the DC input strings (up to 3)
 - Voltage, current, frequency and power for all AC outputs (also up to 3)
-- Total number of runtime hours.
+- Total number of runtime hours
 
 ### Device
 
