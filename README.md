@@ -1,4 +1,5 @@
-## Python - Omnik Inverter Client
+<!-- Banner -->
+![alt Banner of the Omnik Inverter package](https://raw.githubusercontent.com/klaasnicolaas/python-omnikinverter/main/assets/header_omnik_inverter-min.png)
 
 <!-- PROJECT SHIELDS -->
 [![GitHub Release][releases-shield]][releases]
@@ -16,6 +17,7 @@
 [![Code Quality][code-quality-shield]][code-quality]
 [![Maintainability][maintainability-shield]][maintainability-url]
 [![Code Coverage][codecov-shield]][codecov-url]
+
 [![Build Status][build-shield]][build-url]
 
 Asynchronous Python client for the Omnik Inverter.
