@@ -11,6 +11,7 @@ repository = "https://github.com/klaasnicolaas/python-omnikinverter"
 documentation = "https://github.com/klaasnicolaas/python-omnikinverter"
 keywords = ["omnik", "inverter", "power", "energy", "async", "client"]
 classifiers = [
+    "Development Status :: 5 - Production/Stable",
     "Framework :: AsyncIO",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
@@ -30,7 +31,7 @@ aiohttp = ">=3.0.0"
 yarl = ">=1.6.0"
 asynctest = "^0.13.0"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 aresponses = "^2.1.6"
 bandit = "^1.7.4"
 black = "^22.10"
@@ -57,6 +58,7 @@ pytest-asyncio = "^0.20.2"
 pytest-cov = "^4.0.0"
 pyupgrade = "^3.2.2"
 safety = "^2.3.2"
+tomli = "^2.0.1"
 vulture = "^2.6"
 yamllint = "^1.28.0"
 types-cachetools = "^5.2.1"

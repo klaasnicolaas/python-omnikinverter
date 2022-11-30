@@ -990,7 +990,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "061bd22cb1574ec52879547526f8c0d8c75dfed0bf44dec1a85dbf5e2a237cf0"
+content-hash = "d6aaa12ee9c30fdf99c8332c8de95c9a86432e2273ad75fce0bed1f5969a958e"
 
 [metadata.files]
 aiohttp = [
@@ -1783,7 +1783,6 @@ wrapt = [
     {file = "wrapt-1.14.1.tar.gz", hash = "sha256:380a85cf89e0e69b7cfbe2ea9f765f004ff419f34194018a6827ac0e3edfed4d"},
 ]
 yamllint = [
-    {file = "yamllint-1.28.0-py2.py3-none-any.whl", hash = "sha256:89bb5b5ac33b1ade059743cf227de73daa34d5e5a474b06a5e17fc16583b0cf2"},
     {file = "yamllint-1.28.0.tar.gz", hash = "sha256:9e3d8ddd16d0583214c5fdffe806c9344086721f107435f68bad990e5a88826b"},
 ]
 yarl = [
