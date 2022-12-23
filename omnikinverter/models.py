@@ -155,7 +155,8 @@ class Inverter:
                 if matches[position] != "":
                     if position in [4, 5, 6, 7]:
                         if position in [4, 5]:
-                            return int(matches[position])
+                            # Need to remove spaces before parsing int for SOFAR 2200TL
+                            return int(matches[position].replace(" ", ""))
 
                         if position == 6:
                             energy_value = float(matches[position]) / 100
