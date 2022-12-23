@@ -1,1 +1,1 @@
-var version= "H4.01.51MW.2.01W1.0.64(2018-01-251-D)";var m2mRssi= "39%";var wanIp= "";var myDeviceArray=new Array();myDeviceArray[0]="12345678910,V4.08Build215,V4.12Build246,Omnik1500tl ,1 000,850,232,52002,,1,";
+var version= "H4.01.51MW.2.01W1.0.64(2018-01-251-D)";var m2mRssi= "39%";var wanIp= "";var myDeviceArray=new Array();myDeviceArray[0]="12345678910,V4.08Build215,V4.12Build246,Omnik1500tl ,,850,232,52002,,1,";

@@ -212,7 +212,7 @@ async def test_inverter_js_devicearray(aresponses: ResponsesMockServer) -> None:
         assert inverter.firmware == "V4.08Build215"
         assert inverter.firmware_slave == "V4.12Build246"
         assert inverter.model == "Omnik1500tl"
-        assert inverter.solar_rated_power == 1000
+        assert inverter.solar_rated_power is None
         assert inverter.solar_current_power == 850
         assert inverter.solar_energy_today == 2.32
         assert inverter.solar_energy_total == 5200.2
