@@ -155,7 +155,6 @@ class Inverter:
                 if matches[position] != "":
                     if position in [4, 5, 6, 7]:
                         if position in [4, 5]:
-                            # Need to remove spaces before parsing int for SOFAR 2200TL
                             return int(matches[position].replace(" ", ""))
 
                         if position == 6:
