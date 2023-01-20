@@ -44,6 +44,7 @@ A python package with which you can read the data from your Omnik Inverter. Keep
 | Bosswerk | BW-MI300         | HTML       |
 | Bosswerk | BW-MI600         | HTML       |
 | Sofar    | 3600TLM          | HTML       |
+| Sofar    | 2200TL           | JS         |
 | Huayu    | HY-600-Pro       | HTML       |
 
 ## Installation

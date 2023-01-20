@@ -219,6 +219,36 @@ async def test_inverter_js_devicearray(aresponses: ResponsesMockServer) -> None:
 
 
 @pytest.mark.asyncio
+async def test_inverter_js_devicearray_sofar2200tl(
+    aresponses: ResponsesMockServer,
+) -> None:
+    """Test request from an SOFAR 2200TL Inverter - JS DeviceArray source."""
+    aresponses.add(
+        "example.com",
+        "/js/status.js",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/x-javascript"},
+            text=load_fixtures("status_devicearray_sofar220tl.js"),
+        ),
+    )
+
+    async with aiohttp.ClientSession() as session:
+        client = OmnikInverter(host="example.com", session=session)
+        inverter: Inverter = await client.inverter()
+        assert inverter
+        assert inverter.serial_number == "1234567890"
+        assert inverter.firmware == "V450"
+        assert inverter.firmware_slave is None
+        assert inverter.model == "SOFAR2200TL"
+        assert inverter.solar_rated_power == 2000
+        assert inverter.solar_current_power == 400
+        assert inverter.solar_energy_today == 5.67
+        assert inverter.solar_energy_total == 12307.0
+
+
+@pytest.mark.asyncio
 async def test_device_js_devicearray(aresponses: ResponsesMockServer) -> None:
     """Test request from a Device - JS DeviceArray source."""
     aresponses.add(
