@@ -20,6 +20,7 @@ class Inverter:
     solar_current_power: int | None
     solar_energy_today: float | None
     solar_energy_total: float | None
+    alarm_code: str | None = None
 
     # TCP only
     inverter_active: bool | None = None
@@ -77,7 +78,8 @@ class Inverter:
             model=get_value("i_modle"),
             firmware=get_value("i_ver_m"),
             firmware_slave=get_value("i_ver_s"),
-            solar_rated_power=get_value("i_pow"),
+            alarm_code=get_value("i_alarm"),
+            solar_rated_power=int(get_value("i_pow")),
             solar_current_power=int(get_value("i_pow_n")),
             solar_energy_today=float(get_value("i_eday")),
             solar_energy_total=float(get_value("i_eall")),
@@ -117,6 +119,7 @@ class Inverter:
             model=get_value("webdata_pv_type"),
             firmware=get_value("webdata_msvn"),
             firmware_slave=get_value("webdata_ssvn"),
+            alarm_code=get_value("webdata_alarm"),
             solar_rated_power=get_value("webdata_rate_p"),
             solar_current_power=get_value("webdata_now_p"),
             solar_energy_today=get_value("webdata_today_e"),
@@ -174,6 +177,7 @@ class Inverter:
             model=get_value(3),
             firmware=get_value(1),
             firmware_slave=get_value(2),
+            alarm_code=get_value(8),
             solar_rated_power=get_value(4),
             solar_current_power=get_value(5),
             solar_energy_today=get_value(6),

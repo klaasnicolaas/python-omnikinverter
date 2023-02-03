@@ -22,6 +22,7 @@ async def main() -> None:
         print(f"Firmware Main: {inverter.firmware}")
         print(f"Firmware Slave: {inverter.firmware_slave}")
         print(f"Rated Power: {inverter.solar_rated_power}")
+        print(f"Alarm Code: {inverter.alarm_code}")
         print(f"Current Power: {inverter.solar_current_power}")
         print(f"Energy Production Today: {inverter.solar_energy_today}")
         print(f"Energy Production Total: {inverter.solar_energy_total}")

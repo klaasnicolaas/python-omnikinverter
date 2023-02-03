@@ -5,8 +5,10 @@
     "i_ver_m":"V1.25Build23261",
     "i_ver_s":"V1.40Build52927",
     "i_modle":"omnik2000tl2",
-    "i_pow":"",
+    "i_pow":"2000",
     "i_pow_n":1225,
     "i_eday":"10.90",
-    "i_eall":"8674.0"
+    "i_eall":"8674.0",
+    "i_alarm":"F23",
+    "i_last_t":0
 }

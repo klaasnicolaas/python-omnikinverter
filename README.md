@@ -91,6 +91,7 @@ You can read the following data with this package:
 - Inverter Model
 - Firmware Version - Main
 - Firmware Version - Slave
+- Alarm Code
 - Rated Power (W)
 - Current Power Production (W)
 - Day Energy Production (kWh)
