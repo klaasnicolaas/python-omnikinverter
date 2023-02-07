@@ -272,10 +272,17 @@ def _parse_information_reply(data: bytes) -> dict[str, Any]:
         "firmware_slave": None,
     }
 
-    result = {}
+    result: dict[str, Any] = {}
 
     for (name, extractor) in field_extractors.items():
         value = getattr(tcp_data, name)
+
+        # Set temperature to None if it matches 65326, this is returned
+        # when the inverter is "offline".
+        if name == "temperature" and value == 65326:
+            result["temperature"] = None
+            continue
+
         if name == "ac_output":
             # Flatten the list of frequency+power AC objects
 

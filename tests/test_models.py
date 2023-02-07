@@ -569,6 +569,52 @@ class TestTcpWithSocketMock(asynctest.TestCase):  # type: ignore
         assert inverter.firmware == "NL1-V1.0-0077-4"
         assert inverter.firmware_slave == "V2.0-0024"
 
+    async def test_inverter_tcp_offline(self) -> None:
+        """Test request from an Inverter (offline) - TCP source."""
+        serial_number = 1608449224
+        socket_mock = asynctest.SocketMock()
+        socket_mock.type = socket.SOCK_STREAM
+
+        def send_side_effect(data: bytes) -> int:
+            assert data == tcp.create_information_request(serial_number)
+            asynctest.set_read_ready(socket_mock, self.loop)
+            return len(data)
+
+        def recv_side_effect(_max_bytes: int) -> bytes:
+            return load_fixture_bytes("tcp_reply_offline.data")
+
+        socket_mock.send.side_effect = send_side_effect
+        socket_mock.recv.side_effect = recv_side_effect
+
+        client = OmnikInverter(
+            host="example.com",
+            source_type="tcp",
+            serial_number=serial_number,
+            _socket_mock=socket_mock,
+        )
+
+        inverter: Inverter = await client.inverter()
+
+        assert inverter
+        assert inverter.solar_rated_power is None
+        assert inverter.solar_current_power == 0
+
+        assert inverter.model is None
+        assert inverter.serial_number == "NLBN4020157P9024"
+        assert inverter.temperature is None
+        assert inverter.dc_input_voltage == [0.0, 0.0, 0.0]
+        assert inverter.dc_input_current == [0.0, 0.0, 0.0]
+        assert inverter.ac_output_voltage == [0.0, 0.0, 0.0]
+        assert inverter.ac_output_current == [0.0, 0.0, 0.0]
+        assert inverter.ac_output_frequency == [0.0, 0.0, 0.0]
+        assert inverter.ac_output_power == [0.0, 0.0, 0.0]
+        assert inverter.solar_energy_today == 4.7
+        assert inverter.solar_energy_total == 15818.0
+        assert inverter.solar_hours_total == 0
+        assert inverter.inverter_active is False
+        assert inverter.firmware == ""
+        assert inverter.firmware_slave == ""
+
     async def test_connection_broken(self) -> None:
         """Test on connection broken after success - TCP source."""
         serial_number = 1
