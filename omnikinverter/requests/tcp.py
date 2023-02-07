@@ -9,6 +9,7 @@ from omnikinverter.exceptions import (
     OmnikInverterAuthError,
     OmnikInverterConnectionError,
 )
+from asyncio.streams import StreamReader, StreamWriter
 
 from omnikinverter import tcp_handler
 
@@ -19,6 +20,10 @@ class OmnikTcpRequest:
     tcp_port: int
     request_timeout: float
     _close_session: bool = False
+
+    _reader: StreamReader | None = None
+    _writer: StreamWriter | None = None
+    _raw_msg: Any | None = None
 
     def __init__(
         self,
@@ -55,36 +60,39 @@ class OmnikTcpRequest:
         # Make sure the request is valid.
         self._validate_request()
 
-        # Define the await function.
-        open_connection = asyncio.open_connection(self.host, self.tcp_port)
-        
         try:
-            # Await for the method with a timeout.
-            reader, writer = await asyncio.wait_for(open_connection, self.request_timeout)
+            await asyncio.wait_for(self._connect(), timeout=self.request_timeout)
+            await asyncio.wait_for(self._write_message(), timeout=self.request_timeout)
+            await asyncio.wait_for(self._read_message(), timeout=self.request_timeout)
+            await asyncio.wait_for(self._close(), timeout=self.request_timeout)
+        except OSError as exception:
+            raise OmnikInverterConnectionError(
+                "Failed to communicate with the Omnik Inverter device over TCP"
+            ) from exception
         except asyncio.TimeoutError as exception:
             raise OmnikInverterConnectionError(
                 "Timeout occurred when opening a TCP connection to the Omnik Inverter device"
             ) from exception
-        except OSError as exception:
-            raise OmnikInverterConnectionError(
-                "Failed to open a TCP connection to the Omnik Inverter device"
-            ) from exception
+        
+        return tcp_handler.parse_messages(self.serial_number, self._raw_msg)
 
-        try:
-            writer.write(tcp_handler.create_information_request(self.serial_number))
-            await writer.drain()
+    async def _connect(self) -> None:
+        # Await for the method with a timeout.
+        reader, writer = await asyncio.open_connection(self.host, self.tcp_port)
 
-            raw_msg = await reader.read(1024)
-        finally:
-            writer.close()
-            try:
-                await writer.wait_closed()
-            except OSError as exception:
-                raise OmnikInverterConnectionError(
-                    "Failed to communicate with the Omnik Inverter device over TCP"
-                ) from exception
+        self._reader = reader
+        self._writer = writer
 
-        return tcp_handler.parse_messages(self.serial_number, raw_msg)
+    async def _write_message(self) -> None:
+        self._writer.write(tcp_handler.create_information_request(self.serial_number))
+        await self._writer.drain()
+
+    async def _read_message(self) -> None:
+        self._raw_msg = await self._reader.read(1024)
+        
+    async def _close(self) -> None:
+        self._writer.close()
+        await self._writer.wait_closed()
 
     def _validate_request(self) -> None:
         if self.serial_number is None:
