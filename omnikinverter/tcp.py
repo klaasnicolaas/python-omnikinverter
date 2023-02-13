@@ -255,10 +255,15 @@ def _parse_information_reply(data: bytes) -> dict[str, Any]:
             1: True,
         }[num]
 
+    # Set temperature to None if it matches 65326, this is returned
+    # when the inverter is "offline".
+    def temperature_to_float(temp: int) -> Optional[float]:
+        return None if temp == 65326 else temp * 0.1
+
     # Only these fields will be extracted from the structure
     field_extractors = {
         "serial_number": None,
-        "temperature": 0.1,
+        "temperature": temperature_to_float,
         "dc_input_voltage": list_divide_10,
         "dc_input_current": list_divide_10,
         "ac_output_current": list_divide_10,
@@ -272,10 +277,11 @@ def _parse_information_reply(data: bytes) -> dict[str, Any]:
         "firmware_slave": None,
     }
 
-    result = {}
+    result: dict[str, Any] = {}
 
     for (name, extractor) in field_extractors.items():
         value = getattr(tcp_data, name)
+
         if name == "ac_output":
             # Flatten the list of frequency+power AC objects
 
