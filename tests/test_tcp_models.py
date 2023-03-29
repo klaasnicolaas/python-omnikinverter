@@ -36,16 +36,16 @@ async def test_inverter_tcp_checksum_correct() -> None:
     """Ensure the implementation validates CRC before accepting data."""
     serial_number = 1
     # Serial number, twice
-    serial_number_bytes = list(serial_number.to_bytes(4, "little") * 2)
+    serial_number_bytes = serial_number.to_bytes(4, "little") * 2
 
-    test_message_contents = list(b"foo")
-    test_message = (
+    test_message_contents = b"foo"
+    test_message = [
         len(test_message_contents),  # Length
         tcp.MESSAGE_RECV_SEP,
         tcp.MESSAGE_TYPE_STRING,
         *serial_number_bytes,
         *test_message_contents,
-    )
+    ]
     false_checksum = 0xFE
     checksum = sum(test_message) & 0xFF
 
@@ -53,8 +53,12 @@ async def test_inverter_tcp_checksum_correct() -> None:
         assert tcp.parse_messages(
             serial_number,
             bytearray(
-                [tcp.MESSAGE_START, *list(test_message)]
-                + [false_checksum, tcp.MESSAGE_END],
+                [
+                    tcp.MESSAGE_START,
+                    *test_message,
+                    false_checksum,
+                    tcp.MESSAGE_END,
+                ],
             ),
         )
 
@@ -68,21 +72,21 @@ async def test_inverter_tcp_recv_sep() -> None:
     """Require RECV_SEP "separator" between length and message_type."""
     serial_number = 1
     # Serial number, twice
-    serial_number_bytes = list(serial_number.to_bytes(4, "little") * 2)
+    serial_number_bytes = serial_number.to_bytes(4, "little") * 2
 
-    test_message = (
+    test_message = [
         0,  # Length
         123,  # Invalid separator
         tcp.MESSAGE_TYPE_STRING,
         *serial_number_bytes,
-    )
+    ]
     checksum = sum(test_message) & 0xFF
 
     with pytest.raises(OmnikInverterPacketInvalidError) as excinfo:
         assert tcp.parse_messages(
             serial_number,
             bytearray(
-                [tcp.MESSAGE_START, *list(test_message)] + [checksum, tcp.MESSAGE_END],
+                [tcp.MESSAGE_START, *test_message, checksum, tcp.MESSAGE_END],
             ),
         )
 
@@ -91,20 +95,20 @@ async def test_inverter_tcp_recv_sep() -> None:
 
 async def test_inverter_tcp_double_serial_match() -> None:
     """Require both serial numbers in the received buffer to be identical."""
-    test_message = (
+    test_message = [
         0,  # Length
         tcp.MESSAGE_RECV_SEP,
         tcp.MESSAGE_TYPE_STRING,
-        *list((1).to_bytes(4, "little")),
-        *list((2).to_bytes(4, "little")),
-    )
+        *(1).to_bytes(4, "little"),
+        *(2).to_bytes(4, "little"),
+    ]
     checksum = sum(test_message) & 0xFF
 
     with pytest.raises(OmnikInverterPacketInvalidError) as excinfo:
         assert tcp.parse_messages(
             3,
             bytearray(
-                [tcp.MESSAGE_START, *list(test_message)] + [checksum, tcp.MESSAGE_END],
+                [tcp.MESSAGE_START, *test_message, checksum, tcp.MESSAGE_END],
             ),
         )
 
@@ -115,22 +119,23 @@ async def test_inverter_tcp_end_marker() -> None:
     """Require end marker."""
     serial_number = 1
     # Serial number, twice
-    serial_number_bytes = list(serial_number.to_bytes(4, "little") * 2)
+    serial_number_bytes = serial_number.to_bytes(4, "little") * 2
 
-    test_message = (
+    test_message = [
         0,  # Length
         tcp.MESSAGE_RECV_SEP,
         tcp.MESSAGE_TYPE_STRING,
         *serial_number_bytes,
-    )
+    ]
     checksum = sum(test_message) & 0xFF
 
     with pytest.raises(OmnikInverterPacketInvalidError) as excinfo:
         assert tcp.parse_messages(
             serial_number,
             bytearray(
-                [tcp.MESSAGE_START, *list(test_message)]
-                + [
+                [
+                    tcp.MESSAGE_START,
+                    *test_message,
                     checksum,
                     123,  # Invalid end byte
                 ],
@@ -144,21 +149,21 @@ async def test_inverter_tcp_known_message_type() -> None:
     """Require message type to be known."""
     serial_number = 1
     # Serial number, twice
-    serial_number_bytes = list(serial_number.to_bytes(4, "little") * 2)
+    serial_number_bytes = serial_number.to_bytes(4, "little") * 2
 
-    test_message = (
+    test_message = [
         0,  # Length
         tcp.MESSAGE_RECV_SEP,
         0,  # Unknown message type
         *serial_number_bytes,
-    )
+    ]
     checksum = sum(test_message) & 0xFF
 
     with pytest.raises(OmnikInverterPacketInvalidError) as excinfo:
         assert tcp.parse_messages(
             serial_number,
             bytearray(
-                [tcp.MESSAGE_START, *list(test_message)] + [checksum, tcp.MESSAGE_END],
+                [tcp.MESSAGE_START, *test_message, checksum, tcp.MESSAGE_END],
             ),
         )
 
@@ -172,14 +177,14 @@ async def test_inverter_tcp_require_information_reply() -> None:
     """Require at least one of the messages to be an information reply."""
     serial_number = 1
     # Serial number, twice
-    serial_number_bytes = list(serial_number.to_bytes(4, "little") * 2)
+    serial_number_bytes = serial_number.to_bytes(4, "little") * 2
 
-    test_message = (
+    test_message = [
         0,  # Length
         tcp.MESSAGE_RECV_SEP,
         tcp.MESSAGE_TYPE_STRING,
         *serial_number_bytes,
-    )
+    ]
     checksum = sum(test_message) & 0xFF
 
     with pytest.raises(OmnikInverterPacketInvalidError) as excinfo:
