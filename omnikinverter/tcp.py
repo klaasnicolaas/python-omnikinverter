@@ -1,7 +1,9 @@
 """Data model and conversions for tcp-based communication with the Omnik Inverter."""
+from __future__ import annotations
+
 from collections.abc import Generator
 from ctypes import BigEndianStructure, c_char, c_ubyte, c_uint, c_ushort
-from typing import Any, Optional
+from typing import Any
 
 from .const import LOGGER
 from .exceptions import OmnikInverterPacketInvalidError
@@ -29,18 +31,20 @@ class _AcOutput(BigEndianStructure):
         ("power", c_ushort),
     ]
 
-    def get_power(self) -> Optional[int]:
+    def get_power(self) -> int | None:
         """Retrieve AC power.
 
-        Returns:
+        Returns
+        -------
             The power field, or None if it is unset.
         """
         return None if self.power == UINT16_MAX else self.power
 
-    def get_frequency(self) -> Optional[float]:
+    def get_frequency(self) -> float | None:
         """Retrieve AC frequency.
 
-        Returns:
+        Returns
+        -------
             The frequency field in Hertz, or None if it is unset.
         """
         return None if self.frequency == UINT16_MAX else self.frequency * 0.01
@@ -72,7 +76,9 @@ class _TcpData(BigEndianStructure):
 
 
 def _pack_message(
-    message_type: int, serial_number: int, message: bytearray
+    message_type: int,
+    serial_number: int,
+    message: bytearray,
 ) -> bytearray:
     # Prepend message "header"
     request_data = bytearray([len(message), MESSAGE_SEND_SEP, message_type])
@@ -99,28 +105,30 @@ def _unpack_message(message: bytearray) -> tuple[int, int, bytearray]:
     message_checksum = message.pop()
     checksum = sum(message) & 0xFF
     if message_checksum != checksum:
-        raise OmnikInverterPacketInvalidError(
-            f"Checksum mismatch (calculated `{checksum}` got `{message_checksum}`)"
-        )
+        msg = f"Checksum mismatch (calculated `{checksum}` got `{message_checksum}`)"
+        raise OmnikInverterPacketInvalidError(msg)
 
     # Now that the checksum has been computed remove the length,
     # separator, message type and repeated serial number
 
     length = message.pop(0)  # Length
     if message.pop(0) != MESSAGE_RECV_SEP:
-        raise OmnikInverterPacketInvalidError("Invalid receiver separator")
+        msg = "Invalid receiver separator"
+        raise OmnikInverterPacketInvalidError(msg)
 
     message_type = message.pop(0)
     LOGGER.debug(
-        "Message type %02x, length %s, checksum %02x", message_type, length, checksum
+        "Message type %02x, length %s, checksum %02x",
+        message_type,
+        length,
+        checksum,
     )
 
     serial0 = int.from_bytes(message[:4], "little")
     serial1 = int.from_bytes(message[4:8], "little")
     if serial0 != serial1:
-        raise OmnikInverterPacketInvalidError(
-            f"Serial number mismatch in reply {serial0} != {serial1}"
-        )
+        msg = f"Serial number mismatch in reply {serial0} != {serial1}"
+        raise OmnikInverterPacketInvalidError(msg)
 
     return (message_type, serial0, message[8:])
 
@@ -134,44 +142,52 @@ def _unpack_messages(
         # text message, there's a bunch of trailing 0xFF garbage
         if message_start == 0xFF:  # pragma: no cover
             if not all(d == 0xFF for d in data):
-                raise OmnikInverterPacketInvalidError(
+                msg = (
                     "(Next) message starts with `0xFF` but the remainder "
                     f"is not strictly 0xFF: {data}"
                 )
+                raise OmnikInverterPacketInvalidError(msg)
             # We're done
             return
 
         if message_start != MESSAGE_START:
-            raise OmnikInverterPacketInvalidError("Invalid start byte")
+            msg = f"Invalid start byte: {message_start}"
+            raise OmnikInverterPacketInvalidError(msg)
 
         length = data[0] + MESSAGE_HEADER_SIZE
 
         message = data[:length]
         if len(message) != length:
-            raise OmnikInverterPacketInvalidError(
+            msg = (
                 f"Could only read {len(message)} out of {length} "
-                "expected bytes from TCP stream",
+                "expected bytes from TCP stream"
             )
+            raise OmnikInverterPacketInvalidError(msg)
 
         yield _unpack_message(message)
 
         # Prepare for the next message by stripping off the end byte
         data = data[length:]
         if data.pop(0) != MESSAGE_END:
-            raise OmnikInverterPacketInvalidError("Invalid end byte")
+            msg = "Invalid end byte"
+            raise OmnikInverterPacketInvalidError(msg)
 
 
 def create_information_request(serial_number: int) -> bytearray:
     """Compute a magic message to which the Omnik will reply with raw statistics.
 
     Args:
+    ----
         serial_number: Integer with the serial number of your Omnik device.
 
     Returns:
+    -------
         A bytearray with the raw message data, to be sent over a TCP socket.
     """
     return _pack_message(
-        MESSAGE_TYPE_INFORMATION_REQUEST, serial_number, bytearray([0x01, 0x00])
+        MESSAGE_TYPE_INFORMATION_REQUEST,
+        serial_number,
+        bytearray([0x01, 0x00]),
     )
 
 
@@ -179,18 +195,20 @@ def parse_messages(serial_number: int, data: bytes) -> dict[str, Any]:
     """Perform a raw TCP request to the Omnik device.
 
     Args:
+    ----
         serial_number: Serial number passed to
             `clk.create_information_request()`, used to validate the reply.
         data: Raw data reply from the Omnik Inverter.
 
     Returns:
+    -------
         A Python dictionary (text) with the response from
         the Omnik Inverter.
 
     Raises:
+    ------
         OmnikInverterPacketInvalidError: Received data fails basic validity checks.
     """
-
     info = None
 
     for message_type, reply_serial_number, message in _unpack_messages(bytearray(data)):
@@ -210,18 +228,19 @@ def parse_messages(serial_number: int, data: bytes) -> dict[str, Any]:
             info = _parse_information_reply(message)
         elif message_type == MESSAGE_TYPE_STRING:  # pragma: no cover
             LOGGER.warning(
-                "Omnik sent text message `%s`", message.decode("utf8").strip()
+                "Omnik sent text message `%s`",
+                message.decode("utf8").strip(),
             )
         else:
-            raise OmnikInverterPacketInvalidError(
+            msg = (
                 f"Unknown Omnik message type {message_type:02x} "
-                f"with contents `{message}`",
+                f"with contents `{message}`"
             )
+            raise OmnikInverterPacketInvalidError(msg)
 
     if info is None:
-        raise OmnikInverterPacketInvalidError(
-            "None of the messages contained an information reply!"
-        )
+        msg = "None of the messages contained an information reply!"
+        raise OmnikInverterPacketInvalidError(msg)
 
     return info
 
@@ -244,7 +263,7 @@ def _parse_information_reply(data: bytes) -> dict[str, Any]:
         if sum(padding):
             LOGGER.warning("Unexpected `%s`: `%s`", name, padding)
 
-    def list_divide_10(integers: list[int]) -> list[Optional[float]]:
+    def list_divide_10(integers: list[int]) -> list[float | None]:
         return [None if v == UINT16_MAX else v * 0.1 for v in integers]
 
     def int_to_bool(num: int) -> bool:
@@ -255,7 +274,7 @@ def _parse_information_reply(data: bytes) -> dict[str, Any]:
 
     # Set temperature to None if it matches 65326, this is returned
     # when the inverter is "offline".
-    def temperature_to_float(temp: int) -> Optional[float]:
+    def temperature_to_float(temp: int) -> float | None:
         return None if temp == 65326 else temp * 0.1
 
     # Only these fields will be extracted from the structure
