@@ -164,6 +164,7 @@ async def test_html_no_auth(aresponses: ResponsesMockServer) -> None:
 @pytest.mark.asyncio
 async def test_timeout(aresponses: ResponsesMockServer) -> None:
     """Test request timeout from Omnik Inverter."""
+
     # Faking a timeout by sleeping
     async def response_handler(_: aiohttp.ClientResponse) -> Response:
         await asyncio.sleep(0.2)

@@ -193,9 +193,7 @@ def parse_messages(serial_number: int, data: bytes) -> dict[str, Any]:
 
     info = None
 
-    for (message_type, reply_serial_number, message) in _unpack_messages(
-        bytearray(data)
-    ):
+    for message_type, reply_serial_number, message in _unpack_messages(bytearray(data)):
         if reply_serial_number != serial_number:  # pragma: no cover
             # This is allowed as it does not seem to be required to pass the serial
             # number in the request - though empirical testing has to point out whether
@@ -279,7 +277,7 @@ def _parse_information_reply(data: bytes) -> dict[str, Any]:
 
     result: dict[str, Any] = {}
 
-    for (name, extractor) in field_extractors.items():
+    for name, extractor in field_extractors.items():
         value = getattr(tcp_data, name)
 
         if name == "ac_output":
