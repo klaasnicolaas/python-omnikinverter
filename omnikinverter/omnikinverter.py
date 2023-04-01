@@ -35,8 +35,6 @@ class OmnikInverter:
 
     _close_session: bool = False
 
-    _socket_mock: None = None
-
     async def request(
         self,
         uri: str,
@@ -139,10 +137,7 @@ class OmnikInverter:
             raise OmnikInverterAuthError(msg)
 
         try:
-            if self._socket_mock is not None:
-                reader, writer = await asyncio.open_connection(sock=self._socket_mock)
-            else:  # pragma: no cover
-                reader, writer = await asyncio.open_connection(self.host, self.tcp_port)
+            reader, writer = await asyncio.open_connection(self.host, self.tcp_port)
         except OSError as exception:
             msg = "Failed to open a TCP connection to the Omnik Inverter device"
             raise OmnikInverterConnectionError(msg) from exception

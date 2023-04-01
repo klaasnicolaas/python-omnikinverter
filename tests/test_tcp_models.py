@@ -1,7 +1,8 @@
 """Test the models from TCP source."""
-import socket
+from collections.abc import Callable, Coroutine
+from socket import socket
+from threading import Thread
 
-import asynctest
 import pytest
 
 from omnikinverter import Device, Inverter, OmnikInverter, tcp
@@ -213,129 +214,144 @@ async def test_tcp_serial_number_unset() -> None:
     assert str(excinfo.value) == "serial_number is missing from the request"
 
 
-class TestTcpWithSocketMock(asynctest.TestCase):  # type: ignore[misc]
-    """Test cases specific to the TCP backend."""
+def tcp_server(
+    serial_number: int,
+    reply: str | Callable[[socket], None],
+) -> tuple[Coroutine[None, None, None], int]:
+    """Run a TCP socket server in a new thread, accepting a single connection."""
+    # Create socket and generate random port
+    sock = socket()
+    sock.bind(("", 0))
+    (_, port) = sock.getsockname()
+    sock.listen(1)
 
-    async def test_inverter_tcp(self) -> None:
-        """Test request from an Inverter - TCP source."""
-        serial_number = 987654321
-        socket_mock = asynctest.SocketMock()
-        socket_mock.type = socket.SOCK_STREAM
+    def worker() -> None:
+        """Accept a single connection and send predefined reply."""
+        (conn, _) = sock.accept()
 
-        def send_side_effect(data: bytes) -> int:
-            assert data == tcp.create_information_request(serial_number)
-            asynctest.set_read_ready(socket_mock, self.loop)
-            return len(data)
+        if isinstance(reply, str):
+            data = conn.recv(1024)
+            req = tcp.create_information_request(serial_number)
+            assert data == req
+            conn.sendall(load_fixture_bytes(reply))
+            conn.close()
+        else:
+            reply(conn)
 
-        def recv_side_effect(_max_bytes: int) -> bytes:
-            return load_fixture_bytes("tcp_reply.data")
+        # Stop the server
+        sock.close()
 
-        socket_mock.send.side_effect = send_side_effect
-        socket_mock.recv.side_effect = recv_side_effect
+    thread = Thread(target=worker)
+    thread.start()
 
-        client = OmnikInverter(
-            host="example.com",
-            source_type="tcp",
-            serial_number=serial_number,
-            _socket_mock=socket_mock,
-        )
+    async def wait_for_server_thread() -> None:
+        thread.join()
 
-        inverter: Inverter = await client.inverter()
+    return (wait_for_server_thread(), port)
 
-        assert inverter
-        assert inverter.solar_rated_power is None
-        assert inverter.solar_current_power == 2615
 
-        assert inverter.model is None
-        assert inverter.serial_number == "NLDN012345CS4321"
-        assert inverter.temperature == 43.1
-        assert inverter.dc_input_voltage == [187.3, 188.9, None]
-        assert inverter.dc_input_current == [8.1, 7.800000000000001, None]
-        assert inverter.ac_output_voltage == [239.60000000000002, None, None]
-        assert inverter.ac_output_current == [10.8, None, None]
-        assert inverter.ac_output_frequency == [50.06, None, None]
-        assert inverter.ac_output_power == [2615.0, None, None]
-        assert inverter.solar_energy_today == 7.4
-        assert inverter.solar_energy_total == 65432.100000000006
-        assert inverter.solar_hours_total == 54321
-        assert inverter.inverter_active is True
-        assert inverter.firmware == "NL1-V1.0-0077-4"
-        assert inverter.firmware_slave == "V2.0-0024"
+async def test_inverter_tcp() -> None:
+    """Test request from an Inverter - TCP source."""
+    serial_number = 987654321
 
-    async def test_inverter_tcp_offline(self) -> None:
-        """Test request from an Inverter (offline) - TCP source."""
-        serial_number = 1608449224
-        socket_mock = asynctest.SocketMock()
-        socket_mock.type = socket.SOCK_STREAM
+    (server_exit, port) = tcp_server(serial_number, "tcp_reply.data")
 
-        def send_side_effect(data: bytes) -> int:
-            assert data == tcp.create_information_request(serial_number)
-            asynctest.set_read_ready(socket_mock, self.loop)
-            return len(data)
+    client = OmnikInverter(
+        host="localhost",
+        source_type="tcp",
+        serial_number=serial_number,
+        tcp_port=port,
+    )
 
-        def recv_side_effect(_max_bytes: int) -> bytes:
-            return load_fixture_bytes("tcp_reply_offline.data")
+    inverter: Inverter = await client.inverter()
 
-        socket_mock.send.side_effect = send_side_effect
-        socket_mock.recv.side_effect = recv_side_effect
+    assert inverter
+    assert inverter.solar_rated_power is None
+    assert inverter.solar_current_power == 2615
 
-        client = OmnikInverter(
-            host="example.com",
-            source_type="tcp",
-            serial_number=serial_number,
-            _socket_mock=socket_mock,
-        )
+    assert inverter.model is None
+    assert inverter.serial_number == "NLDN012345CS4321"
+    assert inverter.temperature == 43.1
+    assert inverter.dc_input_voltage == [187.3, 188.9, None]
+    assert inverter.dc_input_current == [8.1, 7.800000000000001, None]
+    assert inverter.ac_output_voltage == [239.60000000000002, None, None]
+    assert inverter.ac_output_current == [10.8, None, None]
+    assert inverter.ac_output_frequency == [50.06, None, None]
+    assert inverter.ac_output_power == [2615.0, None, None]
+    assert inverter.solar_energy_today == 7.4
+    assert inverter.solar_energy_total == 65432.100000000006
+    assert inverter.solar_hours_total == 54321
+    assert inverter.inverter_active is True
+    assert inverter.firmware == "NL1-V1.0-0077-4"
+    assert inverter.firmware_slave == "V2.0-0024"
 
-        inverter: Inverter = await client.inverter()
+    await server_exit
 
-        assert inverter
-        assert inverter.solar_rated_power is None
-        assert inverter.solar_current_power == 0
 
-        assert inverter.model is None
-        assert inverter.serial_number == "NLBN4020157P9024"
-        assert inverter.temperature is None
-        assert inverter.dc_input_voltage == [0.0, 0.0, 0.0]
-        assert inverter.dc_input_current == [0.0, 0.0, 0.0]
-        assert inverter.ac_output_voltage == [0.0, 0.0, 0.0]
-        assert inverter.ac_output_current == [0.0, 0.0, 0.0]
-        assert inverter.ac_output_frequency == [0.0, 0.0, 0.0]
-        assert inverter.ac_output_power == [0.0, 0.0, 0.0]
-        assert inverter.solar_energy_today == 4.7
-        assert inverter.solar_energy_total == 15818.0
-        assert inverter.solar_hours_total == 0
-        assert inverter.inverter_active is False
-        assert not inverter.firmware
-        assert not inverter.firmware_slave
+async def test_inverter_tcp_offline() -> None:
+    """Test request from an Inverter (offline) - TCP source."""
+    serial_number = 1608449224
 
-    async def test_connection_broken(self) -> None:
-        """Test on connection broken after success - TCP source."""
-        serial_number = 1
-        socket_mock = asynctest.SocketMock()
-        socket_mock.type = socket.SOCK_STREAM
+    (server_exit, port) = tcp_server(serial_number, "tcp_reply_offline.data")
 
-        client = OmnikInverter(
-            host="example.com",
-            source_type="tcp",
-            serial_number=serial_number,
-            _socket_mock=socket_mock,
-        )
+    client = OmnikInverter(
+        host="localhost",
+        source_type="tcp",
+        serial_number=serial_number,
+        tcp_port=port,
+    )
 
-        def send_side_effect(data: bytes) -> int:
-            assert data == tcp.create_information_request(serial_number)
-            asynctest.set_read_ready(socket_mock, self.loop)
-            return len(data)
+    inverter: Inverter = await client.inverter()
 
-        socket_mock.send.side_effect = send_side_effect
-        socket_mock.recv.side_effect = OSError("Connection broken")
+    assert inverter
+    assert inverter.solar_rated_power is None
+    assert inverter.solar_current_power == 0
 
-        with pytest.raises(OmnikInverterConnectionError) as excinfo:
-            assert await client.inverter()
+    assert inverter.model is None
+    assert inverter.serial_number == "NLBN4020157P9024"
+    assert inverter.temperature is None
+    assert inverter.dc_input_voltage == [0.0, 0.0, 0.0]
+    assert inverter.dc_input_current == [0.0, 0.0, 0.0]
+    assert inverter.ac_output_voltage == [0.0, 0.0, 0.0]
+    assert inverter.ac_output_current == [0.0, 0.0, 0.0]
+    assert inverter.ac_output_frequency == [0.0, 0.0, 0.0]
+    assert inverter.ac_output_power == [0.0, 0.0, 0.0]
+    assert inverter.solar_energy_today == 4.7
+    assert inverter.solar_energy_total == 15818.0
+    assert inverter.solar_hours_total == 0
+    assert inverter.inverter_active is False
+    assert not inverter.firmware
+    assert not inverter.firmware_slave
 
-        assert (
-            str(excinfo.value)
-            == "Failed to communicate with the Omnik Inverter device over TCP"
-        )
+    await server_exit
+
+
+async def test_connection_broken() -> None:
+    """Test closed connection after successful handshake - TCP source."""
+    serial_number = 1
+
+    def close_immediately(conn: socket) -> None:
+        """Close the connection immediately without _reading_ nor writing."""
+        conn.close()
+
+    (server_exit, port) = tcp_server(serial_number, close_immediately)
+
+    client = OmnikInverter(
+        host="localhost",
+        source_type="tcp",
+        serial_number=serial_number,
+        tcp_port=port,
+    )
+
+    with pytest.raises(OmnikInverterConnectionError) as excinfo:
+        assert await client.inverter()
+
+    assert (
+        excinfo.value.args[0]
+        == "Failed to communicate with the Omnik Inverter device over TCP"
+    )
+
+    await server_exit
 
 
 async def test_connection_failed() -> None:
