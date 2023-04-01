@@ -324,7 +324,7 @@ class TestTcpWithSocketMock(asynctest.TestCase):  # type: ignore  # noqa
 
         assert (
             str(excinfo.value)
-            == "Failed to close the TCP connection to the Omnik Inverter device"
+            == "Failed to communicate with the Omnik Inverter device over TCP"
         )
 
 

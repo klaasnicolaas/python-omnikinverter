@@ -160,7 +160,7 @@ class OmnikInverter:
             try:
                 await writer.wait_closed()
             except OSError as exception:
-                msg = "Failed to close the TCP connection to the Omnik Inverter device"
+                msg = "Failed to communicate with the Omnik Inverter device over TCP"
                 raise OmnikInverterConnectionError(msg) from exception
 
         return tcp.parse_messages(self.serial_number, raw_msg)
