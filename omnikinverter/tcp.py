@@ -1,12 +1,14 @@
 """Data model and conversions for tcp-based communication with the Omnik Inverter."""
 from __future__ import annotations
 
-from collections.abc import Generator
 from ctypes import BigEndianStructure, c_char, c_ubyte, c_uint, c_ushort
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from .const import LOGGER
 from .exceptions import OmnikInverterPacketInvalidError
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
 
 MESSAGE_START = 0x68
 MESSAGE_END = 0x16
