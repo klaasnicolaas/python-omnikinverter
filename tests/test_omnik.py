@@ -31,7 +31,15 @@ async def test_json_request(aresponses: ResponsesMockServer) -> None:
     async with ClientSession() as session:
         omnik_inverter = OmnikInverter("example.com", session=session)
         await omnik_inverter.request("test")
+        # Should not close external sessions after returning
+        assert not session.closed
+
+        # Session should stay assigned
+        assert session == omnik_inverter.session
+
+        # Neither should close() close the session
         await omnik_inverter.close()
+        assert not session.closed
 
 
 async def test_internal_session(aresponses: ResponsesMockServer) -> None:
@@ -48,6 +56,8 @@ async def test_internal_session(aresponses: ResponsesMockServer) -> None:
     )
     async with OmnikInverter("example.com") as omnik_inverter:
         await omnik_inverter.request("test")
+        # Session was closed and removed
+        assert omnik_inverter.session is None
 
 
 async def test_internal_session_close_while_in_progress(

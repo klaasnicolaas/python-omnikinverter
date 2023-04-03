@@ -70,15 +70,15 @@ class OmnikInverter:
             "Accept": "text/html,application/xhtml+xml,application/xml",
         }
 
-        if self.session is None:
-            self.session = ClientSession()
-            self._close_session = True
-
         if self.source_type == "html" and (
             self.username is None or self.password is None
         ):
             msg = "A username and/or password is missing from the request"
             raise OmnikInverterAuthError(msg)
+
+        if self.session is None:
+            self.session = ClientSession()
+            self._close_session = True
 
         # Use big try to make sure manual session is always cleaned up
         try:
@@ -105,7 +105,7 @@ class OmnikInverter:
 
             raw_response = await response.read()
         finally:
-            if self.session and self._close_session:
+            if self._close_session:
                 await self.session.close()
                 self.session = None
                 self._close_session = False
