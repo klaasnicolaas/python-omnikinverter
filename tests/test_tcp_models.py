@@ -203,7 +203,7 @@ async def test_inverter_tcp_require_information_reply() -> None:
     assert str(excinfo.value) == "None of the messages contained an information reply!"
 
 
-class TestTcpWithSocketMock(asynctest.TestCase):  # type: ignore # noqa: PGH003
+class TestTcpWithSocketMock(asynctest.TestCase):  # type: ignore[unreachable]
     """Test cases specific to the TCP backend."""
 
     async def test_inverter_tcp(self) -> None:
