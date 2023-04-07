@@ -227,7 +227,7 @@ def tcp_server(
     """Run a TCP socket server in a new thread, accepting a single connection."""
     # Create socket and generate random port
     sock = socket()
-    sock.bind(("", 0))
+    sock.bind(("localhost", 0))
     (_, port) = sock.getsockname()
     sock.listen(1)
 
