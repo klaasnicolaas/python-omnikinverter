@@ -182,7 +182,7 @@ async def test_inverter_tcp_require_information_reply() -> None:
     test_message = [
         0,  # Length
         tcp.MESSAGE_RECV_SEP,
-        tcp.MESSAGE_TYPE_STRING,
+        tcp.MESSAGE_TYPE_STRING,  # Only provide a STRING message
         *serial_number_bytes,
     ]
     checksum = sum(test_message) & 0xFF
@@ -193,7 +193,7 @@ async def test_inverter_tcp_require_information_reply() -> None:
             bytearray(
                 [
                     tcp.MESSAGE_START,
-                    *test_message,  # Only contains a STRING message, no INFORMATION_REPLY
+                    *test_message,
                     checksum,
                     tcp.MESSAGE_END,
                 ],
@@ -203,7 +203,7 @@ async def test_inverter_tcp_require_information_reply() -> None:
     assert str(excinfo.value) == "None of the messages contained an information reply!"
 
 
-class TestTcpWithSocketMock(asynctest.TestCase):  # type: ignore
+class TestTcpWithSocketMock(asynctest.TestCase):  # type: ignore[misc]
     """Test cases specific to the TCP backend."""
 
     async def test_inverter_tcp(self) -> None:
@@ -324,7 +324,7 @@ class TestTcpWithSocketMock(asynctest.TestCase):  # type: ignore
 
         assert (
             str(excinfo.value)
-            == "Failed to close the TCP connection to the Omnik Inverter device"
+            == "Failed to communicate with the Omnik Inverter device over TCP"
         )
 
 

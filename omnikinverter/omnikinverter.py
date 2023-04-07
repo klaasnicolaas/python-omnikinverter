@@ -70,17 +70,18 @@ class OmnikInverter:
             "Accept": "text/html,application/xhtml+xml,application/xml",
         }
 
+        if self.source_type == "html" and (
+            self.username is None or self.password is None
+        ):
+            msg = "A username and/or password is missing from the request"
+            raise OmnikInverterAuthError(msg)
+
         if self.session is None:
             self.session = ClientSession()
             self._close_session = True
 
         # Use big try to make sure manual session is always cleaned up
         try:
-            if self.source_type == "html" and (
-                self.username is None or self.password is None
-            ):
-                msg = "A username and/or password is missing from the request"
-                raise OmnikInverterAuthError(msg)
             auth = None
             if self.username and self.password:
                 auth = BasicAuth(self.username, self.password)
@@ -102,22 +103,19 @@ class OmnikInverter:
                 msg = "Error occurred while communicating with Omnik Inverter device"
                 raise OmnikInverterConnectionError(msg) from exception
 
-            types = ["application/json", "application/x-javascript", "text/html"]
-            content_type = response.headers.get("Content-Type", "")
-            if not any(item in content_type for item in types):
-                text = await response.text()
-                msg = "Unexpected response from the Omnik Inverter device"
-                raise OmnikInverterError(
-                    msg,
-                    {"Content-Type": content_type, "response": text},
-                )
-
             raw_response = await response.read()
         finally:
-            if self.session and self._close_session:
-                await self.session.close()
-                self.session = None
-                self._close_session = False
+            await self.close()
+
+        types = ["application/json", "application/x-javascript", "text/html"]
+        content_type = response.headers.get("Content-Type", "")
+        if not any(item in content_type for item in types):
+            text = await response.text()
+            msg = "Unexpected response from the Omnik Inverter device"
+            raise OmnikInverterError(
+                msg,
+                {"Content-Type": content_type, "response": text},
+            )
 
         return raw_response.decode("ascii", "ignore")
 
@@ -159,7 +157,7 @@ class OmnikInverter:
             try:
                 await writer.wait_closed()
             except OSError as exception:
-                msg = "Failed to close the TCP connection to the Omnik Inverter device"
+                msg = "Failed to communicate with the Omnik Inverter device over TCP"
                 raise OmnikInverterConnectionError(msg) from exception
 
         return tcp.parse_messages(self.serial_number, raw_msg)
@@ -222,6 +220,8 @@ class OmnikInverter:
         """Close open client session."""
         if self.session and self._close_session:
             await self.session.close()
+            self.session = None
+            self._close_session = False
 
     async def __aenter__(self) -> OmnikInverter:
         """Async enter.
