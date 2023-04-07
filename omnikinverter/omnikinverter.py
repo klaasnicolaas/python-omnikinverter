@@ -108,7 +108,7 @@ class OmnikInverter:
             if self._close_session:
                 await self.session.close()
                 self.session = None
-                self._close_session = False
+            self._close_session = False
 
         types = ["application/json", "application/x-javascript", "text/html"]
         content_type = response.headers.get("Content-Type", "")
