@@ -1,6 +1,6 @@
 """Test the models from TCP source."""
 from collections.abc import Callable, Coroutine
-from socket import socket
+from socket import SHUT_RDWR, socket
 from threading import Thread
 
 import pytest
@@ -234,6 +234,7 @@ def tcp_server(
             req = tcp.create_information_request(serial_number)
             assert data == req
             conn.sendall(load_fixture_bytes(reply))
+            conn.shutdown(SHUT_RDWR)
             conn.close()
         else:
             reply(conn)
@@ -332,6 +333,7 @@ async def test_connection_broken() -> None:
 
     def close_immediately(conn: socket) -> None:
         """Close the connection immediately without _reading_ nor writing."""
+        conn.shutdown(SHUT_RDWR)
         conn.close()
 
     (server_exit, port) = tcp_server(serial_number, close_immediately)
