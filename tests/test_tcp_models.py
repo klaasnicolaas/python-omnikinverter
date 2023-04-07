@@ -1,7 +1,10 @@
 """Test the models from TCP source."""
-from collections.abc import Callable, Coroutine
+
+from __future__ import annotations
+
 from socket import SHUT_RDWR, socket
 from threading import Thread
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -13,6 +16,9 @@ from omnikinverter.exceptions import (
 )
 
 from . import load_fixture_bytes
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Coroutine
 
 
 async def test_inverter_tcp_start_marker() -> None:
