@@ -105,10 +105,7 @@ class OmnikInverter:
 
             raw_response = await response.read()
         finally:
-            if self._close_session:
-                await self.session.close()
-                self.session = None
-            self._close_session = False
+            await self.close()
 
         types = ["application/json", "application/x-javascript", "text/html"]
         content_type = response.headers.get("Content-Type", "")
@@ -223,6 +220,8 @@ class OmnikInverter:
         """Close open client session."""
         if self.session and self._close_session:
             await self.session.close()
+            self.session = None
+            self._close_session = False
 
     async def __aenter__(self) -> OmnikInverter:
         """Async enter.
