@@ -109,7 +109,7 @@ class OmnikInverter:
 
         types = ["application/json", "application/x-javascript", "text/html"]
         content_type = response.headers.get("Content-Type", "")
-        if content_type.split(";")[0] not in types:
+        if not any(item in content_type for item in types):
             text = await response.text()
             msg = "Unexpected response from the Omnik Inverter device"
             raise OmnikInverterError(
