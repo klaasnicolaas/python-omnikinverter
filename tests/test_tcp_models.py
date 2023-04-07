@@ -6,6 +6,7 @@ import pytest
 
 from omnikinverter import Device, Inverter, OmnikInverter, tcp
 from omnikinverter.exceptions import (
+    OmnikInverterAuthError,
     OmnikInverterConnectionError,
     OmnikInverterPacketInvalidError,
 )
@@ -201,6 +202,15 @@ async def test_inverter_tcp_require_information_reply() -> None:
         )
 
     assert str(excinfo.value) == "None of the messages contained an information reply!"
+
+
+async def test_tcp_serial_number_unset() -> None:
+    """Make sure exception is raised when serial_number is needed but not provided."""
+    client = OmnikInverter(host="example.com", source_type="tcp")
+    with pytest.raises(OmnikInverterAuthError) as excinfo:
+        assert await client.tcp_request()
+
+    assert str(excinfo.value) == "serial_number is missing from the request"
 
 
 class TestTcpWithSocketMock(asynctest.TestCase):  # type: ignore[misc]

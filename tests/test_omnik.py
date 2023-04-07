@@ -29,16 +29,16 @@ async def test_json_request(aresponses: ResponsesMockServer) -> None:
         ),
     )
     async with ClientSession() as session:
-        omnik_inverter = OmnikInverter("example.com", session=session)
-        await omnik_inverter.request("test")
+        client = OmnikInverter("example.com", session=session)
+        await client.request("test")
         # Should not close external sessions after returning
         assert not session.closed
 
         # Session should stay assigned
-        assert session == omnik_inverter.session
+        assert session == client.session
 
         # Neither should close() close the session
-        await omnik_inverter.close()
+        await client.close()
         assert not session.closed
 
 
@@ -243,12 +243,3 @@ async def test_unexpected_response(aresponses: ResponsesMockServer) -> None:
         client = OmnikInverter(host="example.com", session=session)
         with pytest.raises(OmnikInverterError):
             assert await client.request("test")
-
-
-async def test_tcp_serial_number_unset() -> None:
-    """Make sure exception is raised when serial_number is needed but not provided."""
-    client = OmnikInverter(host="example.com", source_type="tcp")
-    with pytest.raises(OmnikInverterAuthError) as excinfo:
-        assert await client.tcp_request()
-
-    assert str(excinfo.value) == "serial_number is missing from the request"
