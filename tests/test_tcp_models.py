@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from socket import SHUT_RDWR, socket
+import struct
+from socket import SHUT_RDWR, SO_LINGER, SOL_SOCKET, socket
 from threading import Thread
 from typing import TYPE_CHECKING
 
@@ -235,10 +236,11 @@ def tcp_server(
         """Accept a single connection and send predefined reply."""
         (conn, _) = sock.accept()
 
+        data = conn.recv(1024)
+        req = tcp.create_information_request(serial_number)
+        assert data == req
+
         if isinstance(reply, str):
-            data = conn.recv(1024)
-            req = tcp.create_information_request(serial_number)
-            assert data == req
             conn.sendall(load_fixture_bytes(reply))
             conn.shutdown(SHUT_RDWR)
             conn.close()
@@ -338,8 +340,16 @@ async def test_connection_broken() -> None:
     serial_number = 1
 
     def close_immediately(conn: socket) -> None:
-        """Close the connection immediately without _reading_ nor writing."""
-        conn.shutdown(SHUT_RDWR)
+        """Close the connection and send RST."""
+        linger_on = 1
+        linger_timeout = 0
+        # Enabling linger with a timeout of 0 causes close() to abort the connection,
+        # forcing "Connection reset by peer" on the client
+        conn.setsockopt(
+            SOL_SOCKET,
+            SO_LINGER,
+            struct.pack("ii", linger_on, linger_timeout),
+        )
         conn.close()
 
     (server_exit, port) = tcp_server(serial_number, close_immediately)
