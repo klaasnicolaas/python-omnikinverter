@@ -1,7 +1,7 @@
 """Data model and conversions for tcp-based communication with the Omnik Inverter."""
 from __future__ import annotations
 
-from ctypes import BigEndianStructure, c_char, c_ubyte, c_uint, c_ushort
+from ctypes import BigEndianStructure, c_char, c_ubyte, c_uint, c_ushort, sizeof
 from typing import TYPE_CHECKING, Any
 
 from .const import LOGGER
@@ -70,6 +70,12 @@ class _TcpData(BigEndianStructure):
         ("padding1", c_ubyte * 4),
         ("unknown0", c_ushort),
         ("padding2", c_ubyte * 10),
+    ]
+
+
+class _TcpFirmwareStrings(BigEndianStructure):
+    _pack_ = 1
+    _fields_ = [
         ("firmware", c_char * 16),
         ("padding3", c_ubyte * 4),
         ("firmware_slave", c_char * 16),
@@ -248,7 +254,20 @@ def parse_messages(serial_number: int, data: bytes) -> dict[str, Any]:
 
 
 def _parse_information_reply(data: bytes) -> dict[str, Any]:
+    if len(data) not in [
+        sizeof(_TcpData),
+        sizeof(_TcpData) + sizeof(_TcpFirmwareStrings),
+    ]:  # pragma: no cover
+        LOGGER.warning(
+            "Unrecognized INFORMATION_REPLY size `%s`, are there extra bytes?",
+            len(data),
+        )
+
     tcp_data = _TcpData.from_buffer_copy(data)
+    tcp_firmware_data = None
+    # Only parse firmware strings if available
+    if len(data) >= sizeof(tcp_data) + sizeof(_TcpFirmwareStrings):
+        tcp_firmware_data = _TcpFirmwareStrings.from_buffer_copy(data, sizeof(tcp_data))
 
     if tcp_data.unknown0 not in [0, UINT16_MAX]:  # pragma: no cover
         LOGGER.warning("Unexpected unknown0 `%s`", tcp_data.unknown0)
@@ -261,8 +280,12 @@ def _parse_information_reply(data: bytes) -> dict[str, Any]:
     # uncovered.
     for idx in range(1, 5):  # pragma: no cover
         name = f"padding{idx}"
-        padding = getattr(tcp_data, name)
-        if sum(padding):
+        padding = getattr(tcp_data, name, None) or getattr(
+            tcp_firmware_data,
+            name,
+            None,
+        )
+        if padding is not None and sum(padding):
             LOGGER.warning("Unexpected `%s`: `%s`", name, padding)
 
     def list_divide_10(integers: list[int]) -> list[float | None]:
@@ -292,8 +315,6 @@ def _parse_information_reply(data: bytes) -> dict[str, Any]:
         "solar_energy_total": 0.1,
         "solar_hours_total": None,
         "inverter_active": int_to_bool,
-        "firmware": None,
-        "firmware_slave": None,
     }
 
     result: dict[str, Any] = {}
@@ -316,5 +337,9 @@ def _parse_information_reply(data: bytes) -> dict[str, Any]:
             value = value.decode(encoding="utf-8")
 
         result[name] = value
+
+    if tcp_firmware_data is not None:
+        for name in ["firmware", "firmware_slave"]:
+            result[name] = getattr(tcp_firmware_data, name)
 
     return result
