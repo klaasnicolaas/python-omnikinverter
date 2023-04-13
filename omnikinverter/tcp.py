@@ -72,6 +72,77 @@ class _TcpData(BigEndianStructure):
         ("padding2", c_ubyte * 10),
     ]
 
+    @classmethod
+    def parse(cls: _TcpData, data: bytes, offset: int = 0) -> dict[str, Any]:
+        tcp_data = cls.from_buffer_copy(data, offset)
+
+        if tcp_data.unknown0 not in [0, UINT16_MAX]:  # pragma: no cover
+            LOGGER.warning("Unexpected unknown0 `%s`", tcp_data.unknown0)
+
+        if tcp_data.padding0 != b"\x81\x02\x01":  # pragma: no cover
+            LOGGER.warning("Unexpected padding0 `%s`", tcp_data.padding0)
+
+        # For all data that's expected to be zero, print it if it's not. Perhaps
+        # there are more interesting fields on different inverters waiting to be
+        # uncovered.
+        for idx in range(1, 3):  # pragma: no cover
+            name = f"padding{idx}"
+            padding = getattr(tcp_data, name)
+            if sum(padding):
+                LOGGER.warning("Unexpected `%s`: `%s`", name, padding)
+
+        def list_divide_10(integers: list[int]) -> list[float | None]:
+            return [None if v == UINT16_MAX else v * 0.1 for v in integers]
+
+        def int_to_bool(num: int) -> bool:
+            return {
+                0: False,
+                1: True,
+            }[num]
+
+        # Set temperature to None if it matches 65326, this is returned
+        # when the inverter is "offline".
+        def temperature_to_float(temp: int) -> float | None:
+            return None if temp == 65326 else temp * 0.1
+
+        # Only these fields will be extracted from the structure
+        field_extractors = {
+            "serial_number": None,
+            "temperature": temperature_to_float,
+            "dc_input_voltage": list_divide_10,
+            "dc_input_current": list_divide_10,
+            "ac_output_current": list_divide_10,
+            "ac_output_voltage": list_divide_10,
+            "ac_output": None,
+            "solar_energy_today": 0.01,
+            "solar_energy_total": 0.1,
+            "solar_hours_total": None,
+            "inverter_active": int_to_bool,
+        }
+
+        result = {}
+
+        for name, extractor in field_extractors.items():
+            value = getattr(tcp_data, name)
+
+            if name == "ac_output":
+                # Flatten the list of frequency+power AC objects
+
+                result["ac_output_frequency"] = [o.get_frequency() for o in value]
+                result["ac_output_power"] = [o.get_power() for o in value]
+                continue
+
+            if isinstance(extractor, float):
+                value *= extractor
+            elif extractor is not None:
+                value = extractor(value)
+            elif isinstance(value, bytes):
+                value = value.decode(encoding="utf-8")
+
+            result[name] = value
+
+        return result
+
 
 class _TcpFirmwareStrings(BigEndianStructure):
     _pack_ = 1
@@ -81,6 +152,17 @@ class _TcpFirmwareStrings(BigEndianStructure):
         ("firmware_slave", c_char * 16),
         ("padding4", c_ubyte * 4),
     ]
+
+    @classmethod
+    def parse(cls: _TcpFirmwareStrings, data: bytes, offset: int = 0) -> dict[str, Any]:
+        tcp_firmware_data = cls.from_buffer_copy(data, offset)
+
+        result = {}
+
+        for name in ["firmware", "firmware_slave"]:
+            result[name] = getattr(tcp_firmware_data, name).decode(encoding="utf-8")
+
+        return result
 
 
 def _pack_message(
@@ -263,83 +345,10 @@ def _parse_information_reply(data: bytes) -> dict[str, Any]:
             len(data),
         )
 
-    tcp_data = _TcpData.from_buffer_copy(data)
-    tcp_firmware_data = None
+    result = _TcpData.parse(data)
+
     # Only parse firmware strings if available
-    if len(data) >= sizeof(tcp_data) + sizeof(_TcpFirmwareStrings):
-        tcp_firmware_data = _TcpFirmwareStrings.from_buffer_copy(data, sizeof(tcp_data))
-
-    if tcp_data.unknown0 not in [0, UINT16_MAX]:  # pragma: no cover
-        LOGGER.warning("Unexpected unknown0 `%s`", tcp_data.unknown0)
-
-    if tcp_data.padding0 != b"\x81\x02\x01":  # pragma: no cover
-        LOGGER.warning("Unexpected padding0 `%s`", tcp_data.padding0)
-
-    # For all data that's expected to be zero, print it if it's not. Perhaps
-    # there are more interesting fields on different inverters waiting to be
-    # uncovered.
-    for idx in range(1, 5):  # pragma: no cover
-        name = f"padding{idx}"
-        padding = getattr(tcp_data, name, None) or getattr(
-            tcp_firmware_data,
-            name,
-            None,
-        )
-        if padding is not None and sum(padding):
-            LOGGER.warning("Unexpected `%s`: `%s`", name, padding)
-
-    def list_divide_10(integers: list[int]) -> list[float | None]:
-        return [None if v == UINT16_MAX else v * 0.1 for v in integers]
-
-    def int_to_bool(num: int) -> bool:
-        return {
-            0: False,
-            1: True,
-        }[num]
-
-    # Set temperature to None if it matches 65326, this is returned
-    # when the inverter is "offline".
-    def temperature_to_float(temp: int) -> float | None:
-        return None if temp == 65326 else temp * 0.1
-
-    # Only these fields will be extracted from the structure
-    field_extractors = {
-        "serial_number": None,
-        "temperature": temperature_to_float,
-        "dc_input_voltage": list_divide_10,
-        "dc_input_current": list_divide_10,
-        "ac_output_current": list_divide_10,
-        "ac_output_voltage": list_divide_10,
-        "ac_output": None,
-        "solar_energy_today": 0.01,
-        "solar_energy_total": 0.1,
-        "solar_hours_total": None,
-        "inverter_active": int_to_bool,
-    }
-
-    result: dict[str, Any] = {}
-
-    for name, extractor in field_extractors.items():
-        value = getattr(tcp_data, name)
-
-        if name == "ac_output":
-            # Flatten the list of frequency+power AC objects
-
-            result["ac_output_frequency"] = [o.get_frequency() for o in value]
-            result["ac_output_power"] = [o.get_power() for o in value]
-            continue
-
-        if isinstance(extractor, float):
-            value *= extractor
-        elif extractor is not None:
-            value = extractor(value)
-        elif isinstance(value, bytes):
-            value = value.decode(encoding="utf-8")
-
-        result[name] = value
-
-    if tcp_firmware_data is not None:
-        for name in ["firmware", "firmware_slave"]:
-            result[name] = getattr(tcp_firmware_data, name)
+    if len(data) >= sizeof(_TcpData) + sizeof(_TcpFirmwareStrings):
+        result.update(_TcpFirmwareStrings.parse(data, sizeof(_TcpData)))
 
     return result
