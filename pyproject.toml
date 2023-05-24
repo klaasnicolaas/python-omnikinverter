@@ -139,6 +139,7 @@ asyncio_mode = "auto"
 select = ["ALL"]
 ignore = [
   "ANN101", # Self... explanatory
+  "ANN102", # cls in classmethods
   "ANN401", # Opinionated warning on disallowing dynamically typed expressions
   "D203", # Conflicts with other rules
   "D213", # Conflicts with other rules
