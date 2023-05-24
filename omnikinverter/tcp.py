@@ -74,6 +74,7 @@ class _TcpData(BigEndianStructure):
 
     @classmethod
     def parse(cls, data: bytes, offset: int = 0) -> dict[str, Any]:
+        """Parse `data` into all fields described by this C structure."""
         tcp_data = cls.from_buffer_copy(data, offset)
 
         if tcp_data.unknown0 not in [0, UINT16_MAX]:  # pragma: no cover
@@ -155,6 +156,7 @@ class _TcpFirmwareStrings(BigEndianStructure):
 
     @classmethod
     def parse(cls, data: bytes, offset: int = 0) -> dict[str, Any]:
+        """Parse `data` into all fields described by this C structure."""
         tcp_firmware_data = cls.from_buffer_copy(data, offset)
 
         result = {}
