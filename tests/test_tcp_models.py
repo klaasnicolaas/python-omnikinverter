@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import struct
+import time
 from socket import SHUT_RDWR, SO_LINGER, SOL_SOCKET, socket
 from threading import Thread
 from typing import TYPE_CHECKING
@@ -403,8 +404,38 @@ async def test_connection_broken() -> None:
         assert await client.inverter()
 
     assert (
-        excinfo.value.args[0]
+        str(excinfo.value)
         == "Failed to communicate with the Omnik Inverter device over TCP"
+    )
+
+    await server_exit
+
+
+async def test_communication_timeout() -> None:
+    """Test on timed out connection attempt - TCP source."""
+    serial_number = 1
+
+    def long_timeout(conn: socket) -> None:
+        """Close the connection and send RST."""
+        time.sleep(0.2)
+        conn.close()
+
+    (server_exit, port) = tcp_server(serial_number, long_timeout)
+
+    client = OmnikInverter(
+        host="localhost",
+        source_type="tcp",
+        serial_number=serial_number,
+        tcp_port=port,
+        request_timeout=0.1,
+    )
+
+    with pytest.raises(OmnikInverterConnectionError) as excinfo:
+        assert await client.inverter()
+
+    assert (
+        str(excinfo.value)
+        == "Timeout occurred while communicating with the Omnik Inverter device"
     )
 
     await server_exit
