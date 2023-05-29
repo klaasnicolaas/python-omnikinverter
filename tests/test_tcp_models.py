@@ -298,6 +298,44 @@ async def test_inverter_tcp() -> None:
     await server_exit
 
 
+async def test_inverter_tcp_no_firmware() -> None:
+    """Test request from an Inverter without firmware reply - TCP source."""
+    serial_number = 987654321
+
+    (server_exit, port) = tcp_server(serial_number, "tcp_reply_no_firmware.data")
+
+    client = OmnikInverter(
+        host="localhost",
+        source_type="tcp",
+        serial_number=serial_number,
+        tcp_port=port,
+    )
+
+    inverter: Inverter = await client.inverter()
+
+    assert inverter
+    assert inverter.solar_rated_power is None
+    assert inverter.solar_current_power == 0
+
+    assert inverter.model is None
+    assert inverter.serial_number == "NLDN202013212035"
+    assert inverter.temperature == 23.400000000000002
+    assert inverter.dc_input_voltage == [118.30000000000001, 0.0, None]
+    assert inverter.dc_input_current == [0.0, 15.100000000000001, None]
+    assert inverter.ac_output_voltage == [224.5, None, None]
+    assert inverter.ac_output_current == [0.1, None, None]
+    assert inverter.ac_output_frequency == [50.02, None, None]
+    assert inverter.ac_output_power == [0, None, None]
+    assert inverter.solar_energy_today == 7.21
+    assert inverter.solar_energy_total == 12861.900000000001
+    assert inverter.solar_hours_total == 30940
+    assert inverter.inverter_active is True
+    assert inverter.firmware is None
+    assert inverter.firmware_slave is None
+
+    await server_exit
+
+
 async def test_inverter_tcp_offline() -> None:
     """Test request from an Inverter (offline) - TCP source."""
     serial_number = 1608449224

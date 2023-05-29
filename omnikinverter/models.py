@@ -14,13 +14,14 @@ class Inverter:
 
     serial_number: str | None
     model: str | None
-    firmware: str | None
-    firmware_slave: str | None
     solar_rated_power: int | None
     solar_current_power: int | None
     solar_energy_today: float | None
     solar_energy_total: float | None
     alarm_code: str | None = None
+
+    firmware: str | None = None
+    firmware_slave: str | None = None
 
     # TCP only
     inverter_active: bool | None = None

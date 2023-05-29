@@ -18,6 +18,7 @@ classifiers = [
     "Natural Language :: English",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
@@ -35,13 +36,13 @@ yarl = ">=1.6.0"
 Changelog = "https://github.com/klaasnicolaas/python-omnikinverter/releases"
 
 [tool.poetry.group.dev.dependencies]
-ruff = ">=0.0.243,<0.0.262"
+ruff = ">=0.0.243,<0.0.271"
 aresponses = "^2.1.6"
 black = ">=22.10,<24.0"
 blacken-docs = "^1.13.0"
 codespell = "^2.2.4"
 coverage = {version = ">=7.2,<8.0", extras = ["toml"]}
-mypy = ">=1.0,<1.3"
+mypy = ">=1.0,<1.4"
 pre-commit = ">=3.2,<4.0"
 pre-commit-hooks = "^4.4.0"
 pylint = "^2.17.1"
@@ -139,6 +140,7 @@ asyncio_mode = "auto"
 select = ["ALL"]
 ignore = [
   "ANN101", # Self... explanatory
+  "ANN102", # cls in classmethods
   "ANN401", # Opinionated warning on disallowing dynamically typed expressions
   "D203", # Conflicts with other rules
   "D213", # Conflicts with other rules

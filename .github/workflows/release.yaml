@@ -1,6 +1,7 @@
 ---
 name: Release
 
+# yamllint disable rule:line-length
 # yamllint disable-line rule:truthy
 on:
   release:
@@ -14,6 +15,9 @@ jobs:
   release:
     name: Releasing to PyPi
     runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      id-token: write
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v3
@@ -24,7 +28,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.DEFAULT_PYTHON }}
-          cache: 'poetry'
+          cache: "poetry"
       - name: 🏗 Install workflow dependencies
         run: |
           poetry config virtualenvs.create true
@@ -39,9 +43,25 @@ jobs:
           poetry version --no-interaction "${version}"
       - name: 🏗 Build package
         run: poetry build --no-interaction
-      - name: 🚀 Publish to PyPi
+      - name: 🚀 Publish package to PyPi
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  tweet:
+    name: 🐦 Tweet the release
+    runs-on: ubuntu-latest
+    needs: release
+    steps:
+      - uses: Eomm/why-don-t-you-tweet@v1
+        with:
+          # GitHub event payload
+          # https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#release
+          tweet-message: |
+            ⬆️ ${{ github.event.release.tag_name }} of ${{ github.event.repository.name }} just released 🎉 #update @klaasnicolaas #python #package #omnik #inverter #release #bot #assistant
+
+            Check out the release notes here: ${{ github.event.release.html_url }}
         env:
-          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
-        run: |
-          poetry config pypi-token.pypi "${PYPI_TOKEN}"
-          poetry publish --no-interaction
+          # Get your tokens from https://developer.twitter.com/apps
+          TWITTER_CONSUMER_API_KEY: ${{ secrets.TWITTER_CONSUMER_API_KEY }}
+          TWITTER_CONSUMER_API_SECRET: ${{ secrets.TWITTER_CONSUMER_API_SECRET }}
+          TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_ACCESS_TOKEN }}
+          TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
