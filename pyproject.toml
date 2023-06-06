@@ -23,7 +23,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 packages = [
-    { include = "omnikinverter" },
+    { include = "omnikinverter", from = "src" },
 ]
 
 [tool.poetry.dependencies]
