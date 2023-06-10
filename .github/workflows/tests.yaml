@@ -27,7 +27,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
-          cache: 'poetry'
+          cache: "poetry"
       - name: 🏗 Install workflow dependencies
         run: |
           poetry config virtualenvs.create true
@@ -59,7 +59,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.DEFAULT_PYTHON }}
-          cache: 'poetry'
+          cache: "poetry"
       - name: 🏗 Install workflow dependencies
         run: |
           poetry config virtualenvs.create true
