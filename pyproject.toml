@@ -11,19 +11,19 @@ repository = "https://github.com/klaasnicolaas/python-omnikinverter"
 documentation = "https://github.com/klaasnicolaas/python-omnikinverter"
 keywords = ["omnik", "inverter", "power", "energy", "async", "client"]
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
-    "Framework :: AsyncIO",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
-    "Natural Language :: English",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3",
-    "Topic :: Software Development :: Libraries :: Python Modules",
+  "Development Status :: 5 - Production/Stable",
+  "Framework :: AsyncIO",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Natural Language :: English",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3",
+  "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 packages = [
-    { include = "omnikinverter", from = "src" },
+  { include = "omnikinverter", from = "src" },
 ]
 
 [tool.poetry.dependencies]
@@ -52,15 +52,13 @@ pytest-cov = "^4.0.0"
 yamllint = "^1.30.0"
 covdefaults = "^2.3.0"
 
-[tool.black]
-target-version = ['py39']
-
-[tool.coverage.paths]
-source = ["omnikinverter"]
-
 [tool.coverage.run]
 plugins = ["covdefaults"]
 source = ["omnikinverter"]
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
 
 [tool.mypy]
 # Specify the target platform details in config, so your developers are
@@ -68,6 +66,9 @@ source = ["omnikinverter"]
 # results.
 platform = "linux"
 python_version = "3.9"
+
+# flake8-mypy expects the two following for sensible formatting
+show_column_numbers = true
 
 # show error messages from unrelated files
 follow_imports = "normal"
@@ -81,8 +82,8 @@ disallow_any_generics = true
 disallow_incomplete_defs = true
 disallow_subclassing_any = true
 disallow_untyped_calls = true
-disallow_untyped_defs = true
 disallow_untyped_decorators = true
+disallow_untyped_defs = true
 no_implicit_optional = true
 no_implicit_reexport = true
 strict_optional = true
@@ -93,44 +94,37 @@ warn_return_any = true
 warn_unused_configs = true
 warn_unused_ignores = true
 
-[tool.pylint.MASTER]
-extension-pkg-whitelist = [
-  "pydantic"
-]
-ignore= [
-  "tests"
-]
-
 [tool.pylint.BASIC]
 good-names = [
-    "_",
-    "ex",
-    "fp",
-    "i",
-    "id",
-    "j",
-    "k",
-    "on",
-    "Run",
-    "T",
+  "_",
+  "ex",
+  "fp",
+  "i",
+  "id",
+  "j",
+  "k",
+  "on",
+  "Run",
+  "T",
+  "vw",
 ]
-
-[tool.pylint.DESIGN]
-max-attributes=20
 
 [tool.pylint."MESSAGES CONTROL"]
 disable= [
-    "too-few-public-methods",
-    "duplicate-code",
-    "format",
-    "unsubscriptable-object",
+  "too-few-public-methods",
+  "duplicate-code",
+  "format",
+  "unsubscriptable-object",
 ]
 
 [tool.pylint.SIMILARITIES]
 ignore-imports = true
 
 [tool.pylint.FORMAT]
-max-line-length=88
+max-line-length = 88
+
+[tool.pylint.DESIGN]
+max-attributes = 20
 
 [tool.pytest.ini_options]
 addopts = "--cov"
@@ -160,5 +154,5 @@ known-first-party = ["omnikinverter"]
 max-complexity = 25
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0"]
