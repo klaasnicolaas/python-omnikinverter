@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from ctypes import BigEndianStructure, c_char, c_ubyte, c_uint, c_ushort, sizeof
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from .const import LOGGER
 from .exceptions import OmnikInverterPacketInvalidError
@@ -28,7 +28,7 @@ MESSAGE_HEADER_SIZE = 3 + 2 * 4 + 1
 
 
 class _AcOutput(BigEndianStructure):
-    _fields_ = [
+    _fields_: ClassVar[list[tuple[str, type[object]]]] = [
         ("frequency", c_ushort),
         ("power", c_ushort),
     ]
@@ -54,7 +54,7 @@ class _AcOutput(BigEndianStructure):
 
 class _TcpData(BigEndianStructure):
     _pack_ = 1
-    _fields_ = [
+    _fields_: ClassVar[list[tuple[str, type[object]]]] = [
         ("padding0", c_char * 3),
         ("serial_number", c_char * 16),
         ("temperature", c_ushort),
@@ -147,7 +147,7 @@ class _TcpData(BigEndianStructure):
 
 class _TcpFirmwareStrings(BigEndianStructure):
     _pack_ = 1
-    _fields_ = [
+    _fields_: ClassVar[list[tuple[str, type[object]]]] = [
         ("firmware", c_char * 16),
         ("padding3", c_ubyte * 4),
         ("firmware_slave", c_char * 16),
