@@ -11,8 +11,7 @@
 [![GitHub Activity][commits-shield]][commits-url]
 [![PyPi Downloads][downloads-shield]][downloads-url]
 [![GitHub Last Commit][last-commit-shield]][commits-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
+[![Open in Dev Containers][devcontainer-shield]][devcontainer]
 
 [![Maintainability][maintainability-shield]][maintainability-url]
 [![Code Coverage][codecov-shield]][codecov-url]
@@ -129,8 +128,14 @@ Thank you for being involved! :heart_eyes:
 
 ## Setting up development environment
 
-This Python project is fully managed using the [Poetry][poetry] dependency
-manager.
+The simplest way to begin is by utilizing the [Dev Container][devcontainer]
+feature of Visual Studio Code or by opening a CodeSpace directly on GitHub.
+By clicking the button below you immediately start a Dev Container in Visual Studio Code.
+
+[![Open in Dev Containers][devcontainer-shield]][devcontainer]
+
+This Python project relies on [Poetry][poetry] as its dependency manager,
+providing comprehensive management and control over project dependencies.
 
 You need at least:
 
@@ -197,6 +202,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
+[energiewacht]: https://www.energiewacht.com/hoofdsite/home/nieuws/omnik-failliet/
+[omnik-inverter]: https://github.com/robbinjanssen/home-assistant-omnik-inverter
+
 <!-- MARKDOWN LINKS & IMAGES -->
 [build-shield]: https://github.com/klaasnicolaas/python-omnikinverter/actions/workflows/tests.yaml/badge.svg
 [build-url]: https://github.com/klaasnicolaas/python-omnikinverter/actions/workflows/tests.yaml
@@ -206,10 +214,10 @@ SOFTWARE.
 [commits-url]: https://github.com/klaasnicolaas/python-omnikinverter/commits/main
 [codecov-shield]: https://codecov.io/gh/klaasnicolaas/python-omnikinverter/branch/main/graph/badge.svg?token=VQTR24YFQ9
 [codecov-url]: https://codecov.io/gh/klaasnicolaas/python-omnikinverter
+[devcontainer-shield]: https://img.shields.io/static/v1?label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode
+[devcontainer]: https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/klaasnicolaas/python-omnikinverter
 [downloads-shield]: https://img.shields.io/pypi/dm/omnikinverter
 [downloads-url]: https://pypistats.org/packages/omnikinverter
-[issues-shield]: https://img.shields.io/github/issues/klaasnicolaas/python-omnikinverter.svg
-[issues-url]: https://github.com/klaasnicolaas/python-omnikinverter/issues
 [license-shield]: https://img.shields.io/github/license/klaasnicolaas/python-omnikinverter.svg
 [last-commit-shield]: https://img.shields.io/github/last-commit/klaasnicolaas/python-omnikinverter.svg
 [maintenance-shield]: https://img.shields.io/maintenance/yes/2023.svg
@@ -220,11 +228,7 @@ SOFTWARE.
 [python-versions-shield]: https://img.shields.io/pypi/pyversions/omnikinverter
 [releases-shield]: https://img.shields.io/github/release/klaasnicolaas/python-omnikinverter.svg
 [releases]: https://github.com/klaasnicolaas/python-omnikinverter/releases
-[stars-shield]: https://img.shields.io/github/stars/klaasnicolaas/python-omnikinverter.svg
-[stars-url]: https://github.com/klaasnicolaas/python-omnikinverter/stargazers
 
-[energiewacht]: https://www.energiewacht.com/hoofdsite/home/nieuws/omnik-failliet/
-[omnik-inverter]: https://github.com/robbinjanssen/home-assistant-omnik-inverter
 [poetry-install]: https://python-poetry.org/docs/#installation
 [poetry]: https://python-poetry.org
 [pre-commit]: https://pre-commit.com
