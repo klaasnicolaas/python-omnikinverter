@@ -4,7 +4,7 @@ from __future__ import annotations
 import asyncio
 import json
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import async_timeout
 from aiohttp import BasicAuth, ClientError, ClientResponseError, ClientSession
@@ -18,6 +18,9 @@ from .exceptions import (
     OmnikInverterError,
 )
 from .models import Device, Inverter
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 
 @dataclass
@@ -226,7 +229,7 @@ class OmnikInverter:
             self.session = None
             self._close_session = False
 
-    async def __aenter__(self) -> OmnikInverter:
+    async def __aenter__(self) -> Self:
         """Async enter.
 
         Returns
@@ -235,7 +238,7 @@ class OmnikInverter:
         """
         return self
 
-    async def __aexit__(self, *_exc_info: str) -> None:
+    async def __aexit__(self, *_exc_info: object) -> None:
         """Async exit.
 
         Args:
