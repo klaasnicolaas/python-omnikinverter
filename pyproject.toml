@@ -38,7 +38,7 @@ Changelog = "https://github.com/klaasnicolaas/python-omnikinverter/releases"
 [tool.poetry.group.dev.dependencies]
 ruff = "0.1.1"
 aresponses = "2.1.6"
-black = "23.10.0"
+black = "23.10.1"
 blacken-docs = "1.16.0"
 codespell = "2.2.6"
 coverage = {version = "7.3.2", extras = ["toml"]}
