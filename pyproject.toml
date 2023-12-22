@@ -36,7 +36,7 @@ yarl = ">=1.6.0"
 Changelog = "https://github.com/klaasnicolaas/python-omnikinverter/releases"
 
 [tool.poetry.group.dev.dependencies]
-ruff = "0.1.8"
+ruff = "0.1.9"
 aresponses = "2.1.6"
 black = "23.12.0"
 blacken-docs = "1.16.0"
