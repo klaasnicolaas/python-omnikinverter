@@ -114,7 +114,7 @@ class Inverter:
                     if search_key in ["webdata_today_e", "webdata_total_e"]:
                         return float(match)
                     return match
-                return None
+                return None  # noqa: TRY300
             except AttributeError as exception:
                 msg = "Your inverter has no data source from a html file."
                 raise OmnikInverterWrongSourceError(msg) from exception
@@ -173,7 +173,7 @@ class Inverter:
                             energy_value = float(matches[position]) / 10
                         return energy_value
                     return matches[position].replace(" ", "")
-                return None
+                return None  # noqa: TRY300
             except AttributeError as exception:
                 msg = "Your inverter has no data source from a javascript file."
                 raise OmnikInverterWrongSourceError(msg) from exception
