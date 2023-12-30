@@ -130,6 +130,7 @@ addopts = "--cov"
 asyncio_mode = "auto"
 
 [tool.ruff]
+target-version = "py311"
 select = ["ALL"]
 ignore = [
   "ANN101", # Self... explanatory

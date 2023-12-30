@@ -4,9 +4,8 @@ from __future__ import annotations
 import asyncio
 import json
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import Any, Self
 
-import async_timeout
 from aiohttp import BasicAuth, ClientError, ClientResponseError, ClientSession
 from aiohttp.hdrs import METH_GET
 from yarl import URL
@@ -18,9 +17,6 @@ from .exceptions import (
     OmnikInverterError,
 )
 from .models import Device, Inverter
-
-if TYPE_CHECKING:
-    from typing_extensions import Self
 
 
 @dataclass
@@ -88,7 +84,7 @@ class OmnikInverter:
                 auth = BasicAuth(self.username, self.password)
 
             try:
-                async with async_timeout.timeout(self.request_timeout):
+                async with asyncio.timeout(self.request_timeout):
                     response = await self.session.request(
                         method,
                         url,
@@ -140,17 +136,17 @@ class OmnikInverter:
             raise OmnikInverterAuthError(msg)
 
         try:
-            async with async_timeout.timeout(self.request_timeout):
+            async with asyncio.timeout(self.request_timeout):
                 reader, writer = await asyncio.open_connection(self.host, self.tcp_port)
-        except OSError as exception:
-            msg = "Failed to open a TCP connection to the Omnik Inverter device"
-            raise OmnikInverterConnectionError(msg) from exception
         except asyncio.TimeoutError as exception:  # pragma: no cover
             msg = "Timeout occurred while connecting to the Omnik Inverter device"
             raise OmnikInverterConnectionError(msg) from exception
+        except OSError as exception:
+            msg = "Failed to open a TCP connection to the Omnik Inverter device"
+            raise OmnikInverterConnectionError(msg) from exception
 
         try:
-            async with async_timeout.timeout(self.request_timeout):
+            async with asyncio.timeout(self.request_timeout):
                 writer.write(tcp.create_information_request(self.serial_number))
                 await writer.drain()
 
