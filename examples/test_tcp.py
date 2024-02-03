@@ -16,7 +16,7 @@ async def main() -> None:
         source_type="tcp",
         serial_number=123456789,
     ) as client:
-        inverter: Inverter = await client.inverter()
+        inverter: Inverter = (await client.perform_request()).inverter()
         # TCP backend (currently?) doesn't provide WiFi module statistics,
         # so we're not querying .device() here.
         print(inverter)

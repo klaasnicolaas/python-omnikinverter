@@ -6,7 +6,7 @@ from .exceptions import (
     OmnikInverterWrongSourceError,
     OmnikInverterWrongValuesError,
 )
-from .models import Device, Inverter
+from .models import Device, Inverter, TcpResponse, WebResponse
 from .omnikinverter import OmnikInverter
 
 __all__ = [
@@ -17,4 +17,6 @@ __all__ = [
     "OmnikInverterConnectionError",
     "OmnikInverterWrongSourceError",
     "OmnikInverterWrongValuesError",
+    "TcpResponse",
+    "WebResponse",
 ]

@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import asyncio
-import json
 from dataclasses import dataclass
 from typing import Any, Self
 
@@ -16,7 +15,7 @@ from .exceptions import (
     OmnikInverterConnectionError,
     OmnikInverterError,
 )
-from .models import Device, Inverter
+from .models import TcpResponse, WebResponse
 
 
 @dataclass
@@ -164,7 +163,7 @@ class OmnikInverter:
 
         return tcp.parse_messages(self.serial_number, raw_msg)
 
-    async def inverter(self) -> Inverter:
+    async def perform_request(self) -> WebResponse | TcpResponse:
         """Get values from your Omnik Inverter.
 
         Returns
@@ -175,48 +174,21 @@ class OmnikInverter:
         ------
             OmnikInverterError: Unknown source type.
         """
-        if self.source_type == "json":
-            data = await self.request("status.json", params={"CMD": "inv_query"})
-            return Inverter.from_json(json.loads(data))
-        if self.source_type == "html":
-            data = await self.request("status.html")
-            return Inverter.from_html(data)
-        if self.source_type == "javascript":
-            data = await self.request("js/status.js")
-            return Inverter.from_js(data)
         if self.source_type == "tcp":
             fields = await self.tcp_request()
-            return Inverter.from_tcp(fields)
+            return TcpResponse(fields)
 
-        msg = f"Unknown source type `{self.source_type}`"
-        raise OmnikInverterError(msg)
-
-    async def device(self) -> Device:
-        """Get values from the device.
-
-        Returns
-        -------
-            A Device data object from the Omnik Inverter. None on the "tcp" source_type.
-
-        Raises
-        ------
-            OmnikInverterError: Unknown source type.
-        """
         if self.source_type == "json":
             data = await self.request("status.json", params={"CMD": "inv_query"})
-            return Device.from_json(json.loads(data))
-        if self.source_type == "html":
+        elif self.source_type == "html":
             data = await self.request("status.html")
-            return Device.from_html(data)
-        if self.source_type == "javascript":
+        elif self.source_type == "javascript":
             data = await self.request("js/status.js")
-            return Device.from_js(data)
-        if self.source_type == "tcp":
-            # None of the fields are available through a TCP data dump.
-            return Device()
+        else:
+            msg = f"Unknown source type `{self.source_type}`"
+            raise OmnikInverterError(msg)
 
-        msg = f"Unknown source type `{self.source_type}`"
-        raise OmnikInverterError(msg)
+        return WebResponse(response_string=data, source_type=self.source_type)
 
     async def close(self) -> None:
         """Close open client session."""

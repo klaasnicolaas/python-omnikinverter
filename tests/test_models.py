@@ -28,7 +28,7 @@ async def test_inverter_js_webdata(aresponses: ResponsesMockServer) -> None:
 
     async with ClientSession() as session:
         client = OmnikInverter(host="example.com", session=session)
-        inverter: Inverter = await client.inverter()
+        inverter: Inverter = (await client.perform_request()).inverter()
         assert inverter
         assert inverter.serial_number == "12345678910"
         assert inverter.firmware == "NL2-V9.8-5931"
@@ -56,7 +56,7 @@ async def test_device_js_webdata(aresponses: ResponsesMockServer) -> None:
 
     async with ClientSession() as session:
         client = OmnikInverter(host="example.com", session=session)
-        device: Device = await client.device()
+        device: Device = (await client.perform_request()).device()
         assert device
         assert device.signal_quality == 96
         assert device.firmware == "H4.01.38Y1.0.09W1.0.08"
@@ -84,7 +84,7 @@ async def test_inverter_html(aresponses: ResponsesMockServer) -> None:
             password="supercool",  # noqa: S106
             session=session,
         )
-        inverter: Inverter = await client.inverter()
+        inverter: Inverter = (await client.perform_request()).inverter()
         assert inverter
         assert inverter.serial_number == "12345678910"
         assert inverter.firmware == "V5.07Build245"
@@ -118,7 +118,7 @@ async def test_device_html(aresponses: ResponsesMockServer) -> None:
             password="supercool",  # noqa: S106
             session=session,
         )
-        device: Device = await client.device()
+        device: Device = (await client.perform_request()).device()
         assert device
         assert device.signal_quality is None
         assert device.firmware == "ME_08_0102_2.03"
@@ -144,7 +144,7 @@ async def test_inverter_without_session(aresponses: ResponsesMockServer) -> None
         username="klaas",
         password="supercool",  # noqa: S106
     )
-    inverter: Inverter = await client.inverter()
+    inverter: Inverter = (await client.perform_request()).inverter()
     assert inverter
     assert inverter.serial_number == "1234567890ABCDE"
     assert inverter.firmware == "001F"
@@ -176,7 +176,7 @@ async def test_device_without_session(aresponses: ResponsesMockServer) -> None:
         username="klaas",
         password="supercool",  # noqa: S106
     )
-    device: Device = await client.device()
+    device: Device = (await client.perform_request()).device()
     assert device
     assert device.signal_quality == 96
     assert device.firmware == "MW_08_512_0501_1.82"
@@ -198,7 +198,7 @@ async def test_inverter_js_devicearray(aresponses: ResponsesMockServer) -> None:
 
     async with ClientSession() as session:
         client = OmnikInverter(host="example.com", session=session)
-        inverter: Inverter = await client.inverter()
+        inverter: Inverter = (await client.perform_request()).inverter()
         assert inverter
         assert inverter.serial_number == "12345678910"
         assert inverter.firmware == "V4.08Build215"
@@ -227,7 +227,7 @@ async def test_inverter_js_devicearray_sofar2200tl(
 
     async with ClientSession() as session:
         client = OmnikInverter(host="example.com", session=session)
-        inverter: Inverter = await client.inverter()
+        inverter: Inverter = (await client.perform_request()).inverter()
         assert inverter
         assert inverter.serial_number == "1234567890"
         assert inverter.firmware == "V450"
@@ -254,7 +254,7 @@ async def test_device_js_devicearray(aresponses: ResponsesMockServer) -> None:
 
     async with ClientSession() as session:
         client = OmnikInverter(host="example.com", session=session)
-        device: Device = await client.device()
+        device: Device = (await client.perform_request()).device()
         assert device
         assert device.signal_quality == 39
         assert device.firmware == "H4.01.51MW.2.01W1.0.64(2018-01-251-D)"
@@ -276,7 +276,7 @@ async def test_inverter_json(aresponses: ResponsesMockServer) -> None:
 
     async with ClientSession() as session:
         client = OmnikInverter(host="example.com", source_type="json", session=session)
-        inverter: Inverter = await client.inverter()
+        inverter: Inverter = (await client.perform_request()).inverter()
         assert inverter
         assert inverter.serial_number is None
         assert inverter.firmware == "V1.25Build23261"
@@ -304,7 +304,7 @@ async def test_device_json(aresponses: ResponsesMockServer) -> None:
 
     async with ClientSession() as session:
         client = OmnikInverter(host="example.com", source_type="json", session=session)
-        device: Device = await client.device()
+        device: Device = (await client.perform_request()).device()
         assert device
         assert device.signal_quality is None
         assert device.firmware == "ME-111001-V1.0.6(2015-10-16)"
@@ -327,14 +327,14 @@ async def test_wrong_values(aresponses: ResponsesMockServer) -> None:
     async with ClientSession() as session:
         client = OmnikInverter(host="example.com", source_type="json", session=session)
         with pytest.raises(OmnikInverterWrongValuesError):
-            assert await client.inverter()
+            assert (await client.perform_request()).inverter()
 
 
 async def test_inverter_unknown_source_type() -> None:
     """Test exception on wrong source type."""
     client = OmnikInverter(host="example.com", source_type="blah")
     with pytest.raises(OmnikInverterError) as excinfo:
-        assert await client.inverter()
+        assert (await client.perform_request()).inverter()
 
     assert str(excinfo.value) == "Unknown source type `blah`"
 
@@ -343,6 +343,6 @@ async def test_device_unknown_source_type() -> None:
     """Test exception on wrong source type."""
     client = OmnikInverter(host="example.com", source_type="blah")
     with pytest.raises(OmnikInverterError) as excinfo:
-        assert await client.device()
+        assert (await client.perform_request()).device()
 
     assert str(excinfo.value) == "Unknown source type `blah`"
