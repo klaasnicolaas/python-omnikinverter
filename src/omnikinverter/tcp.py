@@ -39,6 +39,7 @@ class _AcOutput(BigEndianStructure):
         Returns
         -------
             The power field, or None if it is unset.
+
         """
         return None if self.power == UINT16_MAX else self.power
 
@@ -48,6 +49,7 @@ class _AcOutput(BigEndianStructure):
         Returns
         -------
             The frequency field in Hertz, or None if it is unset.
+
         """
         return None if self.frequency == UINT16_MAX else self.frequency * 0.01
 
@@ -275,6 +277,7 @@ def create_information_request(serial_number: int) -> bytearray:
     Returns:
     -------
         A bytearray with the raw message data, to be sent over a TCP socket.
+
     """
     return _pack_message(
         MESSAGE_TYPE_INFORMATION_REQUEST,
@@ -300,6 +303,7 @@ def parse_messages(serial_number: int, data: bytes) -> dict[str, Any]:
     Raises:
     ------
         OmnikInverterPacketInvalidError: Received data fails basic validity checks.
+
     """
     info = None
 

@@ -60,6 +60,7 @@ class OmnikInverter:
                 with the Omnik Inverter.
             OmnikInverterAuthError: Authentication failed with the Omnik Inverter.
             OmnikInverterError: Received an unexpected response from the Omnik Inverter.
+
         """
         url = URL.build(scheme="http", host=self.host, path="/").join(URL(uri))
 
@@ -93,7 +94,7 @@ class OmnikInverter:
                         headers=headers,
                     )
                     response.raise_for_status()
-            except asyncio.TimeoutError as exception:
+            except TimeoutError as exception:
                 msg = "Timeout occurred while connecting to Omnik Inverter device"
                 raise OmnikInverterConnectionError(msg) from exception
             except (ClientError, ClientResponseError) as exception:
@@ -130,6 +131,7 @@ class OmnikInverter:
                 with the Omnik Inverter.
             OmnikInverterConnectionError: An error occurred while communicating
                 with the Omnik Inverter.
+
         """
         if self.serial_number is None:
             msg = "serial_number is missing from the request"
@@ -138,7 +140,7 @@ class OmnikInverter:
         try:
             async with asyncio.timeout(self.request_timeout):
                 reader, writer = await asyncio.open_connection(self.host, self.tcp_port)
-        except asyncio.TimeoutError as exception:  # pragma: no cover
+        except TimeoutError as exception:  # pragma: no cover
             msg = "Timeout occurred while connecting to the Omnik Inverter device"
             raise OmnikInverterConnectionError(msg) from exception
         except OSError as exception:
@@ -151,7 +153,7 @@ class OmnikInverter:
                 await writer.drain()
 
                 raw_msg = await reader.read(1024)
-        except asyncio.TimeoutError as exception:
+        except TimeoutError as exception:
             msg = "Timeout occurred while communicating with the Omnik Inverter device"
             raise OmnikInverterConnectionError(msg) from exception
         finally:
@@ -174,6 +176,7 @@ class OmnikInverter:
         Raises
         ------
             OmnikInverterError: Unknown source type.
+
         """
         if self.source_type == "json":
             data = await self.request("status.json", params={"CMD": "inv_query"})
@@ -201,6 +204,7 @@ class OmnikInverter:
         Raises
         ------
             OmnikInverterError: Unknown source type.
+
         """
         if self.source_type == "json":
             data = await self.request("status.json", params={"CMD": "inv_query"})
@@ -231,6 +235,7 @@ class OmnikInverter:
         Returns
         -------
             The Omnik Inverter object.
+
         """
         return self
 
@@ -240,5 +245,6 @@ class OmnikInverter:
         Args:
         ----
             _exc_info: Exec type.
+
         """
         await self.close()
