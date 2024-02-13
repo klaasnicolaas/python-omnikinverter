@@ -53,6 +53,7 @@ class Inverter:
         ------
             OmnikInverterWrongValuesError: Inverter pass on
                 incorrect data (day and total are equal).
+
         """
 
         def get_value(search: str) -> Any:
@@ -70,6 +71,7 @@ class Inverter:
             Returns:
             -------
                 Boolean value.
+
             """
             return all(ele == data_list[0] for ele in data_list)
 
@@ -100,6 +102,7 @@ class Inverter:
         Returns:
         -------
             An Inverter object.
+
         """
 
         def get_value(search_key: str) -> Any:
@@ -142,6 +145,7 @@ class Inverter:
         Returns:
         -------
             An Inverter object.
+
         """
 
         def get_value(position: int) -> Any:
@@ -201,6 +205,7 @@ class Inverter:
         Returns:
         -------
             An Inverter object.
+
         """
         return Inverter(
             **data,
@@ -231,6 +236,7 @@ class Device:
         Returns:
         -------
             An Device object.
+
         """
         return Device(
             signal_quality=None,
@@ -249,6 +255,7 @@ class Device:
         Returns:
         -------
             An Device object.
+
         """
         for correction in [" ", "%"]:
             data = data.replace(correction, "")
@@ -282,6 +289,7 @@ class Device:
         Returns:
         -------
             An Device object.
+
         """
         for correction in [" ", "%"]:
             data = data.replace(correction, "")
