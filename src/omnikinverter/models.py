@@ -1,4 +1,5 @@
 """Models for Omnik Inverter."""
+
 from __future__ import annotations
 
 import re

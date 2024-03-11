@@ -1,4 +1,5 @@
 """Testing functionality for the Omnik Inverter device."""
+
 from pathlib import Path
 
 
