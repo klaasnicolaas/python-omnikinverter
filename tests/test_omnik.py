@@ -1,4 +1,5 @@
 """Basic tests for the Omnik Inverter device."""
+
 import asyncio
 from unittest.mock import patch
 
@@ -207,11 +208,14 @@ async def test_client_error() -> None:
     """Test request client error from Omnik Inverter."""
     async with ClientSession() as session:
         client = OmnikInverter(host="example.com", session=session)
-        with patch.object(
-            session,
-            "request",
-            side_effect=ClientError,
-        ), pytest.raises(OmnikInverterConnectionError):
+        with (
+            patch.object(
+                session,
+                "request",
+                side_effect=ClientError,
+            ),
+            pytest.raises(OmnikInverterConnectionError),
+        ):
             assert await client.request("test")
 
 

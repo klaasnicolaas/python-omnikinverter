@@ -1,4 +1,5 @@
 """Data model and conversions for tcp-based communication with the Omnik Inverter."""
+
 from __future__ import annotations
 
 from ctypes import BigEndianStructure, c_char, c_ubyte, c_uint, c_ushort, sizeof

@@ -1,4 +1,5 @@
 """Asynchronous Python client for the Omnik Inverter."""
+
 from __future__ import annotations
 
 import asyncio
