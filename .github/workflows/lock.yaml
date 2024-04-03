@@ -4,13 +4,17 @@ name: Lock
 # yamllint disable-line rule:truthy
 on:
   schedule:
-    - cron: "0 17 * * *"
+    - cron: "0 8 * * *"
   workflow_dispatch:
 
 jobs:
   lock:
     name: 🔒 Lock closed issues and PRs
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+      discussions: write
     steps:
       - uses: dessant/lock-threads@v5.0.1
         with:
