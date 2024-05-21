@@ -150,6 +150,7 @@ class Inverter:
         """
 
         def get_value(position: int) -> Any:
+            energy_value: float
             try:
                 if data.find("webData") != -1:
                     matches = (
