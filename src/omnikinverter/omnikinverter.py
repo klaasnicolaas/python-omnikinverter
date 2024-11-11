@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 from dataclasses import dataclass
+from importlib import metadata
 from typing import Any, Self
 
 from aiohttp import BasicAuth, ClientError, ClientResponseError, ClientSession
@@ -18,6 +19,8 @@ from .exceptions import (
     OmnikInverterError,
 )
 from .models import Device, Inverter
+
+VERSION = metadata.version(__package__)
 
 
 @dataclass
@@ -67,6 +70,7 @@ class OmnikInverter:
 
         headers = {
             "Accept": "text/html,application/xhtml+xml,application/xml",
+            "User-Agent": f"PythonOmnikInverter/{VERSION}",
         }
 
         if self.source_type == "html" and (
