@@ -3,6 +3,7 @@
 import pytest
 from aiohttp import ClientSession
 from aresponses import ResponsesMockServer
+from syrupy.assertion import SnapshotAssertion
 
 from omnikinverter import Device, Inverter, OmnikInverter
 from omnikinverter.exceptions import (
@@ -13,7 +14,9 @@ from omnikinverter.exceptions import (
 from . import load_fixtures
 
 
-async def test_inverter_js_webdata(aresponses: ResponsesMockServer) -> None:
+async def test_inverter_js_webdata(
+    aresponses: ResponsesMockServer, snapshot: SnapshotAssertion
+) -> None:
     """Test request from an Inverter - JS Webdata source."""
     aresponses.add(
         "example.com",
@@ -29,19 +32,12 @@ async def test_inverter_js_webdata(aresponses: ResponsesMockServer) -> None:
     async with ClientSession() as session:
         client = OmnikInverter(host="example.com", session=session)
         inverter: Inverter = await client.inverter()
-        assert inverter
-        assert inverter.serial_number == "12345678910"
-        assert inverter.firmware == "NL2-V9.8-5931"
-        assert inverter.firmware_slave == "V5.3-00157"
-        assert inverter.model == "omnik4000tl2"
-        assert inverter.alarm_code == "F13"
-        assert inverter.solar_rated_power == 4000
-        assert inverter.solar_current_power == 140
-        assert inverter.solar_energy_today == 0.3
-        assert inverter.solar_energy_total == 15363.7
+        assert inverter == snapshot
 
 
-async def test_device_js_webdata(aresponses: ResponsesMockServer) -> None:
+async def test_device_js_webdata(
+    aresponses: ResponsesMockServer, snapshot: SnapshotAssertion
+) -> None:
     """Test request from a Device - JS Webdata source."""
     aresponses.add(
         "example.com",
@@ -57,13 +53,12 @@ async def test_device_js_webdata(aresponses: ResponsesMockServer) -> None:
     async with ClientSession() as session:
         client = OmnikInverter(host="example.com", session=session)
         device: Device = await client.device()
-        assert device
-        assert device.signal_quality == 96
-        assert device.firmware == "H4.01.38Y1.0.09W1.0.08"
-        assert device.ip_address == "192.168.0.10"
+        assert device == snapshot
 
 
-async def test_inverter_html(aresponses: ResponsesMockServer) -> None:
+async def test_inverter_html(
+    aresponses: ResponsesMockServer, snapshot: SnapshotAssertion
+) -> None:
     """Test request from an Inverter - HTML source."""
     aresponses.add(
         "example.com",
@@ -85,19 +80,12 @@ async def test_inverter_html(aresponses: ResponsesMockServer) -> None:
             session=session,
         )
         inverter: Inverter = await client.inverter()
-        assert inverter
-        assert inverter.serial_number == "12345678910"
-        assert inverter.firmware == "V5.07Build245"
-        assert inverter.firmware_slave is None
-        assert inverter.model == "Omnik2500tl"
-        assert inverter.alarm_code == "F13"
-        assert inverter.solar_rated_power == 2500
-        assert inverter.solar_current_power == 219
-        assert inverter.solar_energy_today == 0.23
-        assert inverter.solar_energy_total == 6454.5
+        assert inverter == snapshot
 
 
-async def test_device_html(aresponses: ResponsesMockServer) -> None:
+async def test_device_html(
+    aresponses: ResponsesMockServer, snapshot: SnapshotAssertion
+) -> None:
     """Test request from a Device - HTML source."""
     aresponses.add(
         "example.com",
@@ -119,13 +107,12 @@ async def test_device_html(aresponses: ResponsesMockServer) -> None:
             session=session,
         )
         device: Device = await client.device()
-        assert device
-        assert device.signal_quality is None
-        assert device.firmware == "ME_08_0102_2.03"
-        assert device.ip_address == "192.168.0.106"
+        assert device == snapshot
 
 
-async def test_inverter_without_session(aresponses: ResponsesMockServer) -> None:
+async def test_inverter_without_session(
+    aresponses: ResponsesMockServer, snapshot: SnapshotAssertion
+) -> None:
     """Test request from an Inverter - HTML source and without session."""
     aresponses.add(
         "example.com",
@@ -145,19 +132,12 @@ async def test_inverter_without_session(aresponses: ResponsesMockServer) -> None
         password="supercool",  # noqa: S106
     )
     inverter: Inverter = await client.inverter()
-    assert inverter
-    assert inverter.serial_number == "1234567890ABCDE"
-    assert inverter.firmware == "001F"
-    assert inverter.firmware_slave == "002F"
-    assert inverter.model == "0079"
-    assert inverter.alarm_code is None
-    assert inverter.solar_rated_power is None
-    assert inverter.solar_current_power == 5850
-    assert inverter.solar_energy_today == 9.80
-    assert inverter.solar_energy_total == 44.0
+    assert inverter == snapshot
 
 
-async def test_device_without_session(aresponses: ResponsesMockServer) -> None:
+async def test_device_without_session(
+    aresponses: ResponsesMockServer, snapshot: SnapshotAssertion
+) -> None:
     """Test request from a Device - HTML source and without session."""
     aresponses.add(
         "example.com",
@@ -177,13 +157,12 @@ async def test_device_without_session(aresponses: ResponsesMockServer) -> None:
         password="supercool",  # noqa: S106
     )
     device: Device = await client.device()
-    assert device
-    assert device.signal_quality == 96
-    assert device.firmware == "MW_08_512_0501_1.82"
-    assert device.ip_address == "192.168.178.3"
+    assert device == snapshot
 
 
-async def test_inverter_js_devicearray(aresponses: ResponsesMockServer) -> None:
+async def test_inverter_js_devicearray(
+    aresponses: ResponsesMockServer, snapshot: SnapshotAssertion
+) -> None:
     """Test request from an Inverter - JS DeviceArray source."""
     aresponses.add(
         "example.com",
@@ -199,19 +178,12 @@ async def test_inverter_js_devicearray(aresponses: ResponsesMockServer) -> None:
     async with ClientSession() as session:
         client = OmnikInverter(host="example.com", session=session)
         inverter: Inverter = await client.inverter()
-        assert inverter
-        assert inverter.serial_number == "12345678910"
-        assert inverter.firmware == "V4.08Build215"
-        assert inverter.firmware_slave == "V4.12Build246"
-        assert inverter.model == "Omnik1500tl"
-        assert inverter.solar_rated_power is None
-        assert inverter.solar_current_power == 850
-        assert inverter.solar_energy_today == 2.32
-        assert inverter.solar_energy_total == 5200.2
+        assert inverter == snapshot
 
 
 async def test_inverter_js_devicearray_sofar2200tl(
     aresponses: ResponsesMockServer,
+    snapshot: SnapshotAssertion,
 ) -> None:
     """Test request from an SOFAR 2200TL Inverter - JS DeviceArray source."""
     aresponses.add(
@@ -228,18 +200,12 @@ async def test_inverter_js_devicearray_sofar2200tl(
     async with ClientSession() as session:
         client = OmnikInverter(host="example.com", session=session)
         inverter: Inverter = await client.inverter()
-        assert inverter
-        assert inverter.serial_number == "1234567890"
-        assert inverter.firmware == "V450"
-        assert inverter.firmware_slave is None
-        assert inverter.model == "SOFAR2200TL"
-        assert inverter.solar_rated_power == 2000
-        assert inverter.solar_current_power == 400
-        assert inverter.solar_energy_today == 5.67
-        assert inverter.solar_energy_total == 12307.0
+        assert inverter == snapshot
 
 
-async def test_device_js_devicearray(aresponses: ResponsesMockServer) -> None:
+async def test_device_js_devicearray(
+    aresponses: ResponsesMockServer, snapshot: SnapshotAssertion
+) -> None:
     """Test request from a Device - JS DeviceArray source."""
     aresponses.add(
         "example.com",
@@ -255,13 +221,12 @@ async def test_device_js_devicearray(aresponses: ResponsesMockServer) -> None:
     async with ClientSession() as session:
         client = OmnikInverter(host="example.com", session=session)
         device: Device = await client.device()
-        assert device
-        assert device.signal_quality == 39
-        assert device.firmware == "H4.01.51MW.2.01W1.0.64(2018-01-251-D)"
-        assert device.ip_address is None
+        assert device == snapshot
 
 
-async def test_inverter_json(aresponses: ResponsesMockServer) -> None:
+async def test_inverter_json(
+    aresponses: ResponsesMockServer, snapshot: SnapshotAssertion
+) -> None:
     """Test request from an Inverter - JSON source."""
     aresponses.add(
         "example.com",
@@ -277,19 +242,12 @@ async def test_inverter_json(aresponses: ResponsesMockServer) -> None:
     async with ClientSession() as session:
         client = OmnikInverter(host="example.com", source_type="json", session=session)
         inverter: Inverter = await client.inverter()
-        assert inverter
-        assert inverter.serial_number is None
-        assert inverter.firmware == "V1.25Build23261"
-        assert inverter.firmware_slave == "V1.40Build52927"
-        assert inverter.model == "omnik2000tl2"
-        assert inverter.alarm_code == "F23"
-        assert inverter.solar_rated_power == 2000
-        assert inverter.solar_current_power == 1225
-        assert inverter.solar_energy_today == 10.90
-        assert inverter.solar_energy_total == 8674.0
+        assert inverter == snapshot
 
 
-async def test_device_json(aresponses: ResponsesMockServer) -> None:
+async def test_device_json(
+    aresponses: ResponsesMockServer, snapshot: SnapshotAssertion
+) -> None:
     """Test request from a Device - JSON source."""
     aresponses.add(
         "example.com",
@@ -305,10 +263,7 @@ async def test_device_json(aresponses: ResponsesMockServer) -> None:
     async with ClientSession() as session:
         client = OmnikInverter(host="example.com", source_type="json", session=session)
         device: Device = await client.device()
-        assert device
-        assert device.signal_quality is None
-        assert device.firmware == "ME-111001-V1.0.6(2015-10-16)"
-        assert device.ip_address == "192.168.0.10"
+        assert device == snapshot
 
 
 async def test_wrong_values(aresponses: ResponsesMockServer) -> None:

@@ -1,0 +1,34 @@
+# serializer version: 1
+# name: test_device_html
+  Device(signal_quality=None, firmware='ME_08_0102_2.03', ip_address='192.168.0.106')
+# ---
+# name: test_device_js_devicearray
+  Device(signal_quality=39, firmware='H4.01.51MW.2.01W1.0.64(2018-01-251-D)', ip_address=None)
+# ---
+# name: test_device_js_webdata
+  Device(signal_quality=96, firmware='H4.01.38Y1.0.09W1.0.08', ip_address='192.168.0.10')
+# ---
+# name: test_device_json
+  Device(signal_quality=None, firmware='ME-111001-V1.0.6(2015-10-16)', ip_address='192.168.0.10')
+# ---
+# name: test_device_without_session
+  Device(signal_quality=96, firmware='MW_08_512_0501_1.82', ip_address='192.168.178.3')
+# ---
+# name: test_inverter_html
+  Inverter(serial_number='12345678910', model='Omnik2500tl', solar_rated_power=2500, solar_current_power=219, solar_energy_today=0.23, solar_energy_total=6454.5, alarm_code='F13', firmware='V5.07Build245', firmware_slave=None, inverter_active=None, solar_hours_total=None, temperature=None, dc_input_voltage=None, dc_input_current=None, ac_output_voltage=None, ac_output_current=None, ac_output_frequency=None, ac_output_power=None)
+# ---
+# name: test_inverter_js_devicearray
+  Inverter(serial_number='12345678910', model='Omnik1500tl', solar_rated_power=None, solar_current_power=850, solar_energy_today=2.32, solar_energy_total=5200.2, alarm_code=None, firmware='V4.08Build215', firmware_slave='V4.12Build246', inverter_active=None, solar_hours_total=None, temperature=None, dc_input_voltage=None, dc_input_current=None, ac_output_voltage=None, ac_output_current=None, ac_output_frequency=None, ac_output_power=None)
+# ---
+# name: test_inverter_js_devicearray_sofar2200tl
+  Inverter(serial_number='1234567890', model='SOFAR2200TL', solar_rated_power=2000, solar_current_power=400, solar_energy_today=5.67, solar_energy_total=12307.0, alarm_code=None, firmware='V450', firmware_slave=None, inverter_active=None, solar_hours_total=None, temperature=None, dc_input_voltage=None, dc_input_current=None, ac_output_voltage=None, ac_output_current=None, ac_output_frequency=None, ac_output_power=None)
+# ---
+# name: test_inverter_js_webdata
+  Inverter(serial_number='12345678910', model='omnik4000tl2', solar_rated_power=4000, solar_current_power=140, solar_energy_today=0.3, solar_energy_total=15363.7, alarm_code='F13', firmware='NL2-V9.8-5931', firmware_slave='V5.3-00157', inverter_active=None, solar_hours_total=None, temperature=None, dc_input_voltage=None, dc_input_current=None, ac_output_voltage=None, ac_output_current=None, ac_output_frequency=None, ac_output_power=None)
+# ---
+# name: test_inverter_json
+  Inverter(serial_number=None, model='omnik2000tl2', solar_rated_power=2000, solar_current_power=1225, solar_energy_today=10.9, solar_energy_total=8674.0, alarm_code='F23', firmware='V1.25Build23261', firmware_slave='V1.40Build52927', inverter_active=None, solar_hours_total=None, temperature=None, dc_input_voltage=None, dc_input_current=None, ac_output_voltage=None, ac_output_current=None, ac_output_frequency=None, ac_output_power=None)
+# ---
+# name: test_inverter_without_session
+  Inverter(serial_number='1234567890ABCDE', model='0079', solar_rated_power=None, solar_current_power=5850, solar_energy_today=9.8, solar_energy_total=44.0, alarm_code=None, firmware='001F', firmware_slave='002F', inverter_active=None, solar_hours_total=None, temperature=None, dc_input_voltage=None, dc_input_current=None, ac_output_voltage=None, ac_output_current=None, ac_output_frequency=None, ac_output_power=None)
+# ---
