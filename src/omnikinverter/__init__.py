@@ -13,8 +13,8 @@ __all__ = [
     "Device",
     "Inverter",
     "OmnikInverter",
-    "OmnikInverterError",
     "OmnikInverterConnectionError",
+    "OmnikInverterError",
     "OmnikInverterWrongSourceError",
     "OmnikInverterWrongValuesError",
 ]
