@@ -29,7 +29,7 @@ MESSAGE_HEADER_SIZE = 3 + 2 * 4 + 1
 
 
 class _AcOutput(BigEndianStructure):
-    _fields_: ClassVar[list[tuple[str, type[object]]]] = [
+    _fields_: ClassVar = [
         ("frequency", c_ushort),
         ("power", c_ushort),
     ]
@@ -57,7 +57,7 @@ class _AcOutput(BigEndianStructure):
 
 class _TcpData(BigEndianStructure):
     _pack_ = 1
-    _fields_: ClassVar[list[tuple[str, type[object]]]] = [
+    _fields_: ClassVar = [
         ("padding0", c_char * 3),
         ("serial_number", c_char * 16),
         ("temperature", c_ushort),
@@ -150,7 +150,7 @@ class _TcpData(BigEndianStructure):
 
 class _TcpFirmwareStrings(BigEndianStructure):
     _pack_ = 1
-    _fields_: ClassVar[list[tuple[str, type[object]]]] = [
+    _fields_: ClassVar = [
         ("firmware", c_char * 16),
         ("padding3", c_ubyte * 4),
         ("firmware_slave", c_char * 16),
