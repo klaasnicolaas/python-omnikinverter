@@ -109,7 +109,7 @@ class Inverter:
         def get_value(search_key: str) -> Any:
             try:
                 match = cast(
-                    re.Match[str],
+                    "re.Match[str]",
                     re.search(f'(?<={search_key}=").*?(?=";)', data.replace(" ", "")),
                 ).group(0)
                 if match:
@@ -154,14 +154,16 @@ class Inverter:
             try:
                 if data.find("webData") != -1:
                     matches = (
-                        cast(re.Match[str], re.search(r'(?<=webData=").*?(?=";)', data))
+                        cast(
+                            "re.Match[str]", re.search(r'(?<=webData=").*?(?=";)', data)
+                        )
                         .group(0)
                         .split(",")
                     )
                 else:
                     matches = (
                         cast(
-                            re.Match[str],
+                            "re.Match[str]",
                             re.search(r'(?<=myDeviceArray\[0\]=").*?(?=";)', data),
                         )
                         .group(0)
@@ -264,7 +266,7 @@ class Device:
 
         def get_value(search_key: str) -> Any:
             match = cast(
-                re.Match[str],
+                "re.Match[str]",
                 re.search(f'(?<={search_key}=").*?(?=";)', data),
             ).group(0)
 
@@ -298,7 +300,7 @@ class Device:
 
         def get_value(search_key: str) -> Any:
             match = cast(
-                re.Match[str],
+                "re.Match[str]",
                 re.search(f'(?<={search_key}=").*?(?=";)', data),
             ).group(0)
 
