@@ -76,7 +76,7 @@ class _TcpData(BigEndianStructure):
     ]
 
     @classmethod
-    def parse(cls, data: bytes, offset: int = 0) -> dict[str, Any]:
+    def parse(cls, data: bytes | bytearray, offset: int = 0) -> dict[str, Any]:
         """Parse `data` into all fields described by this C structure."""
         tcp_data = cls.from_buffer_copy(data, offset)
 
@@ -158,7 +158,7 @@ class _TcpFirmwareStrings(BigEndianStructure):
     ]
 
     @classmethod
-    def parse(cls, data: bytes, offset: int = 0) -> dict[str, Any]:
+    def parse(cls, data: bytes | bytearray, offset: int = 0) -> dict[str, Any]:
         """Parse `data` into all fields described by this C structure."""
         tcp_firmware_data = cls.from_buffer_copy(data, offset)
 
@@ -287,7 +287,7 @@ def create_information_request(serial_number: int) -> bytearray:
     )
 
 
-def parse_messages(serial_number: int, data: bytes) -> dict[str, Any]:
+def parse_messages(serial_number: int, data: bytes | bytearray) -> dict[str, Any]:
     """Perform a raw TCP request to the Omnik device.
 
     Args:
@@ -342,7 +342,7 @@ def parse_messages(serial_number: int, data: bytes) -> dict[str, Any]:
     return info
 
 
-def _parse_information_reply(data: bytes) -> dict[str, Any]:
+def _parse_information_reply(data: bytes | bytearray) -> dict[str, Any]:
     if len(data) not in [
         sizeof(_TcpData),
         sizeof(_TcpData) + sizeof(_TcpFirmwareStrings),
