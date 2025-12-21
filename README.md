@@ -13,11 +13,9 @@
 [![GitHub Last Commit][last-commit-shield]][commits-url]
 [![Open in Dev Containers][devcontainer-shield]][devcontainer]
 
-[![Maintainability][maintainability-shield]][maintainability-url]
-[![Code Coverage][codecov-shield]][codecov-url]
-
-[![Code Quality][code-quality-shield]][code-quality]
 [![Build Status][build-shield]][build-url]
+[![Typing Status][typing-shield]][typing-url]
+[![Code Coverage][codecov-shield]][codecov-url]
 
 Asynchronous Python client for the Omnik Inverter.
 
@@ -212,8 +210,6 @@ SOFTWARE.
 <!-- MARKDOWN LINKS & IMAGES -->
 [build-shield]: https://github.com/klaasnicolaas/python-omnikinverter/actions/workflows/tests.yaml/badge.svg
 [build-url]: https://github.com/klaasnicolaas/python-omnikinverter/actions/workflows/tests.yaml
-[code-quality-shield]: https://github.com/klaasnicolaas/python-omnikinverter/actions/workflows/codeql.yaml/badge.svg
-[code-quality]: https://github.com/klaasnicolaas/python-omnikinverter/actions/workflows/codeql.yaml
 [commits-shield]: https://img.shields.io/github/commit-activity/y/klaasnicolaas/python-omnikinverter.svg
 [commits-url]: https://github.com/klaasnicolaas/python-omnikinverter/commits/main
 [codecov-shield]: https://codecov.io/gh/klaasnicolaas/python-omnikinverter/branch/main/graph/badge.svg?token=VQTR24YFQ9
@@ -225,8 +221,6 @@ SOFTWARE.
 [license-shield]: https://img.shields.io/github/license/klaasnicolaas/python-omnikinverter.svg
 [last-commit-shield]: https://img.shields.io/github/last-commit/klaasnicolaas/python-omnikinverter.svg
 [maintenance-shield]: https://img.shields.io/maintenance/yes/2025.svg
-[maintainability-shield]: https://api.codeclimate.com/v1/badges/ec5166b74a63f375d1a1/maintainability
-[maintainability-url]: https://codeclimate.com/github/klaasnicolaas/python-omnikinverter/maintainability
 [project-stage-shield]: https://img.shields.io/badge/project%20stage-experimental-yellow.svg
 [pypi]: https://pypi.org/project/omnikinverter/
 [python-versions-shield]: https://img.shields.io/pypi/pyversions/omnikinverter
