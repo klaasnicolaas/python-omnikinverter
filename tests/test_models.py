@@ -31,7 +31,7 @@ async def test_inverter_js_webdata(
 
     async with ClientSession() as session:
         client = OmnikInverter(host="example.com", session=session)
-        inverter: Inverter = await client.inverter()
+        inverter: Inverter = (await client.perform_request()).inverter()
         assert inverter == snapshot
 
 
@@ -52,7 +52,7 @@ async def test_device_js_webdata(
 
     async with ClientSession() as session:
         client = OmnikInverter(host="example.com", session=session)
-        device: Device = await client.device()
+        device: Device = (await client.perform_request()).device()
         assert device == snapshot
 
 
@@ -79,7 +79,7 @@ async def test_inverter_html(
             password="supercool",  # noqa: S106
             session=session,
         )
-        inverter: Inverter = await client.inverter()
+        inverter: Inverter = (await client.perform_request()).inverter()
         assert inverter == snapshot
 
 
@@ -106,7 +106,7 @@ async def test_device_html(
             password="supercool",  # noqa: S106
             session=session,
         )
-        device: Device = await client.device()
+        device: Device = (await client.perform_request()).device()
         assert device == snapshot
 
 
@@ -131,7 +131,7 @@ async def test_inverter_without_session(
         username="klaas",
         password="supercool",  # noqa: S106
     )
-    inverter: Inverter = await client.inverter()
+    inverter: Inverter = (await client.perform_request()).inverter()
     assert inverter == snapshot
 
 
@@ -156,7 +156,7 @@ async def test_device_without_session(
         username="klaas",
         password="supercool",  # noqa: S106
     )
-    device: Device = await client.device()
+    device: Device = (await client.perform_request()).device()
     assert device == snapshot
 
 
@@ -177,7 +177,7 @@ async def test_inverter_js_devicearray(
 
     async with ClientSession() as session:
         client = OmnikInverter(host="example.com", session=session)
-        inverter: Inverter = await client.inverter()
+        inverter: Inverter = (await client.perform_request()).inverter()
         assert inverter == snapshot
 
 
@@ -199,7 +199,7 @@ async def test_inverter_js_devicearray_sofar2200tl(
 
     async with ClientSession() as session:
         client = OmnikInverter(host="example.com", session=session)
-        inverter: Inverter = await client.inverter()
+        inverter: Inverter = (await client.perform_request()).inverter()
         assert inverter == snapshot
 
 
@@ -220,7 +220,7 @@ async def test_device_js_devicearray(
 
     async with ClientSession() as session:
         client = OmnikInverter(host="example.com", session=session)
-        device: Device = await client.device()
+        device: Device = (await client.perform_request()).device()
         assert device == snapshot
 
 
@@ -241,7 +241,7 @@ async def test_inverter_json(
 
     async with ClientSession() as session:
         client = OmnikInverter(host="example.com", source_type="json", session=session)
-        inverter: Inverter = await client.inverter()
+        inverter: Inverter = (await client.perform_request()).inverter()
         assert inverter == snapshot
 
 
@@ -262,7 +262,7 @@ async def test_device_json(
 
     async with ClientSession() as session:
         client = OmnikInverter(host="example.com", source_type="json", session=session)
-        device: Device = await client.device()
+        device: Device = (await client.perform_request()).device()
         assert device == snapshot
 
 
@@ -282,14 +282,14 @@ async def test_wrong_values(aresponses: ResponsesMockServer) -> None:
     async with ClientSession() as session:
         client = OmnikInverter(host="example.com", source_type="json", session=session)
         with pytest.raises(OmnikInverterWrongValuesError):
-            assert await client.inverter()
+            assert (await client.perform_request()).inverter()
 
 
 async def test_inverter_unknown_source_type() -> None:
     """Test exception on wrong source type."""
     client = OmnikInverter(host="example.com", source_type="blah")
     with pytest.raises(OmnikInverterError) as excinfo:
-        assert await client.inverter()
+        assert (await client.perform_request()).inverter()
 
     assert str(excinfo.value) == "Unknown source type `blah`"
 
@@ -298,6 +298,6 @@ async def test_device_unknown_source_type() -> None:
     """Test exception on wrong source type."""
     client = OmnikInverter(host="example.com", source_type="blah")
     with pytest.raises(OmnikInverterError) as excinfo:
-        assert await client.device()
+        assert (await client.perform_request()).device()
 
     assert str(excinfo.value) == "Unknown source type `blah`"
