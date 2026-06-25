@@ -121,7 +121,7 @@ async def test_wrong_js_source(aresponses: ResponsesMockServer) -> None:
     async with ClientSession() as session:
         client = OmnikInverter(host="example.com", session=session)
         with pytest.raises(OmnikInverterWrongSourceError):
-            assert await client.inverter()
+            assert (await client.perform_request()).inverter()
 
 
 async def test_wrong_html_source(aresponses: ResponsesMockServer) -> None:
@@ -146,7 +146,7 @@ async def test_wrong_html_source(aresponses: ResponsesMockServer) -> None:
             session=session,
         )
         with pytest.raises(OmnikInverterWrongSourceError):
-            assert await client.inverter()
+            assert (await client.perform_request()).inverter()
 
 
 async def test_html_no_auth(aresponses: ResponsesMockServer) -> None:
@@ -164,7 +164,7 @@ async def test_html_no_auth(aresponses: ResponsesMockServer) -> None:
     async with ClientSession() as session:
         client = OmnikInverter(host="example.com", source_type="html", session=session)
         with pytest.raises(OmnikInverterAuthError):
-            assert await client.inverter()
+            assert await client.perform_request()
 
 
 async def test_timeout(aresponses: ResponsesMockServer) -> None:
@@ -183,7 +183,7 @@ async def test_timeout(aresponses: ResponsesMockServer) -> None:
     async with ClientSession() as session:
         client = OmnikInverter(host="example.com", session=session, request_timeout=0.1)
         with pytest.raises(OmnikInverterConnectionError):
-            assert await client.inverter()
+            assert await client.perform_request()
 
 
 async def test_content_type(aresponses: ResponsesMockServer) -> None:
@@ -201,7 +201,7 @@ async def test_content_type(aresponses: ResponsesMockServer) -> None:
     async with ClientSession() as session:
         client = OmnikInverter(host="example.com", session=session)
         with pytest.raises(OmnikInverterError):
-            assert await client.inverter()
+            assert await client.perform_request()
 
 
 async def test_client_error() -> None:
