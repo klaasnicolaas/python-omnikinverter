@@ -2,11 +2,96 @@
 
 from __future__ import annotations
 
+import json
 import re
 from dataclasses import dataclass
 from typing import Any, cast
 
-from .exceptions import OmnikInverterWrongSourceError, OmnikInverterWrongValuesError
+from .exceptions import (
+    OmnikInverterError,
+    OmnikInverterWrongSourceError,
+    OmnikInverterWrongValuesError,
+)
+
+
+@dataclass
+class WebResponse:
+    """Holds an unparsed response from the connected Omnik."""
+
+    response_string: str
+    source_type: str
+
+    def inverter(self) -> Inverter:
+        """Get values from your Omnik Inverter.
+
+        Returns
+        -------
+            An Inverter data object from the Omnik Inverter.
+
+        Raises
+        ------
+            OmnikInverterError: Unknown source type.
+
+        """
+        if self.source_type == "json":
+            return Inverter.from_json(json.loads(self.response_string))
+        if self.source_type == "html":
+            return Inverter.from_html(self.response_string)
+        if self.source_type == "javascript":
+            return Inverter.from_js(self.response_string)
+
+        msg = f"Unknown source type `{self.source_type}`"  # pragma: no cover
+        raise OmnikInverterError(msg)  # pragma: no cover
+
+    def device(self) -> Device:
+        """Get Device values from your Omnik Inverter.
+
+        Returns
+        -------
+            A Device data object from the Omnik Inverter.
+
+        Raises
+        ------
+            OmnikInverterError: Unknown source type.
+
+        """
+        if self.source_type == "json":
+            return Device.from_json(json.loads(self.response_string))
+        if self.source_type == "html":
+            return Device.from_html(self.response_string)
+        if self.source_type == "javascript":
+            return Device.from_js(self.response_string)
+
+        msg = f"Unknown source type `{self.source_type}`"  # pragma: no cover
+        raise OmnikInverterError(msg)  # pragma: no cover
+
+
+@dataclass
+class TcpResponse:
+    """Holds an unparsed TCP response from the connected Omnik."""
+
+    fields: dict[str, Any]
+
+    def inverter(self) -> Inverter:
+        """Get values from your Omnik Inverter.
+
+        Returns
+        -------
+            An Inverter data object from the Omnik Inverter.
+
+        """
+        return Inverter.from_tcp(self.fields)
+
+    def device(self) -> Device:
+        """Get Device values from your Omnik Inverter.
+
+        Returns
+        -------
+            A Device data object that is left empty: this information
+            is not supported on the TCP backend.
+
+        """
+        return Device()
 
 
 @dataclass
