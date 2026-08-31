@@ -271,7 +271,7 @@ class Device:
             ).group(0)
 
             if match:
-                if search_key in ["cover_sta_rssi"]:
+                if search_key == "cover_sta_rssi":
                     return int(match)
                 return match
             return None
