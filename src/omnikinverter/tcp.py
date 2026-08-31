@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 from ctypes import BigEndianStructure, c_char, c_ubyte, c_uint, c_ushort, sizeof
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 from .const import LOGGER
 from .exceptions import OmnikInverterPacketInvalidError
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
+    from collections.abc import Callable, Generator
 
 MESSAGE_START = 0x68
 MESSAGE_END = 0x16
@@ -110,7 +110,7 @@ class _TcpData(BigEndianStructure):
             return None if temp == 65326 else temp * 0.1
 
         # Only these fields will be extracted from the structure
-        field_extractors = {
+        field_extractors: dict[str, Callable[[Any], Any] | float | None] = {
             "serial_number": None,
             "temperature": temperature_to_float,
             "dc_input_voltage": list_divide_10,
@@ -138,8 +138,8 @@ class _TcpData(BigEndianStructure):
 
             if isinstance(extractor, float):
                 value *= extractor
-            elif extractor is not None:
-                value = extractor(value)
+            elif callable(extractor):
+                value = cast("Callable[[Any], Any]", extractor)(value)
             elif isinstance(value, bytes):
                 value = value.decode(encoding="utf-8")
 
