@@ -20,12 +20,12 @@ jobs:
       id-token: write
     steps:
       - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: 🏗 Set up Poetry
         run: pipx install poetry
       - name: 🏗 Set up Python ${{ env.DEFAULT_PYTHON }}
         id: python
-        uses: actions/setup-python@v6.3.0
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: ${{ env.DEFAULT_PYTHON }}
           cache: "poetry"
@@ -44,14 +44,14 @@ jobs:
       - name: 🏗 Build package
         run: poetry build --no-interaction
       - name: 🚀 Publish package to PyPi
-        uses: pypa/gh-action-pypi-publish@v1.14.2
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
 
   tweet:
     name: 🐦 Tweet the release
     runs-on: ubuntu-latest
     needs: release
     steps:
-      - uses: Eomm/why-don-t-you-tweet@v2.0.0
+      - uses: Eomm/why-don-t-you-tweet@d9ec12835f4d494dda920f95f885df3dba380493 # v2.0.0
         with:
           # GitHub event payload
           # https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#release
