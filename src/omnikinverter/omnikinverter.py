@@ -20,7 +20,7 @@ from .exceptions import (
 )
 from .models import Device, Inverter
 
-VERSION: str = metadata.version(__package__)  # ty:ignore[invalid-argument-type]
+VERSION: str = metadata.version("omnikinverter")
 
 
 @dataclass

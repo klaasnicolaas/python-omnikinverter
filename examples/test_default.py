@@ -1,4 +1,3 @@
-# pylint: disable=W0621
 """Asynchronous Python client for the Omnik Inverter."""
 
 import asyncio
