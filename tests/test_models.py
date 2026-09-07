@@ -15,7 +15,9 @@ from . import load_fixtures
 
 
 async def test_inverter_js_webdata(
-    aresponses: ResponsesMockServer, snapshot: SnapshotAssertion
+    aresponses: ResponsesMockServer,
+    snapshot: SnapshotAssertion,
+    omnik_client: OmnikInverter,
 ) -> None:
     """Test request from an Inverter - JS Webdata source."""
     aresponses.add(
@@ -29,14 +31,14 @@ async def test_inverter_js_webdata(
         ),
     )
 
-    async with ClientSession() as session:
-        client = OmnikInverter(host="example.com", session=session)
-        inverter: Inverter = await client.inverter()
-        assert inverter == snapshot
+    inverter: Inverter = await omnik_client.inverter()
+    assert inverter == snapshot
 
 
 async def test_device_js_webdata(
-    aresponses: ResponsesMockServer, snapshot: SnapshotAssertion
+    aresponses: ResponsesMockServer,
+    snapshot: SnapshotAssertion,
+    omnik_client: OmnikInverter,
 ) -> None:
     """Test request from a Device - JS Webdata source."""
     aresponses.add(
@@ -50,10 +52,8 @@ async def test_device_js_webdata(
         ),
     )
 
-    async with ClientSession() as session:
-        client = OmnikInverter(host="example.com", session=session)
-        device: Device = await client.device()
-        assert device == snapshot
+    device: Device = await omnik_client.device()
+    assert device == snapshot
 
 
 async def test_inverter_html(
