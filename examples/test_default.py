@@ -1,9 +1,11 @@
 # pylint: disable=W0621
 """Asynchronous Python client for the Omnik Inverter."""
 
+from __future__ import annotations
+
 import asyncio
 
-from omnikinverter import Device, Inverter, OmnikInverter
+from omnikinverter import Device, Inverter, OmnikInverter, TcpResponse, WebResponse
 
 
 async def main() -> None:
@@ -12,8 +14,9 @@ async def main() -> None:
         host="examples.com",
         source_type="javascript",
     ) as client:
-        inverter: Inverter = await client.inverter()
-        device: Device = await client.device()
+        response: WebResponse | TcpResponse = await client.perform_request()
+        inverter: Inverter = response.inverter()
+        device: Device = response.device()
         print(inverter)
         print()
         print("-- INVERTER --")

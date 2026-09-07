@@ -178,7 +178,7 @@ async def test_inverter_tcp_known_message_type() -> None:
         )
 
     assert (
-        str(excinfo.value) == "Unknown Omnik message type 00 "
+        str(excinfo.value) == "Unknown Omnik message type 0x0 "
         "with contents `bytearray(b'')`"
     )
 
@@ -273,7 +273,7 @@ async def test_inverter_tcp() -> None:
         tcp_port=port,
     )
 
-    inverter: Inverter = await client.inverter()
+    inverter: Inverter = (await client.perform_request()).inverter()
 
     assert inverter
     assert inverter.solar_rated_power is None
@@ -311,7 +311,7 @@ async def test_inverter_tcp_no_firmware() -> None:
         tcp_port=port,
     )
 
-    inverter: Inverter = await client.inverter()
+    inverter: Inverter = (await client.perform_request()).inverter()
 
     assert inverter
     assert inverter.solar_rated_power is None
@@ -349,7 +349,7 @@ async def test_inverter_tcp_offline() -> None:
         tcp_port=port,
     )
 
-    inverter: Inverter = await client.inverter()
+    inverter: Inverter = (await client.perform_request()).inverter()
 
     assert inverter
     assert inverter.solar_rated_power is None
@@ -401,7 +401,7 @@ async def test_connection_broken() -> None:
     )
 
     with pytest.raises(OmnikInverterConnectionError) as excinfo:
-        assert await client.inverter()
+        assert await client.perform_request()
 
     assert (
         str(excinfo.value)
@@ -431,7 +431,7 @@ async def test_communication_timeout() -> None:
     )
 
     with pytest.raises(OmnikInverterConnectionError) as excinfo:
-        assert await client.inverter()
+        assert await client.perform_request()
 
     assert (
         str(excinfo.value)
@@ -453,7 +453,7 @@ async def test_connection_failed() -> None:
     )
 
     with pytest.raises(OmnikInverterConnectionError) as excinfo:
-        assert await client.inverter()
+        assert await client.perform_request()
 
     assert (
         str(excinfo.value)
@@ -463,16 +463,21 @@ async def test_connection_failed() -> None:
 
 async def test_device_tcp_not_implemented() -> None:
     """Test request from a Device - TCP source."""
-    serial_number = 123456
+    serial_number = 987654321
+
+    (server_exit, port) = tcp_server(serial_number, "tcp_reply.data")
 
     client = OmnikInverter(
-        host="example.com",
+        host="localhost",
         source_type="tcp",
         serial_number=serial_number,
+        tcp_port=port,
     )
 
-    device: Device = await client.device()
+    device: Device = (await client.perform_request()).device()
     # No Device data can be extracted from TCP packets
     assert device.signal_quality is None
     assert device.firmware is None
     assert device.ip_address is None
+
+    await server_exit
