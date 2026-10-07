@@ -99,14 +99,13 @@ class OmnikInverter:
                         headers=headers,
                     )
                     response.raise_for_status()
+                    raw_response = await response.read()
             except TimeoutError as exception:
                 msg = "Timeout occurred while connecting to Omnik Inverter device"
                 raise OmnikInverterConnectionError(msg) from exception
             except (ClientError, ClientResponseError) as exception:
                 msg = "Error occurred while communicating with Omnik Inverter device"
                 raise OmnikInverterConnectionError(msg) from exception
-
-            raw_response = await response.read()
         finally:
             await self.close()
 
@@ -157,7 +156,14 @@ class OmnikInverter:
                 writer.write(tcp.create_information_request(self.serial_number))
                 await writer.drain()
 
-                raw_msg = await reader.read(1024)
+                # The reply may arrive in multiple TCP segments, keep reading
+                # until all announced messages are complete.
+                raw_msg = bytearray()
+                while not tcp.is_complete(raw_msg):
+                    chunk = await reader.read(1024)
+                    if not chunk:
+                        break
+                    raw_msg.extend(chunk)
         except TimeoutError as exception:
             msg = "Timeout occurred while communicating with the Omnik Inverter device"
             raise OmnikInverterConnectionError(msg) from exception
