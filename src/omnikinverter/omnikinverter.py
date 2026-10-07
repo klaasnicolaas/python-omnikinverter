@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import asyncio
+import base64
 import json
 from dataclasses import dataclass
 from importlib import metadata
 from typing import Any, Self
 
-from aiohttp import BasicAuth, ClientError, ClientResponseError, ClientSession
+from aiohttp import ClientError, ClientResponseError, ClientSession
 from aiohttp.hdrs import METH_GET
 from yarl import URL
 
@@ -83,18 +84,17 @@ class OmnikInverter:
             self.session = ClientSession()
             self._close_session = True
 
+        if self.username and self.password:
+            credentials = f"{self.username}:{self.password}".encode("latin1")
+            headers["Authorization"] = f"Basic {base64.b64encode(credentials).decode()}"
+
         # Use big try to make sure manual session is always cleaned up
         try:
-            auth = None
-            if self.username and self.password:
-                auth = BasicAuth(self.username, self.password)
-
             try:
                 async with asyncio.timeout(self.request_timeout):
                     response = await self.session.request(
                         method,
                         url,
-                        auth=auth,
                         params=params,
                         headers=headers,
                     )

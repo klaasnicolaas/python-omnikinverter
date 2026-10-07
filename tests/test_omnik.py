@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 import pytest
 from aiohttp import ClientError, ClientPayloadError, ClientResponse, ClientSession
+from aiohttp.web import BaseRequest
 from aresponses import Response, ResponsesMockServer
 
 from omnikinverter import (
@@ -295,3 +296,29 @@ async def test_body_read_error(aresponses: ResponsesMockServer) -> None:
             pytest.raises(OmnikInverterConnectionError),
         ):
             await client.inverter()
+
+
+async def test_basic_auth_header(aresponses: ResponsesMockServer) -> None:
+    """Test that credentials are sent as a basic auth header."""
+
+    async def response_handler(request: BaseRequest) -> Response:
+        assert request.headers["Authorization"] == "Basic a2xhYXM6c3VwZXJjb29s"
+        return aresponses.Response(
+            status=200,
+            headers={"Content-Type": "text/html"},
+            text=load_fixtures("status.html"),
+        )
+
+    aresponses.add("example.com", "/status.html", "GET", response_handler)
+
+    async with ClientSession() as session:
+        client = OmnikInverter(
+            host="example.com",
+            source_type="html",
+            username="klaas",
+            password="supercool",  # noqa: S106
+            session=session,
+        )
+        assert await client.inverter()
+
+    aresponses.assert_plan_strictly_followed()
