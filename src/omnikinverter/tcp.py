@@ -268,6 +268,32 @@ def _unpack_messages(
             raise OmnikInverterPacketInvalidError(msg)
 
 
+def is_complete(data: bytes | bytearray) -> bool:
+    """Check whether the received data contains only complete messages.
+
+    Args:
+    ----
+        data: Raw data received from the Omnik Inverter so far.
+
+    Returns:
+    -------
+        True when every message in the data has been received in full, False
+        when more data is needed to complete the last message.
+
+    """
+    position = 0
+    while position < len(data):
+        if data[position] != MESSAGE_START:
+            # Trailing 0xFF garbage or an invalid start byte, which is left
+            # for `parse_messages()` to handle.
+            return True
+        if position + 1 >= len(data):
+            return False
+        # Start byte, length byte + message + header and end byte
+        position += 1 + data[position + 1] + MESSAGE_HEADER_SIZE + 1
+    return position > 0 and position <= len(data)
+
+
 def create_information_request(serial_number: int) -> bytearray:
     """Compute a magic message to which the Omnik will reply with raw statistics.
 

@@ -58,9 +58,22 @@ class Inverter:
         """
 
         def get_value(search: str) -> Any:
-            if data[search]:
-                return data[search]
-            return None
+            # Only treat missing and empty values as unknown, a numeric
+            # 0 (e.g. no production at night) is a valid value.
+            value = data.get(search)
+            if value is None or value == "":
+                return None
+            return value
+
+        def get_number(search: str, number_type: type[float]) -> Any:
+            value = get_value(search)
+            if value is None:
+                return None
+            try:
+                return number_type(value)
+            except (TypeError, ValueError) as exception:
+                msg = f"Your inverter returned an invalid value for `{search}`."
+                raise OmnikInverterWrongSourceError(msg) from exception
 
         def validation(data_list: list[Any]) -> bool:
             """Check if the values are not equal to each other.
@@ -76,7 +89,7 @@ class Inverter:
             """
             return all(ele == data_list[0] for ele in data_list)
 
-        if validation([data["i_eday"], data["i_eall"]]):
+        if validation([get_value("i_eday"), get_value("i_eall")]):
             msg = "Inverter pass on incorrect data (day and total are equal)"
             raise OmnikInverterWrongValuesError(msg)
 
@@ -86,10 +99,10 @@ class Inverter:
             firmware=get_value("i_ver_m"),
             firmware_slave=get_value("i_ver_s"),
             alarm_code=get_value("i_alarm"),
-            solar_rated_power=int(get_value("i_pow")),
-            solar_current_power=int(get_value("i_pow_n")),
-            solar_energy_today=float(get_value("i_eday")),
-            solar_energy_total=float(get_value("i_eall")),
+            solar_rated_power=get_number("i_pow", int),
+            solar_current_power=get_number("i_pow_n", int),
+            solar_energy_today=get_number("i_eday", float),
+            solar_energy_total=get_number("i_eall", float),
         )
 
     @staticmethod
@@ -182,7 +195,7 @@ class Inverter:
                         return energy_value
                     return matches[position].replace(" ", "")
                 return None  # noqa: TRY300
-            except AttributeError as exception:
+            except (AttributeError, IndexError) as exception:
                 msg = "Your inverter has no data source from a javascript file."
                 raise OmnikInverterWrongSourceError(msg) from exception
 
@@ -265,10 +278,14 @@ class Device:
             data = data.replace(correction, "")
 
         def get_value(search_key: str) -> Any:
-            match = cast(
-                "re.Match[str]",
-                re.search(f'(?<={search_key}=").*?(?=";)', data),
-            ).group(0)
+            try:
+                match = cast(
+                    "re.Match[str]",
+                    re.search(f'(?<={search_key}=").*?(?=";)', data),
+                ).group(0)
+            except AttributeError as exception:
+                msg = "Your inverter has no data source from a html file."
+                raise OmnikInverterWrongSourceError(msg) from exception
 
             if match:
                 if search_key == "cover_sta_rssi":
@@ -299,10 +316,14 @@ class Device:
             data = data.replace(correction, "")
 
         def get_value(search_key: str) -> Any:
-            match = cast(
-                "re.Match[str]",
-                re.search(f'(?<={search_key}=").*?(?=";)', data),
-            ).group(0)
+            try:
+                match = cast(
+                    "re.Match[str]",
+                    re.search(f'(?<={search_key}=").*?(?=";)', data),
+                ).group(0)
+            except AttributeError as exception:
+                msg = "Your inverter has no data source from a javascript file."
+                raise OmnikInverterWrongSourceError(msg) from exception
 
             if match:
                 if search_key == "m2mRssi":

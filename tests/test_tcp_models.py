@@ -499,3 +499,76 @@ async def test_data_tcp() -> None:
     assert data.device == Device()
 
     await server_exit
+
+
+async def test_inverter_tcp_split_reply() -> None:
+    """Test a reply that arrives in multiple TCP segments - TCP source."""
+    serial_number = 987654321
+
+    def split_reply(conn: socket) -> None:
+        """Send the reply in two parts with a delay in between."""
+        reply = load_fixture_bytes("tcp_reply.data")
+        conn.sendall(reply[:20])
+        time.sleep(0.05)
+        conn.sendall(reply[20:])
+        conn.shutdown(SHUT_RDWR)
+        conn.close()
+
+    (server_exit, port) = tcp_server(serial_number, split_reply)
+
+    client = OmnikInverter(
+        host="localhost",
+        source_type="tcp",
+        serial_number=serial_number,
+        tcp_port=port,
+    )
+
+    inverter: Inverter = await client.inverter()
+
+    assert inverter.serial_number == "NLDN012345CS4321"
+    assert inverter.solar_current_power == 2615
+
+    await server_exit
+
+
+@pytest.mark.parametrize(
+    ("data", "expected"),
+    [
+        (b"", False),
+        (bytes([tcp.MESSAGE_START]), False),
+        (load_fixture_bytes("tcp_reply.data")[:20], False),
+        (load_fixture_bytes("tcp_reply.data"), True),
+        (load_fixture_bytes("tcp_reply.data") + b"\xff\xff", True),
+        (b"\x00", True),
+    ],
+)
+def test_is_complete(data: bytes, expected: bool) -> None:  # noqa: FBT001
+    """Test detection of complete TCP messages."""
+    assert tcp.is_complete(data) is expected
+
+
+async def test_inverter_tcp_truncated_reply() -> None:
+    """Test a reply that is cut off before it is complete - TCP source."""
+    serial_number = 987654321
+
+    def truncated_reply(conn: socket) -> None:
+        """Send only the first part of the reply and close the connection."""
+        conn.sendall(load_fixture_bytes("tcp_reply.data")[:20])
+        conn.shutdown(SHUT_RDWR)
+        conn.close()
+
+    (server_exit, port) = tcp_server(serial_number, truncated_reply)
+
+    client = OmnikInverter(
+        host="localhost",
+        source_type="tcp",
+        serial_number=serial_number,
+        tcp_port=port,
+    )
+
+    with pytest.raises(OmnikInverterPacketInvalidError) as excinfo:
+        assert await client.inverter()
+
+    assert str(excinfo.value).startswith("Could only read")
+
+    await server_exit

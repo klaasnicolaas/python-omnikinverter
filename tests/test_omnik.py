@@ -4,7 +4,7 @@ import asyncio
 from unittest.mock import patch
 
 import pytest
-from aiohttp import ClientError, ClientResponse, ClientSession
+from aiohttp import ClientError, ClientPayloadError, ClientResponse, ClientSession
 from aresponses import Response, ResponsesMockServer
 
 from omnikinverter import (
@@ -247,3 +247,51 @@ async def test_unexpected_response(aresponses: ResponsesMockServer) -> None:
         client = OmnikInverter(host="example.com", session=session)
         with pytest.raises(OmnikInverterError):
             assert await client.request("test")
+
+
+async def test_body_read_timeout(aresponses: ResponsesMockServer) -> None:
+    """Test timeout while reading the response body from the Omnik Inverter."""
+    aresponses.add(
+        "example.com",
+        "/js/status.js",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/x-javascript"},
+            text=load_fixtures("status_webdata.js"),
+        ),
+    )
+
+    async def slow_read(*_args: object) -> bytes:
+        await asyncio.sleep(0.2)
+        return b""
+
+    async with ClientSession() as session:
+        client = OmnikInverter(host="example.com", session=session, request_timeout=0.1)
+        with (
+            patch.object(ClientResponse, "read", slow_read),
+            pytest.raises(OmnikInverterConnectionError),
+        ):
+            await client.inverter()
+
+
+async def test_body_read_error(aresponses: ResponsesMockServer) -> None:
+    """Test client error while reading the response body from the Omnik Inverter."""
+    aresponses.add(
+        "example.com",
+        "/js/status.js",
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "application/x-javascript"},
+            text=load_fixtures("status_webdata.js"),
+        ),
+    )
+
+    async with ClientSession() as session:
+        client = OmnikInverter(host="example.com", session=session)
+        with (
+            patch.object(ClientResponse, "read", side_effect=ClientPayloadError),
+            pytest.raises(OmnikInverterConnectionError),
+        ):
+            await client.inverter()

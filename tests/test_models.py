@@ -1,5 +1,8 @@
 """Test the models."""
 
+import json
+from collections.abc import Callable
+
 import pytest
 from aiohttp import ClientSession
 from aresponses import ResponsesMockServer
@@ -8,6 +11,7 @@ from syrupy.assertion import SnapshotAssertion
 from omnikinverter import Device, Inverter, OmnikInverter, OmnikInverterData
 from omnikinverter.exceptions import (
     OmnikInverterError,
+    OmnikInverterWrongSourceError,
     OmnikInverterWrongValuesError,
 )
 
@@ -352,3 +356,48 @@ async def test_device_unknown_source_type() -> None:
         assert await client.device()
 
     assert str(excinfo.value) == "Unknown source type `blah`"
+
+
+@pytest.mark.parametrize("current_power", [0, "0"])
+def test_inverter_json_zero_power(current_power: int | str) -> None:
+    """Test that zero power from the JSON source is not treated as missing."""
+    data = json.loads(load_fixtures("status.json"))
+    data["i_pow_n"] = current_power
+
+    inverter = Inverter.from_json(data)
+    assert inverter.solar_current_power == 0
+
+
+def test_inverter_json_empty_value() -> None:
+    """Test that an empty value from the JSON source is treated as missing."""
+    data = json.loads(load_fixtures("status.json"))
+    data["i_pow"] = ""
+
+    inverter = Inverter.from_json(data)
+    assert inverter.solar_rated_power is None
+
+
+def test_inverter_json_invalid_value() -> None:
+    """Test exception on a non-numeric value from the JSON source."""
+    data = json.loads(load_fixtures("status.json"))
+    data["i_pow_n"] = "n/a"
+
+    with pytest.raises(OmnikInverterWrongSourceError) as excinfo:
+        Inverter.from_json(data)
+
+    assert (
+        str(excinfo.value) == "Your inverter returned an invalid value for `i_pow_n`."
+    )
+
+
+def test_inverter_js_too_few_values() -> None:
+    """Test exception on JS data with fewer values than expected."""
+    with pytest.raises(OmnikInverterWrongSourceError):
+        Inverter.from_js('var webData="NLDN1234,V5,V4";')
+
+
+@pytest.mark.parametrize("parser", [Device.from_html, Device.from_js])
+def test_device_wrong_source(parser: Callable[[str], Device]) -> None:
+    """Test exception on data without the expected Device values."""
+    with pytest.raises(OmnikInverterWrongSourceError):
+        parser("<html>Not an Omnik</html>")
