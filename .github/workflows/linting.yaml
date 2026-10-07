@@ -4,8 +4,14 @@ name: Linting
 # yamllint disable-line rule:truthy
 on:
   push:
+    branches:
+      - main
   pull_request:
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   DEFAULT_PYTHON: "3.12"
@@ -17,6 +23,7 @@ jobs:
   codespell:
     name: codespell
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -27,8 +34,6 @@ jobs:
         with:
           enable-cache: true
           python-version: ${{ env.DEFAULT_PYTHON }}
-      - name: 🐍 Install Python
-        run: uv python install
       - name: 🏗 Install dependencies
         run: uv sync --locked
       - name: 🚀 Check code for common misspellings
@@ -37,6 +42,7 @@ jobs:
   ruff:
     name: Ruff
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -47,8 +53,6 @@ jobs:
         with:
           enable-cache: true
           python-version: ${{ env.DEFAULT_PYTHON }}
-      - name: 🐍 Install Python
-        run: uv python install
       - name: 🏗 Install dependencies
         run: uv sync --locked
       - name: 🚀 Run Ruff linter
@@ -59,6 +63,7 @@ jobs:
   prek-hooks:
     name: prek-hooks
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -69,40 +74,18 @@ jobs:
         with:
           enable-cache: true
           python-version: ${{ env.DEFAULT_PYTHON }}
-      - name: 🐍 Install Python
-        run: uv python install
       - name: 🏗 Install dependencies
         run: uv sync --locked
-      - name: 🚀 Check Python AST
-        run: uv run prek run check-ast --all-files
-      - name: 🚀 Check for case conflicts
-        run: uv run prek run check-case-conflict --all-files
-      - name: 🚀 Check docstring is first
-        run: uv run prek run check-docstring-first --all-files
-      - name: 🚀 Check that executables have shebangs
-        run: uv run prek run check-executables-have-shebangs --all-files
-      - name: 🚀 Check JSON files
-        run: uv run prek run check-json --all-files
-      - name: 🚀 Check for merge conflicts
-        run: uv run prek run check-merge-conflict --all-files
-      - name: 🚀 Check for broken symlinks
-        run: uv run prek run check-symlinks --all-files
-      - name: 🚀 Check TOML files
-        run: uv run prek run check-toml --all-files
-      - name: 🚀 Check XML files
-        run: uv run prek run check-xml --all-files
-      - name: 🚀 Check YAML files
-        run: uv run prek run check-yaml --all-files
-      - name: 🚀 Detect Private Keys
-        run: uv run prek run detect-private-key --all-files
-      - name: 🚀 Check End of Files
-        run: uv run prek run end-of-file-fixer --all-files
-      - name: 🚀 Trim Trailing Whitespace
-        run: uv run prek run trailing-whitespace --all-files
+      - name: 🚀 Run prek hooks
+        env:
+          # These hooks run in their own jobs or do not apply in CI
+          SKIP: codespell,no-commit-to-branch,pytest,ruff-check,ruff-format,ty,yamllint,zizmor
+        run: uv run prek run --all-files --show-diff-on-failure
 
   yamllint:
     name: yamllint
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -113,8 +96,6 @@ jobs:
         with:
           enable-cache: true
           python-version: ${{ env.DEFAULT_PYTHON }}
-      - name: 🐍 Install Python
-        run: uv python install
       - name: 🏗 Install dependencies
         run: uv sync --locked
       - name: 🚀 Run yamllint
@@ -123,6 +104,7 @@ jobs:
   zizmor:
     name: zizmor
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -133,8 +115,6 @@ jobs:
         with:
           enable-cache: true
           python-version: ${{ env.DEFAULT_PYTHON }}
-      - name: 🐍 Install Python
-        run: uv python install
       - name: 🏗 Install dependencies
         run: uv sync --locked
       - name: 🚀 Run zizmor
