@@ -315,3 +315,11 @@ class Device:
             firmware=get_value("version"),
             ip_address=get_value("wanIp"),
         )
+
+
+@dataclass
+class OmnikInverterData:
+    """Object holding both the Inverter and Device data from a single request."""
+
+    inverter: Inverter
+    device: Device

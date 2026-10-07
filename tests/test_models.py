@@ -5,7 +5,7 @@ from aiohttp import ClientSession
 from aresponses import ResponsesMockServer
 from syrupy.assertion import SnapshotAssertion
 
-from omnikinverter import Device, Inverter, OmnikInverter
+from omnikinverter import Device, Inverter, OmnikInverter, OmnikInverterData
 from omnikinverter.exceptions import (
     OmnikInverterError,
     OmnikInverterWrongValuesError,
@@ -264,6 +264,57 @@ async def test_device_json(
         client = OmnikInverter(host="example.com", source_type="json", session=session)
         device: Device = await client.device()
         assert device == snapshot
+
+
+@pytest.mark.parametrize(
+    ("source_type", "path", "fixture"),
+    [
+        ("javascript", "/js/status.js", "status_webdata.js"),
+        ("json", "/status.json", "status.json"),
+        ("html", "/status.html", "status.html"),
+    ],
+)
+async def test_data_single_request(
+    aresponses: ResponsesMockServer,
+    snapshot: SnapshotAssertion,
+    source_type: str,
+    path: str,
+    fixture: str,
+) -> None:
+    """Test that Inverter and Device data are fetched with a single request."""
+    aresponses.add(
+        "example.com",
+        path,
+        "GET",
+        aresponses.Response(
+            status=200,
+            headers={"Content-Type": "text/html"},
+            text=load_fixtures(fixture),
+        ),
+    )
+
+    async with ClientSession() as session:
+        client = OmnikInverter(
+            host="example.com",
+            source_type=source_type,
+            username="klaas",
+            password="supercool",  # noqa: S106
+            session=session,
+        )
+        data: OmnikInverterData = await client.data()
+
+    aresponses.assert_plan_strictly_followed()
+    assert data.inverter == snapshot(name="inverter")
+    assert data.device == snapshot(name="device")
+
+
+async def test_data_unknown_source_type() -> None:
+    """Test exception on wrong source type."""
+    client = OmnikInverter(host="example.com", source_type="blah")
+    with pytest.raises(OmnikInverterError) as excinfo:
+        assert await client.data()
+
+    assert str(excinfo.value) == "Unknown source type `blah`"
 
 
 async def test_wrong_values(aresponses: ResponsesMockServer) -> None:
