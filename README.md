@@ -35,11 +35,12 @@ A python package with which you can read the data from your Omnik Inverter. Keep
 | Omnik    | Omniksol 2000TL  | JS         |
 | Omnik    | Omniksol 2000TL2 | JSON       |
 | Omnik    | Omniksol 2500TL  | HTML       |
-| Omnik    | Omniksol 3000TL  | TCP        |
+| Omnik    | Omniksol 3000TL  | JS/TCP     |
 | Omnik    | Omniksol 4000TL2 | JS         |
 | Ginlong  | Solis-DLS-WiFi   | JSON/HTML  |
 | Hosola   | 1500TL           | JS         |
-| Hosala   | Bright 2500MTL-S | JS         |
+| Hosola   | 1600T            | JS         |
+| Hosola   | Bright 2500MTL-S | JS         |
 | Bosswerk | BW-MI300         | HTML       |
 | Bosswerk | BW-MI600         | HTML       |
 | Sofar    | 3600TLM          | HTML       |
