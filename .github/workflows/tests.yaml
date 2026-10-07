@@ -4,8 +4,14 @@ name: Testing
 # yamllint disable-line rule:truthy
 on:
   push:
+    branches:
+      - main
   pull_request:
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   DEFAULT_PYTHON: "3.12"
@@ -17,6 +23,7 @@ jobs:
   pytest:
     name: Python ${{ matrix.python }}
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
       matrix:
         python: ["3.12", "3.13", "3.14"]
@@ -30,8 +37,6 @@ jobs:
         with:
           enable-cache: true
           python-version: ${{ matrix.python }}
-      - name: 🐍 Install Python
-        run: uv python install
       - name: 🏗 Install dependencies
         run: uv sync --locked
       - name: 🚀 Run pytest
@@ -48,6 +53,7 @@ jobs:
 
   coverage:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     environment: testing
     needs: pytest
     steps:
@@ -63,8 +69,6 @@ jobs:
         with:
           enable-cache: true
           python-version: ${{ env.DEFAULT_PYTHON }}
-      - name: 🐍 Install Python
-        run: uv python install
       - name: 🏗 Install dependencies
         run: uv sync --locked
       - name: 🚀 Process coverage results
