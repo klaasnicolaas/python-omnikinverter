@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from omnikinverter import Device, Inverter, OmnikInverter, tcp
+from omnikinverter import Device, Inverter, OmnikInverter, OmnikInverterData, tcp
 from omnikinverter.exceptions import (
     OmnikInverterAuthError,
     OmnikInverterConnectionError,
@@ -476,3 +476,26 @@ async def test_device_tcp_not_implemented() -> None:
     assert device.signal_quality is None
     assert device.firmware is None
     assert device.ip_address is None
+
+
+async def test_data_tcp() -> None:
+    """Test request for Inverter and Device data - TCP source."""
+    serial_number = 987654321
+
+    (server_exit, port) = tcp_server(serial_number, "tcp_reply.data")
+
+    client = OmnikInverter(
+        host="localhost",
+        source_type="tcp",
+        serial_number=serial_number,
+        tcp_port=port,
+    )
+
+    data: OmnikInverterData = await client.data()
+
+    assert data.inverter.serial_number == "NLDN012345CS4321"
+    assert data.inverter.solar_current_power == 2615
+    # No Device data can be extracted from TCP packets
+    assert data.device == Device()
+
+    await server_exit

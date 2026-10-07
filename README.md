@@ -68,10 +68,14 @@ async def main():
         username="omnik",
         password="inverter",
     ) as client:
+        # Fetch both the inverter and device data with a single request
+        data = await client.data()
+        print(data.inverter)
+        print(data.device)
+
+        # Or fetch them separately (one request each)
         inverter = await client.inverter()
         device = await client.device()
-        print(inverter)
-        print(device)
 
 
 if __name__ == "__main__":

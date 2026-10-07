@@ -1,4 +1,91 @@
 # serializer version: 1
+# name: test_data_single_request[html-/status.html-status.html][device]
+  Device(
+    firmware='ME_08_0102_2.03',
+    ip_address='192.168.0.106',
+    signal_quality=None,
+  )
+# ---
+# name: test_data_single_request[html-/status.html-status.html][inverter]
+  Inverter(
+    ac_output_current=None,
+    ac_output_frequency=None,
+    ac_output_power=None,
+    ac_output_voltage=None,
+    alarm_code='F13',
+    dc_input_current=None,
+    dc_input_voltage=None,
+    firmware='V5.07Build245',
+    firmware_slave=None,
+    inverter_active=None,
+    model='Omnik2500tl',
+    serial_number='12345678910',
+    solar_current_power=219,
+    solar_energy_today=0.23,
+    solar_energy_total=6454.5,
+    solar_hours_total=None,
+    solar_rated_power=2500,
+    temperature=None,
+  )
+# ---
+# name: test_data_single_request[javascript-/js/status.js-status_webdata.js][device]
+  Device(
+    firmware='H4.01.38Y1.0.09W1.0.08',
+    ip_address='192.168.0.10',
+    signal_quality=96,
+  )
+# ---
+# name: test_data_single_request[javascript-/js/status.js-status_webdata.js][inverter]
+  Inverter(
+    ac_output_current=None,
+    ac_output_frequency=None,
+    ac_output_power=None,
+    ac_output_voltage=None,
+    alarm_code='F13',
+    dc_input_current=None,
+    dc_input_voltage=None,
+    firmware='NL2-V9.8-5931',
+    firmware_slave='V5.3-00157',
+    inverter_active=None,
+    model='omnik4000tl2',
+    serial_number='12345678910',
+    solar_current_power=140,
+    solar_energy_today=0.3,
+    solar_energy_total=15363.7,
+    solar_hours_total=None,
+    solar_rated_power=4000,
+    temperature=None,
+  )
+# ---
+# name: test_data_single_request[json-/status.json-status.json][device]
+  Device(
+    firmware='ME-111001-V1.0.6(2015-10-16)',
+    ip_address='192.168.0.10',
+    signal_quality=None,
+  )
+# ---
+# name: test_data_single_request[json-/status.json-status.json][inverter]
+  Inverter(
+    ac_output_current=None,
+    ac_output_frequency=None,
+    ac_output_power=None,
+    ac_output_voltage=None,
+    alarm_code='F23',
+    dc_input_current=None,
+    dc_input_voltage=None,
+    firmware='V1.25Build23261',
+    firmware_slave='V1.40Build52927',
+    inverter_active=None,
+    model='omnik2000tl2',
+    serial_number=None,
+    solar_current_power=1225,
+    solar_energy_today=10.9,
+    solar_energy_total=8674.0,
+    solar_hours_total=None,
+    solar_rated_power=2000,
+    temperature=None,
+  )
+# ---
 # name: test_device_html
   Device(
     firmware='ME_08_0102_2.03',
