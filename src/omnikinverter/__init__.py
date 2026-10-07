@@ -1,8 +1,10 @@
 """Asynchronous Python client for the Omnik Inverter."""
 
 from .exceptions import (
+    OmnikInverterAuthError,
     OmnikInverterConnectionError,
     OmnikInverterError,
+    OmnikInverterPacketInvalidError,
     OmnikInverterWrongSourceError,
     OmnikInverterWrongValuesError,
 )
@@ -13,9 +15,11 @@ __all__ = [
     "Device",
     "Inverter",
     "OmnikInverter",
+    "OmnikInverterAuthError",
     "OmnikInverterConnectionError",
     "OmnikInverterData",
     "OmnikInverterError",
+    "OmnikInverterPacketInvalidError",
     "OmnikInverterWrongSourceError",
     "OmnikInverterWrongValuesError",
 ]
