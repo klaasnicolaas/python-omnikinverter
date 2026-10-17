@@ -226,7 +226,7 @@ SOFTWARE.
 [license-shield]: https://img.shields.io/github/license/klaasnicolaas/python-omnikinverter.svg
 [last-commit-shield]: https://img.shields.io/github/last-commit/klaasnicolaas/python-omnikinverter.svg
 [maintenance-shield]: https://img.shields.io/maintenance/yes/2026.svg
-[project-stage-shield]: https://img.shields.io/badge/project%20stage-experimental-yellow.svg
+[project-stage-shield]: https://img.shields.io/badge/project%20stage-stable-brightgreen.svg
 [pypi]: https://pypi.org/project/omnikinverter/
 [python-versions-shield]: https://img.shields.io/pypi/pyversions/omnikinverter
 [releases-shield]: https://img.shields.io/github/release/klaasnicolaas/python-omnikinverter.svg
