@@ -230,7 +230,7 @@ def _unpack_message(message: bytearray) -> tuple[int, int, bytearray]:
 
 def _unpack_messages(
     data: bytearray,
-) -> Generator[tuple[int, int, bytearray], None, None]:
+) -> Generator[tuple[int, int, bytearray]]:
     while len(data):
         message_start = data.pop(0)
         # Whenever my Omnik sends an INFORMATION_REPLY followed by a STRING

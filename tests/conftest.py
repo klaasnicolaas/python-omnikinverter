@@ -9,7 +9,7 @@ from omnikinverter import OmnikInverter
 
 
 @pytest.fixture
-async def omnik_client() -> AsyncGenerator[OmnikInverter, None]:
+async def omnik_client() -> AsyncGenerator[OmnikInverter]:
     """Provide a JavaScript client with an externally managed HTTP session."""
     async with ClientSession() as session:
         yield OmnikInverter(host="example.com", session=session)
