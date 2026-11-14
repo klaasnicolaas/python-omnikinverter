@@ -15,6 +15,7 @@ MESSAGE_START = 0x68
 MESSAGE_END = 0x16
 MESSAGE_SEND_SEP = 0x40
 MESSAGE_RECV_SEP = 0x41
+MESSAGE_RECV_SEP_ALT = 0x51
 MESSAGE_TYPE_INFORMATION_REQUEST = 0x30
 MESSAGE_TYPE_INFORMATION_REPLY = 0xB0
 MESSAGE_TYPE_STRING = 0xF0  # Message seems to consist of pure text
@@ -207,7 +208,7 @@ def _unpack_message(message: bytearray) -> tuple[int, int, bytearray]:
     # separator, message type and repeated serial number
 
     length = message.pop(0)  # Length
-    if message.pop(0) != MESSAGE_RECV_SEP:
+    if message.pop(0) not in (MESSAGE_RECV_SEP, MESSAGE_RECV_SEP_ALT):
         msg = "Invalid receiver separator"
         raise OmnikInverterPacketInvalidError(msg)
 

@@ -336,6 +336,38 @@ async def test_inverter_tcp_no_firmware() -> None:
     await server_exit
 
 
+async def test_inverter_tcp_reply_separator_0x51() -> None:
+    """Accept replies using 0x51 as separator (IGEN logger, firmware H4.01.51)."""
+    serial_number = 987654321
+
+    (server_exit, port) = tcp_server(serial_number, "tcp_reply_sep51.data")
+
+    client = OmnikInverter(
+        host="localhost",
+        source_type="tcp",
+        serial_number=serial_number,
+        tcp_port=port,
+    )
+
+    inverter: Inverter = await client.inverter()
+
+    assert inverter
+    assert inverter.solar_current_power == 1561
+    assert inverter.serial_number == "NLDN012345CS4321"
+    assert inverter.temperature == pytest.approx(32.1)
+    assert inverter.dc_input_voltage == pytest.approx([285.9, 233.9, 0.0])
+    assert inverter.dc_input_current == pytest.approx([3.1, 3.3, 0.0])
+    assert inverter.ac_output_voltage == pytest.approx([236.9, 0.0, 0.0])
+    assert inverter.ac_output_frequency == pytest.approx([50.08, 0.0, 0.0])
+    assert inverter.ac_output_power == [1561, 0, 0]
+    assert inverter.solar_energy_today == pytest.approx(2.87)
+    assert inverter.solar_energy_total == pytest.approx(41517.1)
+    assert inverter.solar_hours_total == 38127
+    assert inverter.inverter_active is True
+
+    await server_exit
+
+
 async def test_inverter_tcp_offline() -> None:
     """Test request from an Inverter (offline) - TCP source."""
     serial_number = 1608449224
