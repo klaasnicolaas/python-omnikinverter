@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import struct
 import time
 from socket import SHUT_RDWR, SO_LINGER, SOL_SOCKET, socket
@@ -336,7 +337,9 @@ async def test_inverter_tcp_no_firmware() -> None:
     await server_exit
 
 
-async def test_inverter_tcp_reply_separator_0x51() -> None:
+async def test_inverter_tcp_reply_separator_0x51(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
     """Accept replies using 0x51 as separator (IGEN logger, firmware H4.01.51)."""
     serial_number = 987654321
 
@@ -357,6 +360,7 @@ async def test_inverter_tcp_reply_separator_0x51() -> None:
     assert inverter.temperature == pytest.approx(32.1)
     assert inverter.dc_input_voltage == pytest.approx([285.9, 233.9, 0.0])
     assert inverter.dc_input_current == pytest.approx([3.1, 3.3, 0.0])
+    assert inverter.ac_output_current == pytest.approx([6.6, 0.0, 0.0])
     assert inverter.ac_output_voltage == pytest.approx([236.9, 0.0, 0.0])
     assert inverter.ac_output_frequency == pytest.approx([50.08, 0.0, 0.0])
     assert inverter.ac_output_power == [1561, 0, 0]
@@ -364,8 +368,39 @@ async def test_inverter_tcp_reply_separator_0x51() -> None:
     assert inverter.solar_energy_total == pytest.approx(41517.1)
     assert inverter.solar_hours_total == 38127
     assert inverter.inverter_active is True
+    assert inverter.firmware is None
+    assert inverter.firmware_slave is None
+    assert not [r for r in caplog.records if r.levelno >= logging.WARNING]
 
     await server_exit
+
+
+async def test_inverter_tcp_reply_separator_0x51_size() -> None:
+    """Reject 0x51 replies with an unknown INFORMATION_REPLY size."""
+    serial_number = 1
+    # Serial number, twice
+    serial_number_bytes = serial_number.to_bytes(4, "little") * 2
+
+    test_message = [
+        85,  # Length
+        tcp.MESSAGE_RECV_SEP_ALT,
+        tcp.MESSAGE_TYPE_INFORMATION_REPLY,
+        *serial_number_bytes,
+        *[0] * 85,
+    ]
+    checksum = sum(test_message) & 0xFF
+
+    with pytest.raises(OmnikInverterPacketInvalidError) as excinfo:
+        assert tcp.parse_messages(
+            serial_number,
+            bytearray(
+                [tcp.MESSAGE_START, *test_message, checksum, tcp.MESSAGE_END],
+            ),
+        )
+
+    assert (
+        str(excinfo.value) == "Unrecognized INFORMATION_REPLY size 85 for separator 51"
+    )
 
 
 async def test_inverter_tcp_offline() -> None:
