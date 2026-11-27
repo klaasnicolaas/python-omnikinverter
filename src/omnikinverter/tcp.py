@@ -15,6 +15,8 @@ MESSAGE_START = 0x68
 MESSAGE_END = 0x16
 MESSAGE_SEND_SEP = 0x40
 MESSAGE_RECV_SEP = 0x41
+MESSAGE_RECV_SEP_ALT = 0x51
+MESSAGE_RECV_SEPS = frozenset({MESSAGE_RECV_SEP, MESSAGE_RECV_SEP_ALT})
 MESSAGE_TYPE_INFORMATION_REQUEST = 0x30
 MESSAGE_TYPE_INFORMATION_REPLY = 0xB0
 MESSAGE_TYPE_STRING = 0xF0  # Message seems to consist of pure text
@@ -26,6 +28,8 @@ UINT16_MAX = 65535
 # - Repeated integer serial number (2 * 4 bytes)
 # - CRC in suffix (1 byte)
 MESSAGE_HEADER_SIZE = 3 + 2 * 4 + 1
+# Extra (zero) bytes in MESSAGE_RECV_SEP_ALT replies, which have no firmware strings
+INFORMATION_REPLY_ALT_EXTRA_SIZE = 24
 
 
 class _AcOutput(BigEndianStructure):
@@ -83,7 +87,10 @@ class _TcpData(BigEndianStructure):
         if tcp_data.unknown0 not in [0, UINT16_MAX]:  # pragma: no cover
             LOGGER.warning("Unexpected unknown0 `%s`", tcp_data.unknown0)
 
-        if tcp_data.padding0 != b"\x81\x02\x01":  # pragma: no cover
+        if tcp_data.padding0 not in [
+            b"\x81\x02\x01",
+            b"\x81\x01\x13",
+        ]:  # pragma: no cover
             LOGGER.warning("Unexpected padding0 `%s`", tcp_data.padding0)
 
         # For all data that's expected to be zero, print it if it's not. Perhaps
@@ -207,11 +214,20 @@ def _unpack_message(message: bytearray) -> tuple[int, int, bytearray]:
     # separator, message type and repeated serial number
 
     length = message.pop(0)  # Length
-    if message.pop(0) != MESSAGE_RECV_SEP:
+    separator = message.pop(0)
+    if separator not in MESSAGE_RECV_SEPS:
         msg = "Invalid receiver separator"
         raise OmnikInverterPacketInvalidError(msg)
 
     message_type = message.pop(0)
+    # 0x51 replies use a different layout, only accept the one that is known
+    if (
+        separator == MESSAGE_RECV_SEP_ALT
+        and message_type == MESSAGE_TYPE_INFORMATION_REPLY
+        and length != sizeof(_TcpData) + INFORMATION_REPLY_ALT_EXTRA_SIZE
+    ):
+        msg = f"Unrecognized INFORMATION_REPLY size {length} for separator 51"
+        raise OmnikInverterPacketInvalidError(msg)
     LOGGER.debug(
         "Message type %02x, length %s, checksum %02x",
         message_type,
@@ -349,11 +365,12 @@ def parse_messages(serial_number: int, data: bytes | bytearray) -> dict[str, Any
             if info is not None:  # pragma: no cover
                 LOGGER.warning("Omnik sent multiple INFORMATION_REPLY messages")
             info = _parse_information_reply(message)
-        elif message_type == MESSAGE_TYPE_STRING:  # pragma: no cover
-            LOGGER.warning(
-                "Omnik sent text message `%s`",
-                message.decode("utf8").strip(),
-            )
+        elif message_type == MESSAGE_TYPE_STRING:
+            text = message.decode("utf8").strip()
+            if text == "DATA SEND IS OK":
+                LOGGER.debug("Omnik sent text message `%s`", text)
+            else:  # pragma: no cover
+                LOGGER.warning("Omnik sent text message `%s`", text)
         else:
             msg = (
                 f"Unknown Omnik message type {message_type:02x} "
@@ -371,6 +388,7 @@ def parse_messages(serial_number: int, data: bytes | bytearray) -> dict[str, Any
 def _parse_information_reply(data: bytes | bytearray) -> dict[str, Any]:
     if len(data) not in [
         sizeof(_TcpData),
+        sizeof(_TcpData) + INFORMATION_REPLY_ALT_EXTRA_SIZE,
         sizeof(_TcpData) + sizeof(_TcpFirmwareStrings),
     ]:  # pragma: no cover
         LOGGER.warning(
